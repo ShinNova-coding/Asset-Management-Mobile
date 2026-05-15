@@ -38,9 +38,8 @@ export default function DashboardScreen() {
   return (
     <ScrollView style={[styles.container, {backgroundColor: colors.background}]}>
 
-      {/* Header */}
       <Text style={[styles.header,{color: colors.text}]}>
-        Hello, Alex 
+        Hello
       </Text>
       <Text style={[styles.subheader,{color: colors.subText}]}>
         Here is your hardware inventory overview.
@@ -79,7 +78,6 @@ export default function DashboardScreen() {
 
       </View>
 
-      {/* Assets */}
       <FlatList
         data={assets}
         scrollEnabled={false}
@@ -93,7 +91,6 @@ export default function DashboardScreen() {
           >
 
             <View style={styles.assetTopRow}>
-
               <View
                 style={[
                   styles.iconContainer,
@@ -106,19 +103,15 @@ export default function DashboardScreen() {
                   color={item.color}
                 />
               </View>
-
+              <Text style={[styles.assetName,{color: colors.text}]}>
+                {item.name}
+              </Text>
               <View style={styles.statusBadge}>
                 <Text style={styles.statusText}>
                   {item.status}
                 </Text>
               </View>
-
             </View>
-
-            {/* Asset Name */}
-            <Text style={[styles.assetName,{color: colors.text}]}>
-              {item.name}
-            </Text>
 
             <View style={styles.infoRow}>
 
@@ -160,7 +153,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#111",
   },
@@ -192,7 +185,7 @@ const styles = StyleSheet.create({
   },
 
   statNumber: {
-    fontSize: 28,
+    fontSize: 23,
     fontWeight: "bold",
     color: "#4F46E5",
     marginTop: 10,
@@ -206,7 +199,7 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 19,
     fontWeight: "bold",
     color: "#111",
   },
@@ -219,8 +212,8 @@ const styles = StyleSheet.create({
   assetCard: {
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 18,
-    marginBottom: 18,
+    padding: 14.5,
+    marginBottom: 13,
     borderLeftWidth: 5,
   },
 
@@ -252,14 +245,15 @@ const styles = StyleSheet.create({
   },
 
   assetName: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#222",
-    marginTop: 18,
-    marginBottom: 22,
+    marginTop: 15,
+    marginBottom:19,
   },
 
   infoRow: {
+    paddingTop: 10,
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -272,7 +266,7 @@ const styles = StyleSheet.create({
   },
 
   infoValue: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: "600",
     color: "#333",
   },

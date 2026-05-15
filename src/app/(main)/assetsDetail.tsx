@@ -1,18 +1,18 @@
+import HeaderBar from "@/src/components/HeaderBar";
 import { useTheme } from "@/src/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
   Image,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-// Mock data (replace with API call later)
 const assetsData = [
   {
     id: 1,
@@ -54,7 +54,7 @@ export default function AssetDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
 
-  // Find the specific asset based on the ID from the URL
+
   const asset = assetsData.find((a) => a.id === Number(id));
 
   if (!asset) {
@@ -65,22 +65,13 @@ export default function AssetDetailScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header with Back Arrow */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Asset Details</Text>
-        <View style={{ width: 40 }} /> 
-      </View>
-
+      <HeaderBar title="Asset Details" backButtonAction={()=> router.push('/assets')}/>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>       
-        {/* Asset Image Card */}
+      
         <View style={[styles.imageCard, { backgroundColor: colors.card }]}>
           <Image source={{ uri: asset.image }} style={styles.detailImage} resizeMode="contain" />
           <Text style={[styles.mainTitle, { color: colors.text }]}>{asset.name}</Text>
-          <Text style={[styles.subTitle, { color: colors.subText }]}>SN-{asset.serial}</Text>
-           {/* active Bar */}
+          <Text style={[styles.subTitle, { color: colors.subText }]}>SN-{asset.serial}</Text>           
           <View style={styles.badgeRow}>
             <View style={[styles.badge, styles.activeBadge]}>
               <Text style={styles.activeBadgeText}>{asset.status}</Text>
@@ -90,8 +81,6 @@ export default function AssetDetailScreen() {
             </View>
           </View>
         </View>
-
-        {/* Info Grid (Category & Warranty) */}
         <View style={styles.infoGrid}>
           <View style={[styles.infoBox, { backgroundColor: colors.card }]}>
             <Text style={styles.infoLabel}>Category</Text>
@@ -103,7 +92,6 @@ export default function AssetDetailScreen() {
           </View>
         </View>
 
-        {/* Assigned To Section */}
         <View style={[styles.assignmentCard, { backgroundColor: colors.card }]}>
            <View>
               <Text style={styles.infoLabel}>Assigned To</Text>
@@ -114,13 +102,19 @@ export default function AssetDetailScreen() {
            </View>
         </View>
 
-        {/* Action Button */}
-        <TouchableOpacity style={styles.reportButton}>
+        <TouchableOpacity
+          style={styles.reportButton}
+          onPress={() =>
+            router.push({
+              pathname: "/(main)/reportIssue",
+              params: { id: asset.id },
+            })
+          }
+        >
           <Ionicons name="warning-outline" size={20} color="white" />
           <Text style={styles.reportButtonText}>Report an Issue</Text>
         </TouchableOpacity>
 
-        {/* Assignment History Placeholder */}
         <View style={[styles.historyCard, { backgroundColor: colors.card }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Assignment History</Text>
           <View style={styles.historyItem}>
@@ -152,14 +146,14 @@ const styles = StyleSheet.create({
   imageCard: {
     backgroundColor: "white",
     borderRadius: 24,
-    padding: 20,
+    padding: 3,
     alignItems: "center",
     marginBottom: 16,
   },
-  detailImage: { width: 150, height: 150, marginBottom: 15 },
+  detailImage: { width: 200, height: 200, marginBottom: -3 },
   mainTitle: { fontSize: 24, fontWeight: "bold", color: "#1E1E1E" },
   subTitle: { color: "#888", marginBottom: 15 },
-  badgeRow: { flexDirection: "row", gap: 8 },
+  badgeRow: { flexDirection: "row", gap: 8, paddingBottom: 12 },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
   activeBadge: { backgroundColor: "#4F46E5" },
   activeBadgeText: { color: "white", fontWeight: "bold", fontSize: 12 },
@@ -192,7 +186,7 @@ const styles = StyleSheet.create({
   },
   reportButtonText: { color: "white", fontWeight: "bold", fontSize: 16 },
   historyCard: { backgroundColor: "white", padding: 20, borderRadius: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 15 },
+  sectionTitle: { fontSize: 17, fontWeight: "bold", marginBottom: 15 },
   historyItem: { flexDirection: "row", gap: 12 },
   timeline: { width: 2, backgroundColor: "#4F46E5", marginVertical: 4 },
   historyName: { fontWeight: "600", fontSize: 15 },

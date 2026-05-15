@@ -48,8 +48,6 @@ const pickImage = async () => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        
-        {/* Profile Card */}
        
         <View style={[styles.profileCard, { backgroundColor: colors.card }]}>
           {/* <View style={styles.imageContainer}>
@@ -106,7 +104,6 @@ const pickImage = async () => {
 
         <Text style={[styles.sectionHeader, { color: colors.subText }]}>SYSTEM PREFERENCES</Text>
 
-        {/* Preferences Card */}
         <View style={[styles.menuCard, { backgroundColor: colors.card }]}>
           <TouchableOpacity style={styles.menuItem}>
             <View style={[styles.iconBox, { backgroundColor: isDark ? '#2D3748' : '#EEF2FF' }]}>
@@ -121,7 +118,6 @@ const pickImage = async () => {
 
           <View style={[styles.separator, { backgroundColor: colors.border }]} />
 
-          {/* Dark Mode (important part)*/}
           <View style={styles.menuItem}>
             <View style={[styles.iconBox, { backgroundColor: isDark ? '#312E81' : '#F5F3FF' }]}>
               <Ionicons name="moon-outline" size={22} color="#7C3AED" />

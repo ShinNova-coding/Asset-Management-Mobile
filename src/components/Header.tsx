@@ -7,13 +7,12 @@ export default function Header() {
   return (
     <View style={[styles.container, { backgroundColor: colors.card,borderBottomColor:colors.background }]}>
 
-      {/* Left Side */}
       <View style={styles.leftSection}>
 
         <View>
           <Ionicons
             name="menu"
-            size={24}
+            size={23}
             color="#5B4BFF"
           />
         </View>
@@ -24,7 +23,6 @@ export default function Header() {
 
       </View>
 
-      {/* Right Side */}
       <View style={styles.rightSection}>
 
       </View>
@@ -53,7 +51,7 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
     color: "#5B4BFF",
   },

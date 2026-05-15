@@ -61,16 +61,13 @@ export default function AssetsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
 
-      {/* Title */}
       <Text style={[styles.title, { color: colors.text }]}>
         My Assets
       </Text>
-
       <Text style={styles.subtitle}>
         Manage and track your assigned hardware.
       </Text>
 
-      {/* Search */}
       <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
         <Ionicons
           name="search"
@@ -85,7 +82,6 @@ export default function AssetsScreen() {
         />
       </View>
 
-      {/* Categories */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -113,7 +109,6 @@ export default function AssetsScreen() {
         })}
       </ScrollView>
 
-      {/* Asset List */}
       <FlatList
         data={assets}
         keyExtractor={(item) =>
@@ -128,74 +123,50 @@ export default function AssetsScreen() {
             activeOpacity={0.9}
             style={[styles.assetCard, { backgroundColor: colors.card }]}
             onPress={() =>
-              router.push(
-                `/(tabs)/assets/${item.id}`
-              )
-            }>
+              router.push({
+                pathname: "/(main)/assetsDetail",
+                params: { id: item.id },
+              })
+            }
+          >
+            <Image source={{ uri: item.image }} style={styles.assetImage} />
 
-            {/* Image */}
-            <Image
-              source={{ uri: item.image }}
-              style={styles.assetImage}
-            />
-
-            {/* Content */}
             <View style={styles.assetContent}>
-
               <View style={styles.topRow}>
-
-                <Text style={[styles.assetName,{color: colors.text}]}>
-                  {item.name}
-                </Text>
+                <Text style={[styles.assetName, { color: colors.text }]}>{item.name}</Text>
 
                 <View
                   style={[
                     styles.statusBadge,
-                    item.status ===
-                    "Maintenance"? styles.maintenanceBadge : styles.assignedBadge,
+                    item.status === "Maintenance"
+                      ? styles.maintenanceBadge
+                      : styles.assignedBadge,
                   ]}
                 >
                   <Text
                     style={[
                       styles.statusText,
-                      item.status ===
-                      "Maintenance"? styles.maintenanceText : styles.assignedText,
+                      item.status === "Maintenance"
+                        ? styles.maintenanceText
+                        : styles.assignedText,
                     ]}
                   >
                     {item.status}
                   </Text>
                 </View>
-
               </View>
 
-              <Text style={styles.serial}>
-                SN: {item.serial}
-              </Text>
+              <Text style={styles.serial}>SN: {item.serial}</Text>
 
               <View style={styles.bottomRow}>
-
                 <View style={styles.warrantyRow}>
-                  <Ionicons
-                    name="refresh-circle-outline"
-                    size={16}
-                    color="#777"
-                  />
-
-                  <Text style={styles.warranty}>
-                    {item.warranty}
-                  </Text>
+                  <Ionicons name="refresh-circle-outline" size={16} color="#777" />
+                  <Text style={styles.warranty}>{item.warranty}</Text>
                 </View>
 
-                <Ionicons
-                  name="chevron-forward"
-                  size={22}
-                  color="#999"
-                />
-
+                <Ionicons name="chevron-forward" size={22} color="#999" />
               </View>
-
             </View>
-
           </TouchableOpacity>
         )}
       />
@@ -212,7 +183,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 34,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#1E1E1E",
   },
@@ -221,7 +192,7 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 6,
     marginBottom: 20,
-    fontSize: 15,
+    fontSize: 14,
   },
 
   searchContainer: {
@@ -267,7 +238,7 @@ categoryButton: {
     backgroundColor: "white",
     borderRadius: 24,
     padding: 14,
-    marginBottom: 18,
+    marginBottom: 13,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -291,7 +262,7 @@ categoryButton: {
   },
 
   assetName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: "#2A2A2A",
     flex: 1,
