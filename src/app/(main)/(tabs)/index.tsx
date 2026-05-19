@@ -13,7 +13,7 @@ import { router } from "expo-router";
 
 const assets = [
   {
-    id: 1,
+    id: 7,
     name: "MacBook Pro 16”",
     serial: "C02FX5G...MD6M",
     due: "Sep 2025",
@@ -23,7 +23,7 @@ const assets = [
   },
 
   {
-    id: 2,
+    id: 8,
     name: "iPad Pro 12.9\"",
     serial: "DLXCQ5J...F16P",
     due: "Jun 2024",
@@ -84,7 +84,12 @@ export default function DashboardScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-          onPress={()=> {}}
+          onPress={()=> {
+            router.push({
+              pathname: "/(main)/assetsDetail",
+              params: { id: item.id}
+            });
+          }}
             style={[
               styles.assetCard,{backgroundColor: colors.card},{ borderLeftColor: item.color },
             ]}
@@ -187,7 +192,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 23,
     fontWeight: "bold",
-    color: "#4F46E5",
+    color: "#0070EB",
     marginTop: 10,
   },
 
@@ -205,7 +210,7 @@ const styles = StyleSheet.create({
   },
 
   viewAll: {
-    color: "#4F46E5",
+    color: "#0070EB",
     fontWeight: "700",
   },
 

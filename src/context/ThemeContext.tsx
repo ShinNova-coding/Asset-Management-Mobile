@@ -8,7 +8,7 @@ export const Colors = {
     card: "#FFFFFF",
     text: "#1F2937",
     subText: "#6B7280",
-    primary: "#4F46E5",
+    primary: "#0070EB",
     border: "#F3F4F6",
   },
   dark: {
@@ -16,7 +16,7 @@ export const Colors = {
     card: "#1E293B",
     text: "#F8FAFC",
     subText: "#94A3B8",
-    primary: "#818CF8",
+    primary: "#0070EB",
     border: "#334155",
   }
 };

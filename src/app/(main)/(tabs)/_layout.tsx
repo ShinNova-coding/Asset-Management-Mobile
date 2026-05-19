@@ -48,7 +48,7 @@ export default function TabsLayout() {
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="requests"
         options={{
           title: "Requests",
@@ -60,7 +60,7 @@ export default function TabsLayout() {
             />
           ),
         }}
-      />
+      /> */}
 
       <Tabs.Screen
         name="notifications"
@@ -90,13 +90,14 @@ export default function TabsLayout() {
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="assets/[id]"
         options={{
           href: null, 
           headerShown: false, 
         }}
-      />
+      /> */}
+
     </Tabs>
     
   );

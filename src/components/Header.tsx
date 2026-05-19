@@ -13,7 +13,7 @@ export default function Header() {
           <Ionicons
             name="menu"
             size={23}
-            color="#5B4BFF"
+            color="#0070EB"
           />
         </View>
 
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 26,
     fontWeight: "bold",
-    color: "#5B4BFF",
+    color: "#0070EB",
   },
 
   rightSection: {

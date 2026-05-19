@@ -46,6 +46,25 @@ const assetsData = [
     warranty: "Oct 2025",
     assignedTo: "kmo",
     image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
+  }, 
+  {
+      id: 7,
+    name: "MacBook Pro 16”",
+    serial: "C02FX5G...MD6M",
+    warranty: "Sep 2025",
+    status: "ACTIVE",
+    icon: "laptop-outline",
+    color: "#5B4BFF",
+  },
+
+  {
+    id: 8,
+    name: "iPad Pro 12.9\"",
+    serial: "DLXCQ5J...F16P",
+    warranty: "Jun 2024",
+    status: "ACTIVE",
+    icon: "tablet-portrait-outline",
+    color: "#36D7FF",
   },
 ];
 
@@ -155,7 +174,7 @@ const styles = StyleSheet.create({
   subTitle: { color: "#888", marginBottom: 15 },
   badgeRow: { flexDirection: "row", gap: 8, paddingBottom: 12 },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
-  activeBadge: { backgroundColor: "#4F46E5" },
+  activeBadge: { backgroundColor: "#0070EB" },
   activeBadgeText: { color: "white", fontWeight: "bold", fontSize: 12 },
   conditionBadge: { backgroundColor: "#F3F4F6" },
   conditionBadgeText: { color: "#666", fontSize: 12 },
@@ -173,9 +192,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: "#D1D5FF", justifyContent: "center", alignItems: "center" },
-  avatarText: { color: "#4F46E5", fontWeight: "bold" },
+  avatarText: { color: "#0070EB", fontWeight: "bold" },
   reportButton: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#0070EB",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -188,7 +207,7 @@ const styles = StyleSheet.create({
   historyCard: { backgroundColor: "white", padding: 20, borderRadius: 24 },
   sectionTitle: { fontSize: 17, fontWeight: "bold", marginBottom: 15 },
   historyItem: { flexDirection: "row", gap: 12 },
-  timeline: { width: 2, backgroundColor: "#4F46E5", marginVertical: 4 },
+  timeline: { width: 2, backgroundColor: "#0070EB", marginVertical: 4 },
   historyName: { fontWeight: "600", fontSize: 15 },
   historyDate: { color: "#888", fontSize: 13 },
 });

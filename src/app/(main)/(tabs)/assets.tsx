@@ -6,7 +6,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import { useTheme } from "@/src/context/ThemeContext";
@@ -20,6 +20,18 @@ const categories = [
   "Mobile",
   "Accessories",
 ];
+
+// type Assets = {
+//   asset_id: string;
+//   name: string;
+//   image: string | null;
+//   serial_number: string;
+//   purchased_date: string;
+//   warranty_expiry: string;
+//   category_id: number;
+//   status: string;
+//   condition: string;
+// };
 
 const assets = [
   {
@@ -51,20 +63,66 @@ const assets = [
     image:
       "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
   },
+  
+  {
+    id: 4,
+    name: "Chair",
+    serial: "IT-2023-9901",
+    status: "Assigned",
+    warranty: "Warranty Active",
+    image:
+      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
+  },
+  
+  {
+    id: 5,
+    name: "iPad Air",
+    serial: "IT-2023-9901",
+    status: "Assigned",
+    warranty: "Warranty Active",
+    image:
+      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
+  },
 ];
 
 export default function AssetsScreen() {
+  // const [assets, setAssets] = useState<Assets[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredAssets = assets.filter((item) => {
+  const query = searchQuery.toLowerCase();
+
+  return (
+    item.name.toLowerCase().includes(query) ||
+    item.serial.toLowerCase().includes(query)
+  );
+});
 
   const {colors, isDark }= useTheme();
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  // async function getAssets() {
+  //   try {
+  //   const response = await fetch("http://192.168.100.186:1010/api/asset")
+  //   console.log("===>",response);
+  //   const item= await response.text();
+  //   console.log(item);
+    
+  //   }catch(error){
+  //     console.log("API Error:", error);
+  //   }
+  // }
+  //   useEffect(()=>{
+  //     getAssets()
+  //   },[])
+  
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
 
       <Text style={[styles.title, { color: colors.text }]}>
         My Assets
       </Text>
-      <Text style={styles.subtitle}>
+      <Text style={[styles.subtitle, {color: colors.subText}]}>
         Manage and track your assigned hardware.
       </Text>
 
@@ -74,14 +132,15 @@ export default function AssetsScreen() {
           size={20}
           color={colors.subText}
         />
-
         <TextInput
           placeholder="Search assets by name or SN..."
           placeholderTextColor={colors.subText}
           style={[styles.searchInput, { color: colors.text }]}
+          value= {searchQuery}
+          onChangeText={setSearchQuery}
         />
       </View>
-
+      <View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -108,11 +167,75 @@ export default function AssetsScreen() {
           );
         })}
       </ScrollView>
-
+      </View>
+      <View>
       <FlatList
+              data={filteredAssets}
+              keyExtractor={(item) =>
+                item.id.toString()
+              }
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingBottom: 20,
+              }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  style={[styles.assetCard, { backgroundColor: colors.card }]}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(main)/assetsDetail",
+                      params: { id: item.id },
+                    })
+                  }
+                >
+                  <Image source={{ uri: item.image }} style={styles.assetImage} /> 
+
+                  <View style={styles.assetContent}>
+                    <View style={styles.topRow}>
+                      <Text style={[styles.assetName, { color: colors.text }]}>{item.name}</Text>
+
+                      <View
+                        style={[
+                          styles.statusBadge,
+                          item.status === "available"
+                            ? styles.availableBadge
+                            : styles.assignedBadge,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.statusText,
+                            item.status === "available"
+                              ? styles.availableText
+                              : styles.assignedText,
+                          ]}
+                        >
+                          {item.status}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={styles.serial}>SN: {item.serial}</Text>
+
+                    <View style={styles.bottomRow}>
+                      <View style={styles.warrantyRow}>
+                        <Ionicons name="refresh-circle-outline" size={16} color="#777" />
+                        <Text style={styles.warranty}>Exp: {item.warranty}</Text>
+                      </View>
+
+                      <Ionicons name="chevron-forward" size={22} color="#999" />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+            </View>
+
+      {/* <FlatList
         data={assets}
         keyExtractor={(item) =>
-          item.id.toString()
+          item.asset_id.toString()
         }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
@@ -125,11 +248,11 @@ export default function AssetsScreen() {
             onPress={() =>
               router.push({
                 pathname: "/(main)/assetsDetail",
-                params: { id: item.id },
+                params: { id: item.asset_id },
               })
             }
           >
-            <Image source={{ uri: item.image }} style={styles.assetImage} />
+            <Image source={{ uri: item.image || "https://via.placeholder.com/150" }} style={styles.assetImage} /> 
 
             <View style={styles.assetContent}>
               <View style={styles.topRow}>
@@ -138,16 +261,16 @@ export default function AssetsScreen() {
                 <View
                   style={[
                     styles.statusBadge,
-                    item.status === "Maintenance"
-                      ? styles.maintenanceBadge
+                    item.status === "available"
+                      ? styles.availableBadge
                       : styles.assignedBadge,
                   ]}
                 >
                   <Text
                     style={[
                       styles.statusText,
-                      item.status === "Maintenance"
-                        ? styles.maintenanceText
+                      item.status === "available"
+                        ? styles.availableText
                         : styles.assignedText,
                     ]}
                   >
@@ -156,12 +279,12 @@ export default function AssetsScreen() {
                 </View>
               </View>
 
-              <Text style={styles.serial}>SN: {item.serial}</Text>
+              <Text style={styles.serial}>SN: {item.serial_number}</Text>
 
               <View style={styles.bottomRow}>
                 <View style={styles.warrantyRow}>
                   <Ionicons name="refresh-circle-outline" size={16} color="#777" />
-                  <Text style={styles.warranty}>{item.warranty}</Text>
+                  <Text style={styles.warranty}>Exp: {item.warranty_expiry}</Text>
                 </View>
 
                 <Ionicons name="chevron-forward" size={22} color="#999" />
@@ -169,7 +292,7 @@ export default function AssetsScreen() {
             </View>
           </TouchableOpacity>
         )}
-      />
+      /> */}
     </View>
   );
 }
@@ -179,7 +302,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F3FF",
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 16,
   },
 
   title: {
@@ -201,19 +324,19 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 16,
     paddingHorizontal: 14,
-    height: 56,
+    height: 50,
   },
 
   searchInput: {
     flex: 1,
     marginLeft: 10,
-    fontSize: 15,
+    fontSize: 14,
   },
 
 categoryButton: {
   height: 38,
   backgroundColor: "#E8EAF6",
-  paddingHorizontal: 18,
+  paddingHorizontal: 15,
   borderRadius: 20,
   marginRight: 10,
   justifyContent: "center",
@@ -221,7 +344,7 @@ categoryButton: {
 },
 
   activeCategoryButton: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#0070EB",
   },
 
   categoryText: {
@@ -279,7 +402,7 @@ categoryButton: {
     backgroundColor: "#D1FAE5",
   },
 
-  maintenanceBadge: {
+  availableBadge: {
     backgroundColor: "#CFFAFE",
   },
 
@@ -292,7 +415,7 @@ categoryButton: {
     color: "#059669",
   },
 
-  maintenanceText: {
+  availableText: {
     color: "#0891B2",
   },
 

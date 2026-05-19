@@ -50,6 +50,16 @@ const assetsData = [
     name: "iPad Air",
     serial: "IT-9901",
   },
+    {
+    id: 7,
+    name: "iPhone 15 Pro",
+    serial: "IT-1109",
+  },
+  {
+    id: 8,
+    name: "iPad Air",
+    serial: "IT-9901",
+  },
 ];
 
 export default function ReportIssueScreen() {

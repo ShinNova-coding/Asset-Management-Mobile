@@ -22,10 +22,8 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
 
-      {/* Card */}
       <View style={styles.card}>
 
-        {/* Logo */}
         <View style={styles.logoContainer}>
           <Ionicons name="cube-outline" size={40} color="white" />
         </View>
@@ -35,7 +33,6 @@ export default function LoginScreen() {
           IT Asset Management System
         </Text>
 
-        {/* Form */}
         <View style={styles.form}>
 
           <Text style={styles.label}>EMAIL ADDRESS</Text>
@@ -59,7 +56,7 @@ export default function LoginScreen() {
           <View style={styles.passwordRow}>
             <Text style={styles.label}>PASSWORD</Text>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={()=> router.push("/forgot-password")}>
               <Text style={styles.forgot}>
                 Forgot Password?
               </Text>
@@ -97,8 +94,7 @@ export default function LoginScreen() {
               />
             </TouchableOpacity>
           </View>
-
-          {/* Button */}
+          
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>
               Login
@@ -142,7 +138,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     width: 80,
     height: 80,
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#0070EB",
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
@@ -197,13 +193,13 @@ const styles = StyleSheet.create({
   },
 
   forgot: {
-    color: "#4F46E5",
+    color: "#0070EB",
     fontWeight: "600",
     fontSize: 12,
   },
 
   button: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#0070EB",
     height: 55,
     borderRadius: 12,
     justifyContent: "center",
@@ -224,7 +220,7 @@ const styles = StyleSheet.create({
   },
 
   request: {
-    color: "#4F46E5",
+    color: "#0070EB",
     fontWeight: "700",
   },
 });

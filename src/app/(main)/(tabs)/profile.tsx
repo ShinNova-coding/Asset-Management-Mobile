@@ -1,8 +1,10 @@
+import { useTheme } from "@/src/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Image,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Switch,
@@ -10,9 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { useTheme } from "@/src/context/ThemeContext";
-import * as ImagePicker from "expo-image-picker";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   
@@ -30,8 +30,7 @@ const pickImage = async () => {
     return;
   }
 
-  const result =
-    await ImagePicker.launchImageLibraryAsync({
+  const result =await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
@@ -89,7 +88,6 @@ const pickImage = async () => {
             <Text style={[styles.deptText, { color: colors.primary }]}>Infrastructure & Security</Text>
           </View>
 
-          {/* Stats Row */}
           <View style={styles.statsRow}>
             <View style={[styles.statBox, { backgroundColor: isDark ? '#334155' : '#F9FAFB' }]}>
               <Text style={[styles.statNumber, { color: colors.primary }]}>12</Text>
@@ -105,7 +103,7 @@ const pickImage = async () => {
         <Text style={[styles.sectionHeader, { color: colors.subText }]}>SYSTEM PREFERENCES</Text>
 
         <View style={[styles.menuCard, { backgroundColor: colors.card }]}>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={()=>router.push({pathname:"/(main)/contact-info", params: { employeeId: "EMP-2026"}})}>
             <View style={[styles.iconBox, { backgroundColor: isDark ? '#2D3748' : '#EEF2FF' }]}>
               <Ionicons name="call-outline" size={22} color={colors.primary} />
             </View>
@@ -120,7 +118,7 @@ const pickImage = async () => {
 
           <View style={styles.menuItem}>
             <View style={[styles.iconBox, { backgroundColor: isDark ? '#312E81' : '#F5F3FF' }]}>
-              <Ionicons name="moon-outline" size={22} color="#7C3AED" />
+              <Ionicons name="moon-outline" size={22} color={colors.primary} />
             </View>
             <View style={styles.menuTextContent}>
               <Text style={[styles.menuTitle, { color: colors.text }]}>Dark Mode</Text>
@@ -136,12 +134,12 @@ const pickImage = async () => {
 
           <View style={[styles.separator, { backgroundColor: colors.border }]} />
 
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={[styles.iconBox, { backgroundColor: isDark ? '#4C1D95' : '#FDF2F8' }]}>
-              <Ionicons name="help-buoy-outline" size={22} color="#DB2777" />
+          <TouchableOpacity onPress={()=> router.push("/security")} style={styles.menuItem}>
+            <View style={[styles.iconBox, { backgroundColor: isDark ? '#2D3748' : '#EEF2FF' }]}>
+              <Ionicons name="shield-checkmark-outline" size={22} color="#DB2777" />
             </View>
             <View style={styles.menuTextContent}>
-              <Text style={[styles.menuTitle, { color: colors.text }]}>Support</Text>
+              <Text style={[styles.menuTitle, { color: colors.text }]}>Security</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.subText} />
           </TouchableOpacity>
@@ -158,7 +156,7 @@ const pickImage = async () => {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1 , marginTop: -35},
   scrollContent: { padding: 20 },
   profileCard: {
     borderRadius: 24,
