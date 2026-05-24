@@ -2,8 +2,9 @@ import HeaderBar from "@/src/components/HeaderBar";
 import { useTheme } from "@/src/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -47,6 +48,25 @@ const assetsData = [
     assignedTo: "kmo",
     image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
   }, 
+    {
+    id: 4,
+    name: "Chair",
+    serial: "IT-2023-9901",
+    status: "Assigned",
+    warranty: "Warranty Active",
+    image:
+      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
+  },
+  
+  {
+    id: 5,
+    name: "iPad Air",
+    serial: "IT-2023-9901",
+    status: "Assigned",
+    warranty: "Warranty Active",
+    image:
+      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
+  },
   {
       id: 7,
     name: "MacBook Pro 16”",
@@ -70,11 +90,35 @@ const assetsData = [
 
 export default function AssetDetailScreen() {
   const {colors, isDark} = useTheme();
-  const { id } = useLocalSearchParams();
+  const { id, mode } = useLocalSearchParams();
   const router = useRouter();
 
 
   const asset = assetsData.find((a) => a.id === Number(id));
+  const [status, setStatus] = useState (asset?.status || "");
+  const handleReturn = () => {
+    Alert.alert(
+      "Return Asset",
+      "Are you sure to return this asset?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Return",
+          onPress: () => {
+            setStatus("Returned");
+
+            Alert.alert(
+              "Success",
+              "Asset returned successfully."
+            );
+          },
+        },
+      ]
+    );
+  };
 
   if (!asset) {
     return (
@@ -84,7 +128,7 @@ export default function AssetDetailScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <HeaderBar title="Asset Details" backButtonAction={()=> router.push('/assets')}/>
+      <HeaderBar title="Asset Details" backButtonAction={()=> router.back()}/>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>       
       
         <View style={[styles.imageCard, { backgroundColor: colors.card }]}>
@@ -93,7 +137,7 @@ export default function AssetDetailScreen() {
           <Text style={[styles.subTitle, { color: colors.subText }]}>SN-{asset.serial}</Text>           
           <View style={styles.badgeRow}>
             <View style={[styles.badge, styles.activeBadge]}>
-              <Text style={styles.activeBadgeText}>{asset.status}</Text>
+              <Text style={styles.activeBadgeText}>{status}</Text>
             </View>
             <View style={[styles.badge, styles.conditionBadge]}>
               <Text style={styles.conditionBadgeText}>Condition: {asset.condition}</Text>
@@ -110,16 +154,29 @@ export default function AssetDetailScreen() {
             <Text style={[styles.infoValue, { color: colors.text }]}>{asset.warranty}</Text>
           </View>
         </View>
+{mode ==="assigned" ? (
+  <>
 
-        <View style={[styles.assignmentCard, { backgroundColor: colors.card }]}>
-           <View>
-              <Text style={styles.infoLabel}>Assigned To</Text>
-              <Text style={[styles.infoValue, { color: colors.text }]}>{asset.assignedTo}</Text>
-           </View>
-           <View style={styles.avatar}>
-              <Text style={styles.avatarText}>SJ</Text>
-           </View>
-        </View>
+        <TouchableOpacity
+          style={[
+            styles.returnButton,
+            status === "Returned" && {
+              backgroundColor: "#9CA3AF",
+            },
+          ]}
+          disabled={status === "Returned"}
+          onPress={handleReturn}
+        >
+          <Ionicons
+            name="return-up-back-outline"
+            size={20}
+            color="white"
+          />
+
+          <Text style={styles.reportButtonText}>
+            {status === "Returned"? "Returned": "Return"}
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.reportButton}
@@ -133,18 +190,26 @@ export default function AssetDetailScreen() {
           <Ionicons name="warning-outline" size={20} color="white" />
           <Text style={styles.reportButtonText}>Report an Issue</Text>
         </TouchableOpacity>
+        </>
+) : (
 
-        <View style={[styles.historyCard, { backgroundColor: colors.card }]}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Assignment History</Text>
-          <View style={styles.historyItem}>
-            <View style={styles.timeline} />
-            <View>
-              <Text style={[styles.historyName, { color: colors.text }]}>{asset.assignedTo}</Text>
-              <Text style={styles.historyDate}>Assigned: Jan 12, 2024</Text>
-            </View>
-          </View>
-        </View>
+         <TouchableOpacity
+          style={styles.requestButton}
+          onPress={() => {
+            alert("Asset request submitted");
+          }}
+           >
+          <Ionicons
+            name="add-circle-outline"
+            size={20}
+            color="white"
+           />
 
+          <Text style={styles.reportButtonText}>
+            Request Asset
+          </Text>
+          </TouchableOpacity>
+          )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -210,4 +275,35 @@ const styles = StyleSheet.create({
   timeline: { width: 2, backgroundColor: "#0070EB", marginVertical: 4 },
   historyName: { fontWeight: "600", fontSize: 15 },
   historyDate: { color: "#888", fontSize: 13 },
+  returnButton: {
+  backgroundColor: "#F59E0B",
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 16,
+  borderRadius: 16,
+  gap: 8,
+  marginBottom: 12,
+},
+requestButton: {
+  backgroundColor: "#10B981",
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 16,
+  borderRadius: 16,
+  gap: 8,
+  marginBottom: 20,
+},
+
+reportIssueButton: {
+  backgroundColor: "#EF4444",
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 16,
+  borderRadius: 16,
+  gap: 8,
+  marginBottom: 20,
+},
 });

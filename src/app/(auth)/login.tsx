@@ -1,4 +1,6 @@
 import {
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -16,11 +18,11 @@ export default function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   
   const handleLogin = () => {
-  router.replace("/(tabs)");
+  router.replace("/(main)/(tabs)");
 };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={styles.container} behavior= {Platform.OS === 'ios' ? 'padding' : 'height'}>
 
       <View style={styles.card}>
 
@@ -50,6 +52,9 @@ export default function LoginScreen() {
               keyboardType="email-address"
               value={email}
               onChangeText={setEmail}
+              autoFocus
+              autoCapitalize="none"
+              // autoComplete="email"
             />
           </View>
 
@@ -116,7 +121,7 @@ export default function LoginScreen() {
         </TouchableOpacity>
       </View>
 
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

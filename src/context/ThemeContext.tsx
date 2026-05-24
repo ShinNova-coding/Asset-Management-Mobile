@@ -28,7 +28,7 @@ const ThemeContext = createContext({
 });
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const systemScheme = useColorScheme(); // Detects phone settings
+  const systemScheme = useColorScheme();
   const [isDark, setIsDark] = useState(systemScheme === 'dark');
 
   const theme = {

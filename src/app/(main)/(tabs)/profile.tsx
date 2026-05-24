@@ -143,7 +143,19 @@ const pickImage = async () => {
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.subText} />
           </TouchableOpacity>
-        </View>
+
+          <View style={[styles.separator, { backgroundColor: colors.border }]} />
+
+          <TouchableOpacity onPress={()=> router.push("/about")} style={styles.menuItem}>
+            <View style={[styles.iconBox, { backgroundColor: isDark ? '#2D3748' : '#EEF2FF' }]}>
+              <Ionicons name="information-circle-outline" size={22} color={colors.primary} />
+            </View>
+            <View style={styles.menuTextContent}>
+              <Text style={[styles.menuTitle, { color: colors.text }]}>About</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.subText} />
+          </TouchableOpacity>
+          </View>
 
         <TouchableOpacity style={[styles.logoutButton, { backgroundColor: isDark ? '#451212' : '#FFF1F2', borderColor: isDark ? '#7F1D1D' : '#FFE4E6' }]}>
           <Ionicons name="log-out-outline" size={22} color="#EF4444" />

@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Header() {
@@ -24,7 +25,25 @@ export default function Header() {
       </View>
 
       <View style={styles.rightSection}>
-
+            <TouchableOpacity
+              style={[
+                styles.iconButton,
+                {
+                  backgroundColor: isDark
+                    ? "#1E293B"
+                    : "#EEF4FF",
+                },
+              ]}
+              onPress={() =>
+                router.push("/(main)/history")
+              }
+            >
+              <Ionicons
+                name="time-outline"
+                size={22}
+                color="#0070EB"
+              />
+            </TouchableOpacity>
       </View>
 
     </View>
@@ -61,7 +80,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+  // iconButton: {
+  //   marginLeft: 16,
+  // },
+
   iconButton: {
-    marginLeft: 16,
-  },
+  width: 40,
+  height: 40,
+  borderRadius: 14,
+  justifyContent: "center",
+  alignItems: "center",
+  marginTop: 35,
+},
 });

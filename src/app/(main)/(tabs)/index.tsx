@@ -1,49 +1,84 @@
 import {
   FlatList,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import { useTheme } from "@/src/context/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
+
+const categories = [
+  "All",
+  "Laptops",
+  "Mobile",
+  "Accessories",
+];
 
 const assets = [
   {
-    id: 7,
-    name: "MacBook Pro 16”",
-    serial: "C02FX5G...MD6M",
-    due: "Sep 2025",
-    status: "ACTIVE",
-    icon: "laptop-outline",
-    color: "#5B4BFF",
+    id: 1,
+    name: "MacBook Pro",
+    category: "Laptops",
+    status: "available",
+    condition: "Excellent",
+    image:
+      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?q=80&w=800",
   },
 
   {
-    id: 8,
-    name: "iPad Pro 12.9\"",
-    serial: "DLXCQ5J...F16P",
-    due: "Jun 2024",
-    status: "ACTIVE",
-    icon: "tablet-portrait-outline",
-    color: "#36D7FF",
+    id: 2,
+    name: "iPhone 15 Pro",
+    category: "Mobile",
+    status: "available",
+    condition: "Good",
+    image:
+      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=800",
+  },
+
+  {
+    id: 3,
+    name: "iPad Air",
+    category: "Mobile",
+    status: "available",
+    condition: "Excellent",
+    image:
+      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
+  },
+
+  {
+    id: 4,
+    name: "Dell Monitor",
+    category: "Accessories",
+    status: "available",
+    condition: "Fair",
+    image:
+      "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?q=80&w=800",
   },
 ];
 
 export default function DashboardScreen() {
-  const {colors, isDark} = useTheme();
+   const {colors, isDark} = useTheme();
+   const [selectedCategory, setSelectedCategory] = useState("All");
+   const filteredAssets = selectedCategory === "All" ? assets
+        : assets.filter(
+            (item) =>
+              item.category === selectedCategory
+          );
+
   return (
     <ScrollView style={[styles.container, {backgroundColor: colors.background}]}>
 
       <Text style={[styles.header,{color: colors.text}]}>
         Hello
       </Text>
-      <Text style={[styles.subheader,{color: colors.subText}]}>
+      {/* <Text style={[styles.subheader,{color: colors.subText}]}>
         Here is your hardware inventory overview.
-      </Text>
+      </Text> */}
 
       <View style={styles.statsRow}>
         <View style={[styles.statCard,{backgroundColor: colors.card}]}>
@@ -63,88 +98,109 @@ export default function DashboardScreen() {
       </View>
 
       <View style={styles.sectionRow}>
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: colors.text },
+        ]}
+      >
+        Available Assets
+      </Text>
 
-        <Text style={[styles.sectionTitle, {color: colors.text}]}>
-          Assigned Assets
-        </Text>
-
-        <TouchableOpacity
-          onPress={() => router.push("/(tabs)/assets")}
+  {/* <TouchableOpacity>
+    <Text style={styles.viewAll}>
+      View All
+    </Text>
+  </TouchableOpacity> */}
+     </View>
+      <View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoriesContainer}
         >
-          <Text style={styles.viewAll}>
-            View All
-          </Text>
-        </TouchableOpacity>
+        {categories.map((item) => {
+          const active = selectedCategory === item;
 
+          return (
+            <TouchableOpacity
+              key={item}
+              onPress={() =>setSelectedCategory(item)}
+              style={[
+                styles.categoryButton,
+                { backgroundColor: selectedCategory === item ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
+              ]}
+            >
+              <Text
+                style={{ color: selectedCategory === item ? "white" : colors.subText }}
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
       </View>
 
-      <FlatList
-        data={assets}
-        scrollEnabled={false}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-          onPress={()=> {
-            router.push({
-              pathname: "/(main)/assetsDetail",
-              params: { id: item.id}
-            });
-          }}
-            style={[
-              styles.assetCard,{backgroundColor: colors.card},{ borderLeftColor: item.color },
-            ]}
-          >
-
-            <View style={styles.assetTopRow}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: `${item.color}15` },
-                ]}
-              >
-                <Ionicons
-                  name={item.icon as any}
-                  size={28}
-                  color={item.color}
-                />
-              </View>
-              <Text style={[styles.assetName,{color: colors.text}]}>
-                {item.name}
-              </Text>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusText}>
-                  {item.status}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.infoRow}>
-
-              <View>
-                <Text style={styles.infoLabel}>
-                  SERIAL NO
-                </Text>
-
-                <Text style={[styles.infoValue,{color: colors.text}]}>
-                  {item.serial}
-                </Text>
-              </View>
-
-              <View>
-                <Text style={styles.infoLabel}>
-                  DUE DATE
-                </Text>
-
-                <Text style={[styles.infoValue,{color: colors.text}]}>
-                  {item.due}
-                </Text>
-              </View>
-
-            </View>
-
-          </TouchableOpacity>
-        )}
+<FlatList
+  data={filteredAssets}
+  numColumns={2}
+  scrollEnabled={false}
+  columnWrapperStyle={{
+    justifyContent: "space-between",
+  }}
+  keyExtractor={(item) => item.id.toString()}
+  renderItem={({ item }) => (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={() => {
+        router.push({
+          pathname: "/(main)/assetsDetail",
+          params: {
+            id: item.id,
+            mode: "available",
+          },
+        });
+      }}
+      style={[
+        styles.assetGridCard,
+        {
+          backgroundColor: colors.card,
+        },
+      ]}
+    >
+      <Image
+        source={{ uri: item.image }}
+        style={styles.assetImage}
+        resizeMode="contain"
       />
+
+      <Text
+        numberOfLines={1}
+        style={[
+          styles.gridAssetName,
+          { color: colors.text },
+        ]}
+      >
+        {item.name}
+      </Text>
+
+      <View style={styles.assetInfoRow}>
+        <View style={styles.conditionBadge}>
+          <Text style={styles.conditionText}>
+            {item.condition}
+          </Text>
+        </View>
+        <View style={styles.availableBadge}>
+          <Text style={styles.availableText}>
+            {item.status === "available" ? "Available" : "Assigned"}
+          </Text>
+        </View>
+      </View>
+
+    </TouchableOpacity>
+  )}
+/>
     </ScrollView>
   );
 }
@@ -163,16 +219,12 @@ const styles = StyleSheet.create({
     color: "#111",
   },
 
-  subheader: {
-    color: "#666",
-    marginTop: 6,
-    marginBottom: 24,
-  },
 
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 30,
+    marginTop: 15,
+    marginBottom: 20,
   },
 
   statCard: {
@@ -190,7 +242,7 @@ const styles = StyleSheet.create({
   },
 
   statNumber: {
-    fontSize: 23,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#0070EB",
     marginTop: 10,
@@ -200,7 +252,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: 5,
   },
 
   sectionTitle: {
@@ -209,10 +261,86 @@ const styles = StyleSheet.create({
     color: "#111",
   },
 
-  viewAll: {
-    color: "#0070EB",
-    fontWeight: "700",
+  categoriesContainer: {
+  paddingVertical: 14,
+  paddingRight: 10,
+},
+
+categoryButton: {
+  height: 38,
+  backgroundColor: "#E8EAF6",
+  paddingHorizontal: 15,
+  borderRadius: 20,
+  marginRight: 10,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+  activeCategoryButton: {
+    backgroundColor: "#0070EB",
   },
+
+  categoryText: {
+  color: "#666",
+  fontWeight: "600",
+  fontSize: 14,
+},
+
+  activeCategoryText: {
+    color: "white",
+  },
+
+  assetGridCard: {
+  width: "48%",
+  borderRadius: 22,
+  padding: 10,
+  marginBottom: 10,
+},
+
+assetImage: {
+  width: "100%",
+  height: 120,
+  marginBottom: 7,
+},
+
+gridAssetName: {
+  fontSize: 15,
+  fontWeight: "700",
+  marginBottom: 10,
+},
+
+assetInfoRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+availableBadge: {
+  backgroundColor: "#DCFCE7",
+  alignSelf: "flex-start",
+  paddingHorizontal: 10,
+  paddingVertical: 5,
+  borderRadius: 30,
+},
+
+availableText: {
+  color: "#16A34A",
+  fontSize: 11,
+  fontWeight: "700",
+},
+
+conditionBadge: {
+  backgroundColor: "#F3F4F6",
+  paddingHorizontal: 10,
+  paddingVertical: 5,
+  borderRadius: 30,
+},
+
+conditionText: {
+  color: "#6B7280",
+  fontSize: 11,
+  fontWeight: "700",
+},
 
   assetCard: {
     backgroundColor: "white",

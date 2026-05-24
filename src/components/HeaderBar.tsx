@@ -1,10 +1,10 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../context/ThemeContext";
 import { ThemedText } from "./themed-text";
 import { ThemedView } from "./themed-view";
-import { useTheme } from "../context/ThemeContext";
 
 interface HeaderBarProps {
   title: string;
@@ -36,9 +36,9 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
           <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
             <Ionicons
               name="arrow-back"
-            size={24}
-              color="#4a4a4a"
-              darkColor="#fff"
+              size={24}
+              color={colors.subText}
+              darkColor="#fff"           
             />
           </TouchableOpacity>
         )}
@@ -47,7 +47,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({
       <View style={styles.titleContainer}>
         <ThemedText
           darkColor="#fff"
-          lightColor="#4A4A4A"
+          lightColor={colors.subText}
           style={styles.title}
           numberOfLines={1}
         >
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     lineHeight: 38,
   },
   placeholder: {
-    width: 24, // Same as back button for symmetry
+    width: 24, 
   },
 });
 

@@ -37,6 +37,7 @@ const assets = [
   {
     id: 1,
     name: "MacBook Pro M3",
+    category: "Laptops",
     serial: "IT-2024-8842",
     status: "Assigned",
     warranty: "Warranty Active",
@@ -47,6 +48,7 @@ const assets = [
   {
     id: 2,
     name: "iPhone 15 Pro",
+    category: "Mobile",
     serial: "IT-2024-1109",
     status: "Maintenance",
     warranty: "Exp: Oct 2025",
@@ -57,6 +59,7 @@ const assets = [
   {
     id: 3,
     name: "iPad Air",
+    category: "Mobile",
     serial: "IT-2023-9901",
     status: "Assigned",
     warranty: "Warranty Active",
@@ -67,6 +70,7 @@ const assets = [
   {
     id: 4,
     name: "Chair",
+    category: "Accessories",
     serial: "IT-2023-9901",
     status: "Assigned",
     warranty: "Warranty Active",
@@ -77,6 +81,7 @@ const assets = [
   {
     id: 5,
     name: "iPad Air",
+    category: "Mobile",
     serial: "IT-2023-9901",
     status: "Assigned",
     warranty: "Warranty Active",
@@ -88,18 +93,21 @@ const assets = [
 export default function AssetsScreen() {
   // const [assets, setAssets] = useState<Assets[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const {colors, isDark }= useTheme();
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const filteredAssets = assets.filter((item) => {
   const query = searchQuery.toLowerCase();
 
-  return (
+  const matchesSearch =
     item.name.toLowerCase().includes(query) ||
-    item.serial.toLowerCase().includes(query)
-  );
-});
+    item.serial.toLowerCase().includes(query);
 
-  const {colors, isDark }= useTheme();
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const matchesCategory =
+    selectedCategory === "All" ||
+    item.category === selectedCategory;
+
+  return matchesSearch && matchesCategory;
+});
 
   // async function getAssets() {
   //   try {
@@ -140,6 +148,7 @@ export default function AssetsScreen() {
           onChangeText={setSearchQuery}
         />
       </View>
+
       <View>
       <ScrollView
         horizontal
@@ -168,6 +177,7 @@ export default function AssetsScreen() {
         })}
       </ScrollView>
       </View>
+      
       <View>
       <FlatList
               data={filteredAssets}
@@ -185,7 +195,7 @@ export default function AssetsScreen() {
                   onPress={() =>
                     router.push({
                       pathname: "/(main)/assetsDetail",
-                      params: { id: item.id },
+                      params: { id: item.id, mode: "assigned"},
                     })
                   }
                 >
@@ -332,7 +342,10 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 14,
   },
-
+  categoriesContainer: {
+  paddingVertical: 18,
+  paddingRight: 10,
+},
 categoryButton: {
   height: 38,
   backgroundColor: "#E8EAF6",
@@ -443,8 +456,5 @@ categoryButton: {
     color: "#666",
     fontWeight: "600",
   },
-categoriesContainer: {
-  paddingVertical: 18,
-  paddingRight: 10,
-},
+
 });

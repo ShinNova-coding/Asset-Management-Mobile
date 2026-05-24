@@ -4,22 +4,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 interface ContactData {
   employeeId: string;
   role: string;
   position: string;
-  department: string;
   corporateEmail: string;
   phone: string;
   officeLocation: string;
-  permissions: string[];
+  // permissions: string[];
 }
 
 export default function ContactInfoScreen() {
@@ -46,11 +45,10 @@ export default function ContactInfoScreen() {
           employeeId: employeeId,
           role: "Employee",
           position: "IT Specialist",
-          department: "Infrastructure & Security",
           corporateEmail: "alex@company.com",
           phone: "+95 912345678",
           officeLocation: "Yangon HQ",
-          permissions: ["View Assigned Assets", "Submit Asset Requests"],
+          // permissions: ["View Assigned Assets", "Submit Asset Requests"],
         });
       } catch (error) {
         console.error("Failed to load employee metadata:", error);
@@ -141,7 +139,7 @@ export default function ContactInfoScreen() {
           </View>
         </View>
 
-        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.background }]}>
+        {/* <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.background }]}>
           <View style={styles.sectionTitleRow}>
             <Ionicons name="shield-checkmark-outline" size={20} color="#0070EB" />
             <Text style={[styles.cardHeader, { color: colors.text }]}>System Permissions</Text>
@@ -154,7 +152,7 @@ export default function ContactInfoScreen() {
               <Text style={[styles.permissionText, { color: colors.text }]}>{permission}</Text>
             </View>
           ))}
-        </View>
+        </View> */}
 
       </ScrollView>
     </SafeAreaView>
@@ -242,21 +240,21 @@ const styles = StyleSheet.create({
   label: { fontSize: 13 },
   value: { fontSize: 14, fontWeight: "500" },
   alignRight: { flex: 1, textAlign: "right", marginLeft: 20 },
-  permissionSub: {
-    fontSize: 11,
-    color: "#9CA3AF",
-    fontWeight: "bold",
-    marginVertical: 10,
-    letterSpacing: 0.5,
-  },
-  permissionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F5F3FF",
-    padding: 12,
-    borderRadius: 12,
-    gap: 10,
-    marginBottom: 8,
-  },
-  permissionText: { fontSize: 13, fontWeight: "500" },
+  // permissionSub: {
+  //   fontSize: 11,
+  //   color: "#9CA3AF",
+  //   fontWeight: "bold",
+  //   marginVertical: 10,
+  //   letterSpacing: 0.5,
+  // },
+  // permissionRow: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   backgroundColor: "#F5F3FF",
+  //   padding: 12,
+  //   borderRadius: 12,
+  //   gap: 10,
+  //   marginBottom: 8,
+  // },
+  // permissionText: { fontSize: 13, fontWeight: "500" },
 });

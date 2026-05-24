@@ -1,4 +1,3 @@
-
 import { useFonts } from "expo-font";
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -7,7 +6,6 @@ import { ThemeProvider } from "../context/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
 
-// set the animation setOptions. This is optional
 SplashScreen.setOptions({
   duration: 500,
   fade: true,
@@ -20,12 +18,13 @@ export default function RootLayout() {
 
     useEffect(()=>{
       async function prepare(){
-      if(loaded){
-        SplashScreen.hideAsync()
+        if(loaded){
+          SplashScreen.hideAsync()
+        }
       }
-    }
-    prepare();
+     prepare();
     },[loaded])
+
     if (!loaded){
       return null
     }
