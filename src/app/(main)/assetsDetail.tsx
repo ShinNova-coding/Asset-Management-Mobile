@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -19,7 +20,7 @@ const assetsData = [
     id: 1,
     name: "MacBook Pro M3",
     serial: "IT-2024-8842",
-    status: "Active",
+    status: "Available",
     condition: "Excellent",
     category: "Laptop",
     warranty: "Oct 2026",
@@ -30,7 +31,7 @@ const assetsData = [
     id: 2,
     name: "iPhone 15 Pro",
     serial: "IT-2024-1109",
-    status: "Active",
+    status: "Available",
     condition: "Good",
     category: "Phone",
     warranty: "Oct 2025",
@@ -41,7 +42,7 @@ const assetsData = [
     id: 3,
     name: "iPad Air",
     serial: "IT-2024-1109",
-    status: "Active",
+    status: "Available",
     condition: "Repair",
     category: "Phone",
     warranty: "Oct 2025",
@@ -92,7 +93,7 @@ export default function AssetDetailScreen() {
   const {colors, isDark} = useTheme();
   const { id, mode } = useLocalSearchParams();
   const router = useRouter();
-
+  const [note, setNote] = useState("");
 
   const asset = assetsData.find((a) => a.id === Number(id));
   const [status, setStatus] = useState (asset?.status || "");
@@ -191,7 +192,33 @@ export default function AssetDetailScreen() {
           <Text style={styles.reportButtonText}>Report an Issue</Text>
         </TouchableOpacity>
         </>
-) : (
+) : (          <>
+                 <Text
+                   style={[
+                     styles.label,
+                     { color: colors.subText },
+                   ]}
+                 >
+                   NOTE FOR ASSET REQUEST
+                 </Text>
+         
+                 <TextInput
+                   multiline
+                   value={note}
+                   onChangeText={setNote}
+                   placeholder="Please provide details for your request..."
+                   placeholderTextColor={colors.subText}
+                   style={[
+                     styles.textArea,
+                     {
+                       backgroundColor: colors.card,
+                       color: colors.text,
+                       borderColor: isDark
+                         ? "#334155"
+                         : "#E5E7EB",
+                     },
+                   ]}
+                 />
 
          <TouchableOpacity
           style={styles.requestButton}
@@ -199,16 +226,17 @@ export default function AssetDetailScreen() {
             alert("Asset request submitted");
           }}
            >
-          <Ionicons
-            name="add-circle-outline"
-            size={20}
-            color="white"
-           />
+              <Ionicons
+                name="add-circle-outline"
+                size={20}
+                color="white"
+              />
 
-          <Text style={styles.reportButtonText}>
-            Request Asset
-          </Text>
+              <Text style={styles.reportButtonText}>
+                Request Asset
+              </Text>
           </TouchableOpacity>
+          </>
           )}
       </ScrollView>
     </SafeAreaView>
@@ -285,6 +313,22 @@ const styles = StyleSheet.create({
   gap: 8,
   marginBottom: 12,
 },
+
+   label: {
+    fontSize: 12,
+    fontWeight: "700",
+    marginBottom: 10,
+    marginTop: 6,
+  },
+  textArea: {
+    minHeight: 130,
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 16,
+    textAlignVertical: "top",
+    fontSize: 15,
+    marginBottom: 22,
+  },
 requestButton: {
   backgroundColor: "#10B981",
   flexDirection: "row",

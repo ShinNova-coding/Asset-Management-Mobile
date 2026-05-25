@@ -1,45 +1,59 @@
 import { useTheme } from "@/src/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState } from "react";
 import {
-  FlatList,
+  SectionList,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const notifications = [
+export default function NotificationScreen() {
+
+  const [notifications, setNotifications] = useState([
   {
     id: "1",
+    section: "Today",
+    unread: true,
     type: "assigned",
     title: "New Asset Assigned",
-    message: "A Dell Monitor has been assigned to you.",
-    time: "2h ago",
-    actionText: "View Asset",
-    badge: "NEW",
+    message: "Dell Monitor assigned to you.",
+    time: "10:24 AM",
   },
+
   {
     id: "2",
-    type: "repair",
-    title: "Repair Completed",
-    message: "Your MacBook repair is finished. Please collect it.",
-    time: "1d ago",
-    actionText: "Pickup Instructions",
-  },
-  {
-    id: "3",
+    section: "Today",
+    unread: true,
     type: "urgent",
     title: "Return Reminder",
     message: "iPad return due in 3 days.",
-    time: "3d left",
-    actionText: "Request Extension",
-    badge: "URGENT",
+    time: "8:10 AM",
   },
-];
 
-export default function NotificationScreen() {
+  {
+    id: "3",
+    section: "Yesterday",
+    unread: false,
+    type: "repair",
+    title: "Repair Completed",
+    message: "MacBook repair completed.",
+    time: "4:32 PM",
+  },
+
+  {
+    id: "4",
+    section: "This Week",
+    unread: false,
+    type: "assigned",
+    title: "Asset Request Approved",
+    message: "Your iPhone request was approved.",
+    time: "Monday",
+  },
+]);
   const { colors, isDark } = useTheme();
   
   const renderIcon = (type: string) => {
@@ -82,13 +96,43 @@ export default function NotificationScreen() {
     }
   };
 
+  const deleteNotification = (id: string) => {
+    setNotifications((notifications) => notifications.filter((item) => item.id !== id));
+  }
+
+  const markAllAsRead = () => {
+    setNotifications((notifications) => notifications.map((item)=> ({ ...item, unread: false})));
+  }
+  const groupedNotifications = [
+  {
+    title: "Today",
+    data: notifications.filter(
+      (item) => item.section === "Today"
+    ),
+  },
+
+  {
+    title: "Yesterday",
+    data: notifications.filter(
+      (item) => item.section === "Yesterday"
+    ),
+  },
+
+  {
+    title: "This Week",
+    data: notifications.filter(
+      (item) => item.section === "This Week"
+    ),
+  },
+];
+
   return (
     <SafeAreaView style={[styles.container,{ backgroundColor: colors.background}]}>
 
       <View style={styles.titleRow}>
         <Text style={[styles.title, {color: colors.text}]}>Notifications</Text>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={markAllAsRead}>
           <Text style={styles.markAll}>
             Mark all as read
           </Text>
@@ -99,17 +143,43 @@ export default function NotificationScreen() {
         Stay updated on your IT assets
       </Text>
 
-      <FlatList
-        data={notifications}
+      <SectionList
+        sections={groupedNotifications}
         keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 120,
         }}
+        renderSectionHeader={({ section })=> (
+          <Text style= {[styles.sectionHeader, {color: colors.subText}]}>
+            {section.title}
+          </Text>
+        )}
         renderItem={({ item }) => (
+          <Swipeable
+              renderRightActions={() => (
+                <TouchableOpacity
+                  onPress={() =>
+                    deleteNotification(item.id)
+                  }
+                  style={styles.deleteAction}
+                >
+                  <Ionicons
+                    name="trash-outline"
+                    size={22}
+                    color="white"
+                  />
+
+                  <Text style={styles.deleteText}>
+                    Delete
+                  </Text>
+                </TouchableOpacity>
+              )}
+            >
           <TouchableOpacity
             activeOpacity={0.9}
             style={[
-              styles.card, { backgroundColor: colors.card, borderColor: colors.background},
+              styles.card, { backgroundColor: item.unread ? isDark ? "#1E293B" : "#F8FBFF" : colors.card, borderColor: colors.background},
               item.type === "urgent" && styles.urgentCard,
             ]}
           >
@@ -117,10 +187,14 @@ export default function NotificationScreen() {
 
             <View style={styles.content}>
               <View style={styles.topRow}>
-                <Text style={[styles.cardTitle, {color: colors.text}]}>
-                  {item.title}
-                </Text>
-
+                <View style={styles.titleRowInner}>
+                   {item.unread && (
+                    <View style={styles.unreadDot} />
+                   )}
+                    <Text style={[styles.cardTitle, {color: colors.text}]}>
+                      {item.title}
+                    </Text>
+                </View>
                 <Text style={[styles.time, {color: colors.subText}]}>
                   {item.time}
                 </Text>
@@ -129,30 +203,9 @@ export default function NotificationScreen() {
               <Text style={[styles.message, {color: colors.text}]}>
                 {item.message}
               </Text>
-
-              <View style={styles.bottomRow}>
-                {item.badge && (
-                  <View
-                    style={[
-                      styles.badge,
-                      item.badge === "URGENT" &&
-                        styles.urgentBadge,
-                    ]}
-                  >
-                    <Text style={styles.badgeText}>
-                      {item.badge}
-                    </Text>
-                  </View>
-                )}
-
-                <TouchableOpacity>
-                  <Text style={styles.actionText}>
-                    {item.actionText}
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
           </TouchableOpacity>
+          </Swipeable>
         )}
         ListFooterComponent={() => (
           <View style={styles.footer}>
@@ -161,10 +214,6 @@ export default function NotificationScreen() {
               size={50}
               color="#D1D5DB"
             />
-
-            <Text style={styles.footerText}>
-              No more notifications for today
-            </Text>
           </View>
         )}
       />
@@ -177,14 +226,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F3FF",
     paddingHorizontal: 16,
-    // paddingTop: 16,
   },
 
   titleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    // paddingTop: -10,
     marginTop: -26,
   },
 
@@ -228,6 +275,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 14,
   },
+sectionHeader: {
+  fontSize: 15,
+  fontWeight: "700",
+  marginBottom: 12,
+  marginTop: 20,
+},
+
+titleRowInner: {
+  flexDirection: "row",
+  alignItems: "center",
+  flex: 1,
+},
+
+unreadDot: {
+  width: 8,
+  height: 8,
+  borderRadius: 4,
+  backgroundColor: "#0070EB",
+  marginRight: 8,
+},
 
   content: {
     flex: 1,
@@ -263,37 +330,22 @@ const styles = StyleSheet.create({
     marginTop: 12,
     gap: 10,
   },
+deleteAction: {
+  width: 90,
+  backgroundColor: "#EF4444",
+  borderRadius: 18,
+  marginBottom: 14,
+  justifyContent: "center",
+  alignItems: "center",
+},
 
-  badge: {
-    backgroundColor: "#DBEAFE",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
-  },
-
-  urgentBadge: {
-    backgroundColor: "#FEE2E2",
-  },
-
-  badgeText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#0070EB",
-  },
-
-  actionText: {
-    color: "#0070EB",
-    fontWeight: "600",
-    fontSize: 13,
-  },
-
+deleteText: {
+  color: "white",
+  fontWeight: "700",
+  marginTop: 4,
+},
   footer: {
     alignItems: "center",
     marginTop: 40,
-  },
-
-  footerText: {
-    marginTop: 12,
-    color: "#9CA3AF",
   },
 });

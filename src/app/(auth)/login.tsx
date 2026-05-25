@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -10,15 +11,54 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   
-  const handleLogin = () => {
-  router.replace("/(main)/(tabs)");
+  const handleLogin = async () => {
+  // router.replace("/(main)/(tabs)");
+  if (!email || !password) {
+    setError("Please fill all fields");
+    return;
+  }
+  try {
+    setLoading (true);
+    setError("");
+    const response  = await fetch("http://192.168.100.180:1010/api/login",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json",},
+        body: JSON.stringify({ email, password }),
+      }
+    );
+    const data = await response.json();
+
+    console.log("LOGIN RESPONSE =>", data);
+
+    if (response.ok) {
+      await SecureStore.setItemAsync("token", data.token);
+      await SecureStore.setItemAsync("user", JSON.stringify(data.user));
+      router.replace("/(main)/(tabs)");   
+    } 
+    else {
+      setError (data.message || "Invalid email or password");
+    }
+
+
+  }
+  catch (error) {
+    console.log("LOGIN ERROR =>", error);
+    setError("Network error");
+  }
+  finally {
+    setLoading(false);
+  }
 };
 
   return (
@@ -99,11 +139,19 @@ export default function LoginScreen() {
               />
             </TouchableOpacity>
           </View>
+                      {
+              error ? (
+                <Text style={styles.errorText}>
+                  {error}
+                </Text>
+              ) : null
+            }
           
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled= {loading}>
+            { loading ? (<ActivityIndicator color="white" />) : (
             <Text style={styles.buttonText}>
               Login
-            </Text>
+            </Text> )}
           </TouchableOpacity>
 
         </View>
@@ -228,4 +276,9 @@ const styles = StyleSheet.create({
     color: "#0070EB",
     fontWeight: "700",
   },
+  errorText: {
+  color: "#DC2626",
+  fontSize: 13,
+  marginTop: -6,
+},
 });

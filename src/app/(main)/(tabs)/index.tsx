@@ -92,7 +92,7 @@ export default function DashboardScreen() {
         </View>
 
         <View style={[styles.statCard,{backgroundColor: colors.card}]}>
-          <Text style={[styles.statTitle,{color: colors.subText}]}>ACTIVE</Text>
+          <Text style={[styles.statTitle,{color: colors.subText}]}>ASSIGNED</Text>
           <Text style={[styles.statNumber,{color: colors.primary}]}>3</Text>
         </View>
       </View>

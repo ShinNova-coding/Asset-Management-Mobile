@@ -94,6 +94,7 @@ export default function AssetsScreen() {
   // const [assets, setAssets] = useState<Assets[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const {colors, isDark }= useTheme();
+  const [showCategories, setShowCategories] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const filteredAssets = assets.filter((item) => {
   const query = searchQuery.toLowerCase();
@@ -134,6 +135,7 @@ export default function AssetsScreen() {
         Manage and track your assigned hardware.
       </Text>
 
+    <View style= {styles.searchRow}>
       <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
         <Ionicons
           name="search"
@@ -148,34 +150,61 @@ export default function AssetsScreen() {
           onChangeText={setSearchQuery}
         />
       </View>
+          <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() =>
+            setShowCategories(!showCategories)
+          }
+          style={[
+            styles.filterButton,
+            {
+              backgroundColor: showCategories
+                ? colors.primary
+                : colors.card,
+            },
+          ]}
+          >
+          <Ionicons
+            name="options-outline"
+            size={22}
+            color={
+              showCategories
+                ? "white"
+                : colors.text
+            }
+          />
+        </TouchableOpacity>
+      </View>
 
       <View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoriesContainer}
-        >
-        {categories.map((item) => {
-          const active = selectedCategory === item;
+        {showCategories && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesContainer}
+          >
+          {categories.map((item) => {
+            const active = selectedCategory === item;
 
-          return (
-            <TouchableOpacity
-              key={item}
-              onPress={() =>setSelectedCategory(item)}
-              style={[
-                styles.categoryButton,
-                { backgroundColor: selectedCategory === item ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
-              ]}
-            >
-              <Text
-                style={{ color: selectedCategory === item ? "white" : colors.subText }}
+            return (
+              <TouchableOpacity
+                key={item}
+                onPress={() =>setSelectedCategory(item)}
+                style={[
+                  styles.categoryButton,
+                  { backgroundColor: selectedCategory === item ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
+                ]}
               >
-                {item}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+                <Text
+                  style={{ color: selectedCategory === item ? "white" : colors.subText }}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+          
+            );
+          })}
+        </ScrollView> )}
       </View>
       
       <View>
@@ -329,21 +358,37 @@ const styles = StyleSheet.create({
   },
 
   searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    height: 50,
-  },
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+  borderRadius: 16,
+  paddingHorizontal: 14,
+  height: 50,
+},
 
   searchInput: {
     flex: 1,
     marginLeft: 10,
     fontSize: 14,
   },
+
+  searchRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 4,
+},
+
+filterButton: {
+  width: 50,
+  height: 50,
+  borderRadius: 16,
+  marginLeft: 12,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
   categoriesContainer: {
-  paddingVertical: 18,
+  paddingVertical: 10.5,
   paddingRight: 10,
 },
 categoryButton: {
@@ -374,7 +419,7 @@ categoryButton: {
     backgroundColor: "white",
     borderRadius: 24,
     padding: 14,
-    marginBottom: 13,
+    marginTop: 11.5,
     flexDirection: "row",
     alignItems: "center",
   },
