@@ -13,9 +13,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function ProfileScreen() {
   
+  const { logout } = useAuth();
   const { isDark, colors, setScheme } = useTheme();
 
   const [profileImage, setProfileImage] = useState(
@@ -157,9 +159,13 @@ const pickImage = async () => {
           </TouchableOpacity>
           </View>
 
-        <TouchableOpacity style={[styles.logoutButton, { backgroundColor: isDark ? '#451212' : '#FFF1F2', borderColor: isDark ? '#7F1D1D' : '#FFE4E6' }]}>
-          <Ionicons name="log-out-outline" size={22} color="#EF4444" />
-          <Text style={styles.logoutText}>Logout</Text>
+        <TouchableOpacity onPress={async () => {
+              await logout();
+              router.replace("/(auth)/login")
+            }}
+             style={[styles.logoutButton, { backgroundColor: isDark ? '#451212' : '#FFF1F2', borderColor: isDark ? '#7F1D1D' : '#FFE4E6' }]}>
+              <Ionicons name="log-out-outline" size={22} color="#EF4444" />
+              <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
 
       </ScrollView>

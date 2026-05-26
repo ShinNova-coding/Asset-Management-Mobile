@@ -3,16 +3,32 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { AuthProvider, useAuth } from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
 
-SplashScreen.setOptions({
-  duration: 500,
-  fade: true,
-})
+// SplashScreen.setOptions({
+//   duration: 500,
+//   fade: true,
+// })
+function RootNavigator() {
+  const {token, isLoading } = useAuth();
+
+  if( isLoading){
+    return null;
+  }
+  return (
+      <Stack screenOptions={{ headerShown: false }}>
+           {token ? ( <Stack.Screen name="(main)" /> )
+           : (
+            <Stack.Screen name="(auth)" />)}
+      </Stack> 
+  )
+}
 
 export default function RootLayout() {
+
    const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
    })
@@ -20,7 +36,7 @@ export default function RootLayout() {
     useEffect(()=>{
       async function prepare(){
         if(loaded){
-          SplashScreen.hideAsync()
+          await SplashScreen.hideAsync()
         }
       }
      prepare();
@@ -33,10 +49,9 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{flex: 1}}>
        <ThemeProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)/login" options={{headerShown: false}}/>
-          <Stack.Screen name="(main)/(tabs)" options={{headerShown: false}}/>
-        </Stack>    
+        <AuthProvider>
+           <RootNavigator />
+        </AuthProvider> 
        </ThemeProvider>
     </GestureHandlerRootView>
   );

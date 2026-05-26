@@ -11,8 +11,8 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -20,44 +20,21 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  
-  const handleLogin = async () => {
-  // router.replace("/(main)/(tabs)");
-  if (!email || !password) {
-    setError("Please fill all fields");
-    return;
-  }
-  try {
-    setLoading (true);
-    setError("");
-    const response  = await fetch("http://192.168.100.180:1010/api/login",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json",},
-        body: JSON.stringify({ email, password }),
-      }
-    );
-    const data = await response.json();
+  const {login } = useAuth();
 
-    console.log("LOGIN RESPONSE =>", data);
+const handleLogin = async () => {
+  setLoading(true);
+  setError("");
 
-    if (response.ok) {
-      await SecureStore.setItemAsync("token", data.token);
-      await SecureStore.setItemAsync("user", JSON.stringify(data.user));
-      router.replace("/(main)/(tabs)");   
-    } 
-    else {
-      setError (data.message || "Invalid email or password");
-    }
+  const success = await login(
+    email,
+    password
+  );
 
+  setLoading(false);
 
-  }
-  catch (error) {
-    console.log("LOGIN ERROR =>", error);
-    setError("Network error");
-  }
-  finally {
-    setLoading(false);
+  if ( !success) {
+    setError("Invalid email or password");
   }
 };
 
