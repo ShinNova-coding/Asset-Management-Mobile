@@ -1,16 +1,17 @@
 import HeaderBar from "@/src/components/HeaderBar";
+import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import React from "react";
 import {
-  ActivityIndicator,
-  ScrollView,
+  Image, ScrollView,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 interface ContactData {
   employeeId: string;
   role: string;
@@ -24,49 +25,17 @@ interface ContactData {
 export default function ContactInfoScreen() {
   const router = useRouter();
   const { colors, isDark } = useTheme();
-  
-  const { employeeId } = useLocalSearchParams<{ employeeId: string }>();
 
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<ContactData | null>(null);
+  const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchContactDetails = async () => {
-      try {
-        setLoading(true);
-        // Replace this mockup block with your real axios/fetch call later:
-        // const response = await axios.get(`https://api.yourbackend.com/employees/${employeeId}`);
-        
-        // Simulating API Latency
-        await new Promise((resolve) => setTimeout(resolve, 800));
 
-        // Simulated Response matching the image details
-        setData({
-          employeeId: employeeId,
-          role: "Employee",
-          position: "IT Specialist",
-          corporateEmail: "alex@company.com",
-          phone: "+95 912345678",
-          officeLocation: "Yangon HQ",
-          // permissions: ["View Assigned Assets", "Submit Asset Requests"],
-        });
-      } catch (error) {
-        console.error("Failed to load employee metadata:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchContactDetails();
-  }, [employeeId]);
-
-  if (loading) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background, justifyContent: "center" }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </SafeAreaView>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <SafeAreaView style={[styles.container, { backgroundColor: colors.background, justifyContent: "center" }]}>
+  //       <ActivityIndicator size="large" color={colors.primary} />
+  //     </SafeAreaView>
+  //   );
+  // }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -75,16 +44,27 @@ export default function ContactInfoScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.avatarSection}>
           <View style={styles.imageContainer}>
-            <View style={[styles.avatarCircle, { backgroundColor: '#EEF2FF' }]}>
-              <Ionicons name="person-outline" size={40} color="#0070EB" />
-            </View>
+<Image
+  source={{
+    uri:
+      user?.preview_url?.replace(
+        "http://localhost",
+        "http://192.168.100.180:1010"
+      ),
+  }}
+  style={{
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+  }}
+/>
           </View>
-          <Text style={[styles.userName, { color: colors.text }]}>Alex Rivers</Text>
-          <Text style={[styles.userRole, { color: colors.subText }]}>{data?.position}</Text>
+          <Text style={[styles.userName, { color: colors.text }]}>{user?.name}</Text>
+          <Text style={[styles.userRole, { color: colors.subText }]}>{user?.position || "Employee"}</Text>
           
           <View style={[styles.badgeRow, { marginTop: 10 }]}>
             <View style={styles.deptBadge}>
-              <Text style={styles.deptText}>{data?.department}</Text>
+              <Text style={styles.deptText}>{user?.roles?.[0]?.name || "Employee"}</Text>
             </View>
             <View style={styles.statusBadge}>
               <View style={styles.dot} />
@@ -101,41 +81,35 @@ export default function ContactInfoScreen() {
 
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Employee ID</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{data?.employeeId}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{user?.employee_id}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Role</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{data?.role}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{user?.roles?.[0]?.name}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Position</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{data?.position}</Text>
-          </View>
-          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-            <Text style={[styles.label, { color: colors.subText }]}>Department</Text>
-            <Text style={[styles.value, { color: colors.text }, styles.alignRight]} numberOfLines={1}>
-              {data?.department}
-            </Text>
+            <Text style={[styles.value, { color: colors.text }]}>{user?.position}</Text>
           </View>
         </View>
 
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.background }]}>
           <View style={styles.sectionTitleRow}>
-            <Ionicons name="person-card-outline" size={20} color="#0070EB" />
+            <Ionicons name="person-circle-outline" size={20} color="#0070EB" />
             <Text style={[styles.cardHeader, { color: colors.text }]}>Contact Details</Text>
           </View>
 
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Corporate Email</Text>
-            <Text style={[styles.value, { color: "#0070EB", fontWeight: "600" }]}>{data?.corporateEmail}</Text>
+            <Text style={[styles.value, { color: "#0070EB", fontWeight: "600" }]}>{user?.email}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Phone</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{data?.phone}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{user?.phone_number}</Text>
           </View>
           <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
             <Text style={[styles.label, { color: colors.subText }]}>Office Location</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{data?.officeLocation}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>Dagon, Taw Win Center</Text>
           </View>
         </View>
 

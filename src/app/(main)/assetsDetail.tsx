@@ -14,88 +14,24 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-const assetsData = [
-  {
-    id: 1,
-    name: "MacBook Pro M3",
-    serial: "IT-2024-8842",
-    status: "Available",
-    condition: "Excellent",
-    category: "Laptop",
-    warranty: "Oct 2026",
-    assignedTo: "Sarah Jenkins",
-    image: "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?q=80&w=800",
-  },
-  {
-    id: 2,
-    name: "iPhone 15 Pro",
-    serial: "IT-2024-1109",
-    status: "Available",
-    condition: "Good",
-    category: "Phone",
-    warranty: "Oct 2025",
-    assignedTo: "Sarah Jenkins",
-    image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=800",
-  },
-    {
-    id: 3,
-    name: "iPad Air",
-    serial: "IT-2024-1109",
-    status: "Available",
-    condition: "Repair",
-    category: "Phone",
-    warranty: "Oct 2025",
-    assignedTo: "kmo",
-    image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
-  }, 
-    {
-    id: 4,
-    name: "Chair",
-    serial: "IT-2023-9901",
-    status: "Assigned",
-    warranty: "Warranty Active",
-    image:
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
-  },
-  
-  {
-    id: 5,
-    name: "iPad Air",
-    serial: "IT-2023-9901",
-    status: "Assigned",
-    warranty: "Warranty Active",
-    image:
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
-  },
-  {
-      id: 7,
-    name: "MacBook Pro 16”",
-    serial: "C02FX5G...MD6M",
-    warranty: "Sep 2025",
-    status: "ACTIVE",
-    icon: "laptop-outline",
-    color: "#5B4BFF",
-  },
-
-  {
-    id: 8,
-    name: "iPad Pro 12.9\"",
-    serial: "DLXCQ5J...F16P",
-    warranty: "Jun 2024",
-    status: "ACTIVE",
-    icon: "tablet-portrait-outline",
-    color: "#36D7FF",
-  },
-];
+type Asset = {
+  asset_id: string;
+  name: string;
+  serial_number: string;
+  status: string;
+  asset_condition: string;
+  category_name: string;
+  warranty_period: number;
+  image_url: string | null;
+};
 
 export default function AssetDetailScreen() {
   const {colors, isDark} = useTheme();
-  const { id, mode } = useLocalSearchParams();
+  const { asset: assetParam, mode } = useLocalSearchParams();
   const router = useRouter();
   const [note, setNote] = useState("");
 
-  const asset = assetsData.find((a) => a.id === Number(id));
+  const asset: Asset = assetParam? JSON.parse(assetParam as string) : null;
   const [status, setStatus] = useState (asset?.status || "");
   const handleReturn = () => {
     Alert.alert(
@@ -121,7 +57,7 @@ export default function AssetDetailScreen() {
     );
   };
 
-  if (!asset) {
+  if (!assetParam) {
     return (
       <View style={styles.container}><Text>Asset not found</Text></View>
     );
@@ -133,26 +69,26 @@ export default function AssetDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>       
       
         <View style={[styles.imageCard, { backgroundColor: colors.card }]}>
-          <Image source={{ uri: asset.image }} style={styles.detailImage} resizeMode="contain" />
+          <Image source={{ uri: asset.image_url || undefined }} style={styles.detailImage} resizeMode="contain" />
           <Text style={[styles.mainTitle, { color: colors.text }]}>{asset.name}</Text>
-          <Text style={[styles.subTitle, { color: colors.subText }]}>SN-{asset.serial}</Text>           
+          <Text style={[styles.subTitle, { color: colors.subText }]}>SN-{asset.serial_number}</Text>           
           <View style={styles.badgeRow}>
             <View style={[styles.badge, styles.activeBadge]}>
               <Text style={styles.activeBadgeText}>{status}</Text>
             </View>
             <View style={[styles.badge, styles.conditionBadge]}>
-              <Text style={styles.conditionBadgeText}>Condition: {asset.condition}</Text>
+              <Text style={styles.conditionBadgeText}>Condition: {asset.asset_condition}</Text>
             </View>
           </View>
         </View>
         <View style={styles.infoGrid}>
           <View style={[styles.infoBox, { backgroundColor: colors.card }]}>
             <Text style={styles.infoLabel}>Category</Text>
-            <Text style={[styles.infoValue, { color: colors.text }]}>{asset.category}</Text>
+            <Text style={[styles.infoValue, { color: colors.text }]}>{asset.category_name}</Text>
           </View>
           <View style={[styles.infoBox, { backgroundColor: colors.card }]}>
             <Text style={styles.infoLabel}>Warranty</Text>
-            <Text style={[styles.infoValue, { color: colors.text }]}>{asset.warranty}</Text>
+            <Text style={[styles.infoValue, { color: colors.text }]}>{asset.warranty_period}Months</Text>
           </View>
         </View>
 {mode ==="assigned" ? (
@@ -184,7 +120,7 @@ export default function AssetDetailScreen() {
           onPress={() =>
             router.push({
               pathname: "/(main)/reportIssue",
-              params: { id: asset.id },
+              params: { id: asset.asset_id },
             })
           }
         >

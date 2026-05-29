@@ -1,8 +1,9 @@
 import { useTheme } from "@/src/context/ThemeContext";
+import { getProfile } from "@/src/database/profile.service";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -17,13 +18,13 @@ import { useAuth } from "../../../context/AuthContext";
 
 export default function ProfileScreen() {
   
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const { isDark, colors, setScheme } = useTheme();
-
-  const [profileImage, setProfileImage] = useState(
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400"
-);
-
+  const[profile, setProfile] = useState<any>(null);
+  // const profileImage = user?.preview_url?.replace("http://localhost", "http://192.168.100.180:1010")
+  // console.log ("IMAGE URL :", String(profileImage));
+  console.log("USER DATA:", user);
+  
 const pickImage = async () => {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
     
@@ -39,10 +40,31 @@ const pickImage = async () => {
       quality: 1,
     });
 
-  if (!result.canceled) {
-    setProfileImage(result.assets[0].uri);
-  }
 };
+
+useEffect(() => {
+
+  async function loadProfile() {
+
+    const localProfile =
+      await getProfile();
+
+    console.log(
+      "LOCAL PROFILE:",
+      localProfile
+    );
+
+    setProfile(localProfile);
+  }
+
+  loadProfile();
+
+}, []);
+// const fetchProfile = async() => {
+//   try{
+//     const response = await fetch("http://192.168.100.180:1010/api/profile",)
+//   }
+// }
 
   return (
     
@@ -62,7 +84,7 @@ const pickImage = async () => {
           </View> */}
           <View style={styles.imageContainer}>
               <Image
-                source={{ uri: profileImage }}
+                source={{ uri: profile?.image_url || "https://via.placeholder.com/150"}}
                 style={styles.profileImage}
               />
 
@@ -82,12 +104,12 @@ const pickImage = async () => {
               </TouchableOpacity>
             </View>
 
-          <Text style={[styles.userName, { color: colors.text }]}>Alex Rivers</Text>
-          <Text style={[styles.userRole, { color: colors.subText }]}>IT Specialist</Text>
+          <Text style={[styles.userName, { color: colors.text }]}>{profile?.name}</Text>
+          <Text style={[styles.userRole, { color: colors.subText }]}>{profile?.position || "Employee"}</Text>
           
           <View style={[styles.deptBadge, { backgroundColor: isDark ? '#2D3748' : '#EEF2FF' }]}>
             <Ionicons name="business" size={14} color={colors.primary} />
-            <Text style={[styles.deptText, { color: colors.primary }]}>Infrastructure & Security</Text>
+            <Text style={[styles.deptText, { color: colors.primary }]}>{profile?.roles?.[0]?.name || "Employee"}</Text>
           </View>
 
           <View style={styles.statsRow}>
@@ -161,7 +183,6 @@ const pickImage = async () => {
 
         <TouchableOpacity onPress={async () => {
               await logout();
-              router.replace("/(auth)/login")
             }}
              style={[styles.logoutButton, { backgroundColor: isDark ? '#451212' : '#FFF1F2', borderColor: isDark ? '#7F1D1D' : '#FFE4E6' }]}>
               <Ionicons name="log-out-outline" size={22} color="#EF4444" />

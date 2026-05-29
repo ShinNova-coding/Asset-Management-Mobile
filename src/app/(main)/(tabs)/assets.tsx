@@ -10,120 +10,79 @@ import {
 } from "react-native";
 
 import { useTheme } from "@/src/context/ThemeContext";
+import { getAssets } from "@/src/database/asset.service";
+import { getCategories } from "@/src/database/category.service";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const categories = [
-  "All",
-  "Laptops",
-  "Mobile",
-  "Accessories",
-];
 
-// type Assets = {
-//   asset_id: string;
-//   name: string;
-//   image: string | null;
-//   serial_number: string;
-//   purchased_date: string;
-//   warranty_expiry: string;
-//   category_id: number;
-//   status: string;
-//   condition: string;
-// };
-
-const assets = [
-  {
-    id: 1,
-    name: "MacBook Pro M3",
-    category: "Laptops",
-    serial: "IT-2024-8842",
-    status: "Assigned",
-    warranty: "Warranty Active",
-    image:
-      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?q=80&w=800",
-  },
-
-  {
-    id: 2,
-    name: "iPhone 15 Pro",
-    category: "Mobile",
-    serial: "IT-2024-1109",
-    status: "Maintenance",
-    warranty: "Exp: Oct 2025",
-    image:
-      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=800",
-  },
-
-  {
-    id: 3,
-    name: "iPad Air",
-    category: "Mobile",
-    serial: "IT-2023-9901",
-    status: "Assigned",
-    warranty: "Warranty Active",
-    image:
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
-  },
-  
-  {
-    id: 4,
-    name: "Chair",
-    category: "Accessories",
-    serial: "IT-2023-9901",
-    status: "Assigned",
-    warranty: "Warranty Active",
-    image:
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
-  },
-  
-  {
-    id: 5,
-    name: "iPad Air",
-    category: "Mobile",
-    serial: "IT-2023-9901",
-    status: "Assigned",
-    warranty: "Warranty Active",
-    image:
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
-  },
-];
+type Asset = {
+  asset_id: string;
+  name: string;
+  serial_number: string;
+  status: string;
+  asset_condition: string;
+  warranty_period: number;
+  image_url: string | null;
+  category_name: string;
+};
 
 export default function AssetsScreen() {
-  // const [assets, setAssets] = useState<Assets[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const {colors, isDark }= useTheme();
+  const [categories, setCategories ] = useState<any[]>([]);
   const [showCategories, setShowCategories] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
+
   const filteredAssets = assets.filter((item) => {
   const query = searchQuery.toLowerCase();
 
   const matchesSearch =
     item.name.toLowerCase().includes(query) ||
-    item.serial.toLowerCase().includes(query);
+    item.serial_number.toLowerCase().includes(query);
 
   const matchesCategory =
     selectedCategory === "All" ||
-    item.category === selectedCategory;
+    item.category_name=== selectedCategory;
 
   return matchesSearch && matchesCategory;
 });
 
-  // async function getAssets() {
-  //   try {
-  //   const response = await fetch("http://192.168.100.186:1010/api/asset")
-  //   console.log("===>",response);
-  //   const item= await response.text();
-  //   console.log(item);
-    
-  //   }catch(error){
-  //     console.log("API Error:", error);
-  //   }
-  // }
-  //   useEffect(()=>{
-  //     getAssets()
-  //   },[])
+useEffect(() => {
+
+  async function loadAssets() {
+
+    try {
+
+      setLoading(true);
+
+      const localAssets = await getAssets();
+      setAssets(localAssets as Asset[]);
+      console.log( "LOCAL SQLITE ASSETS:",localAssets);
+
+      const localCategories = await getCategories();
+      setCategories(localCategories);
+      console.log("LOCAL CATEGORIES", localCategories);
+
+    } catch (error) {
+
+      console.log(
+        "LOAD SQLITE ASSETS ERROR:",
+        error
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
+  }
+
+  loadAssets();
+
+}, []);
   
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -183,22 +142,22 @@ export default function AssetsScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesContainer}
           >
-          {categories.map((item) => {
-            const active = selectedCategory === item;
+          {[{id: 0, name: "All"},...categories].map((item) => {
+            const active = selectedCategory === item.name;
 
             return (
               <TouchableOpacity
-                key={item}
-                onPress={() =>setSelectedCategory(item)}
+                key={item.id.toString()}
+                onPress={() =>setSelectedCategory(item.name)}
                 style={[
                   styles.categoryButton,
-                  { backgroundColor: selectedCategory === item ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
+                  { backgroundColor: selectedCategory === item.name ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
                 ]}
               >
                 <Text
-                  style={{ color: selectedCategory === item ? "white" : colors.subText }}
+                  style={{ color: selectedCategory === item.name ? "white" : colors.subText }}
                 >
-                  {item}
+                  {item.name}
                 </Text>
               </TouchableOpacity>
           
@@ -211,7 +170,7 @@ export default function AssetsScreen() {
       <FlatList
               data={filteredAssets}
               keyExtractor={(item) =>
-                item.id.toString()
+                item.asset_id
               }
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{
@@ -224,11 +183,11 @@ export default function AssetsScreen() {
                   onPress={() =>
                     router.push({
                       pathname: "/(main)/assetsDetail",
-                      params: { id: item.id, mode: "assigned"},
+                      params: { asset: JSON.stringify(item), mode: "assigned"},
                     })
                   }
                 >
-                  <Image source={{ uri: item.image }} style={styles.assetImage} /> 
+                  <Image source={{ uri: item.image_url || undefined }} style={styles.assetImage} /> 
 
                   <View style={styles.assetContent}>
                     <View style={styles.topRow}>
@@ -255,12 +214,12 @@ export default function AssetsScreen() {
                       </View>
                     </View>
 
-                    <Text style={styles.serial}>SN: {item.serial}</Text>
+                    <Text style={styles.serial}>SN: {item.serial_number}</Text>
 
                     <View style={styles.bottomRow}>
                       <View style={styles.warrantyRow}>
                         <Ionicons name="refresh-circle-outline" size={16} color="#777" />
-                        <Text style={styles.warranty}>Exp: {item.warranty}</Text>
+                        <Text style={styles.warranty}>Exp: {item.warranty_period}</Text>
                       </View>
 
                       <Ionicons name="chevron-forward" size={22} color="#999" />

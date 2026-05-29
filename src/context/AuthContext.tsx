@@ -1,15 +1,34 @@
 import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 
 import * as SecureStore from "expo-secure-store";
+import { syncAssets } from "../services/syncAssets";
+import { syncCategories } from "../services/syncCategories";
+import { syncProfile } from "../services/syncProfile";
+type UserType = {
+  employee_id: string;
+  name: string;
+  email: string;
+  position: string | null;
+  status: string;
+  phone_number: string | null;
+  joined_date: string;
+  image_url: string | null;
+  preview_url: string | null;
+
+  roles: {
+    id: number;
+    name: string;
+  }[];
+};
 
 type AuthContextType = {
   token: string | null;
-  user: any;
+  user: UserType | null;
   isLoading: boolean;
 
   login: (
@@ -29,13 +48,11 @@ export const AuthProvider = ({
   children: React.ReactNode;
 }) => {
 
-  const [token, setToken] =
-    useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<UserType | null>(null);
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
 
@@ -76,7 +93,7 @@ export const AuthProvider = ({
     try {
 
       const response = await fetch(
-        "http://192.168.100.180:1010/api/login",
+        "http://192.168.100.197:1010/api/login",
         {
           method: "POST",
 
@@ -93,11 +110,11 @@ export const AuthProvider = ({
       );
 
       const data = await response.json();
-
+      console.log("====>",data)
       if (!response.ok) {
         return false;
       }
-      // SAVE TOKEN and USER
+
       await SecureStore.setItemAsync(
         "token",
         data.token
@@ -111,11 +128,14 @@ export const AuthProvider = ({
       setToken(data.token);
       setUser(data.user);
 
+      await syncAssets(data.token);      //Sync assets to SQlite
+      await syncCategories(data.token); 
+      await syncProfile(data.token);   
       return true;
 
     } catch (error) {
 
-      console.log(error);
+      console.log("LOGIN ERROR:",error);
       return false;
     }
   };

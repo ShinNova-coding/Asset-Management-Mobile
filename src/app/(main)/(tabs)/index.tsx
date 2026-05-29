@@ -8,77 +8,76 @@ import {
   View
 } from "react-native";
 
+import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
+import { getAssets } from "@/src/database/asset.service";
+import { getCategories } from "@/src/database/category.service";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const categories = [
-  "All",
-  "Laptops",
-  "Mobile",
-  "Accessories",
-];
-
-const assets = [
-  {
-    id: 1,
-    name: "MacBook Pro",
-    category: "Laptops",
-    status: "available",
-    condition: "Excellent",
-    image:
-      "https://images.unsplash.com/photo-1517336714739-489689fd1ca8?q=80&w=800",
-  },
-
-  {
-    id: 2,
-    name: "iPhone 15 Pro",
-    category: "Mobile",
-    status: "available",
-    condition: "Good",
-    image:
-      "https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=800",
-  },
-
-  {
-    id: 3,
-    name: "iPad Air",
-    category: "Mobile",
-    status: "available",
-    condition: "Excellent",
-    image:
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800",
-  },
-
-  {
-    id: 4,
-    name: "Dell Monitor",
-    category: "Accessories",
-    status: "available",
-    condition: "Fair",
-    image:
-      "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?q=80&w=800",
-  },
-];
+type Asset = {
+  asset_id: string;
+  name: string;
+  serial_number: string;
+  status: string;
+  asset_condition: string;
+  warranty_period: number;
+  image_url: string | null;
+  category_name: string;
+};
 
 export default function DashboardScreen() {
+   const {user } = useAuth();
    const {colors, isDark} = useTheme();
+   const [assets, setAssets] = useState<Asset[]>([]);
+   const [categories, setCategories ] = useState<any[]>([]);
    const [selectedCategory, setSelectedCategory] = useState("All");
+   const [loading, setLoading] = useState(false);
+
    const filteredAssets = selectedCategory === "All" ? assets
         : assets.filter(
             (item) =>
-              item.category === selectedCategory
+              item.category_name === selectedCategory
           );
+    useEffect(() => {
+    
+      async function loadAssets() {
+    
+        try {
+    
+          setLoading(true);
+    
+          const localAssets = await getAssets();
+          setAssets(localAssets as Asset[]);
+          console.log( "LOCAL SQLITE ASSETS:",localAssets);
+    
+          const localCategories = await getCategories();
+          setCategories(localCategories);
+          console.log("LOCAL CATEGORIES", localCategories);
+    
+        } catch (error) {
+    
+          console.log(
+            "LOAD SQLITE ASSETS ERROR:",
+            error
+          );
+    
+        } finally {
+    
+          setLoading(false);
+        }
+      }
+    
+      loadAssets();
+    
+    }, []);
 
   return (
     <ScrollView style={[styles.container, {backgroundColor: colors.background}]}>
 
       <Text style={[styles.header,{color: colors.text}]}>
-        Hello
+        {user?.name}
       </Text>
-      {/* <Text style={[styles.subheader,{color: colors.subText}]}>
-        Here is your hardware inventory overview.
-      </Text> */}
 
       <View style={styles.statsRow}>
         <View style={[styles.statCard,{backgroundColor: colors.card}]}>
@@ -119,22 +118,22 @@ export default function DashboardScreen() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoriesContainer}
         >
-        {categories.map((item) => {
-          const active = selectedCategory === item;
+        {[{id: 0, name: "All"},...categories].map((item) => {
+          const active = selectedCategory === item.name;
 
           return (
             <TouchableOpacity
-              key={item}
-              onPress={() =>setSelectedCategory(item)}
+              key={item.id.toString()}
+              onPress={() =>setSelectedCategory(item.name)}
               style={[
                 styles.categoryButton,
-                { backgroundColor: selectedCategory === item ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
+                { backgroundColor: selectedCategory === item.name ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
               ]}
             >
               <Text
-                style={{ color: selectedCategory === item ? "white" : colors.subText }}
+                style={{ color: selectedCategory === item.name ? "white" : colors.subText }}
               >
-                {item}
+                {item.name}
               </Text>
             </TouchableOpacity>
           );
@@ -149,17 +148,14 @@ export default function DashboardScreen() {
   columnWrapperStyle={{
     justifyContent: "space-between",
   }}
-  keyExtractor={(item) => item.id.toString()}
+  keyExtractor={(item) => item.asset_id.toString()}
   renderItem={({ item }) => (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() => {
         router.push({
           pathname: "/(main)/assetsDetail",
-          params: {
-            id: item.id,
-            mode: "available",
-          },
+          params: { asset: JSON.stringify(item), mode: "available"},
         });
       }}
       style={[
@@ -170,7 +166,7 @@ export default function DashboardScreen() {
       ]}
     >
       <Image
-        source={{ uri: item.image }}
+        source={{ uri: item.image_url || undefined }}
         style={styles.assetImage}
         resizeMode="contain"
       />
@@ -188,7 +184,7 @@ export default function DashboardScreen() {
       <View style={styles.assetInfoRow}>
         <View style={styles.conditionBadge}>
           <Text style={styles.conditionText}>
-            {item.condition}
+            {item.asset_condition}
           </Text>
         </View>
         <View style={styles.availableBadge}>
