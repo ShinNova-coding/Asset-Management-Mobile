@@ -1,14 +1,14 @@
+import * as SecureStore from "expo-secure-store";
 import React, {
   createContext,
   useContext,
   useEffect,
   useState,
 } from "react";
-
-import * as SecureStore from "expo-secure-store";
 import { syncAssets } from "../services/syncAssets";
 import { syncCategories } from "../services/syncCategories";
 import { syncProfile } from "../services/syncProfile";
+import { BASE_URL } from "../URL/api";
 type UserType = {
   employee_id: string;
   name: string;
@@ -93,7 +93,7 @@ export const AuthProvider = ({
     try {
 
       const response = await fetch(
-        "http://192.168.100.197:1010/api/login",
+        `${BASE_URL}/login`,
         {
           method: "POST",
 

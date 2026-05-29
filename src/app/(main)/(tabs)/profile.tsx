@@ -21,6 +21,7 @@ export default function ProfileScreen() {
   const { logout, user } = useAuth();
   const { isDark, colors, setScheme } = useTheme();
   const[profile, setProfile] = useState<any>(null);
+  
   // const profileImage = user?.preview_url?.replace("http://localhost", "http://192.168.100.180:1010")
   // console.log ("IMAGE URL :", String(profileImage));
   console.log("USER DATA:", user);

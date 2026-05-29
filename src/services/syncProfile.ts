@@ -1,7 +1,5 @@
 import { saveProfile } from "../database/profile.service";
-
-const BASE_URL =
-  "http://192.168.100.197:1010";
+import { BASE_URL } from "../URL/api";
 
 export async function syncProfile(
   token: string
@@ -10,7 +8,7 @@ export async function syncProfile(
   try {
 
     const response = await fetch(
-      `${BASE_URL}/api/profile`,
+      `${BASE_URL}/profile`,
       {
         method: "GET",
 

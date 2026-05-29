@@ -1,7 +1,5 @@
 import { saveAssets } from "../database/asset.service";
-
-const BASE_URL =
-  "http://192.168.100.197:1010";
+import { BASE_URL } from "../URL/api";
 
 export async function syncAssets(
   token: string
@@ -10,7 +8,7 @@ export async function syncAssets(
   try {
 
     const response = await fetch(
-      `${BASE_URL}/api/asset`,
+      `${BASE_URL}/asset`,
       {
         method: "GET",
 

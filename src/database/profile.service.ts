@@ -30,12 +30,10 @@ export async function saveProfile(
         user.status,
         user.phone_number,
         user.joined_date,
-
         user.image_url?.replace(
           "http://localhost",
           "http://192.168.100.197:1010"
         ),
-
         user.preview_url?.replace(
           "http://localhost",
           "http://192.168.100.197:1010"
