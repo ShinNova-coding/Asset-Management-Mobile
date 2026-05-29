@@ -1,8 +1,12 @@
-
-import { BASE_URL } from "../URL/api";
+import { api } from "../api/client";
 export async function getCategories() {
-   const response = await fetch(`${BASE_URL}/category`);
-   return response.json();
+   try{
+   const response = await api.get("/category");
+   return response.data?.data??[];
+   }catch (error){
+      console.log("Category API ERROR:", error);
+      return [];
+   }
 }
 
 

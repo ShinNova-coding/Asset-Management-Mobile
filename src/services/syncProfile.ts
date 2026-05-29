@@ -1,5 +1,5 @@
+import { api } from "../api/client";
 import { saveProfile } from "../database/profile.service";
-import { BASE_URL } from "../URL/api";
 
 export async function syncProfile(
   token: string
@@ -8,7 +8,7 @@ export async function syncProfile(
   try {
 
     const response = await fetch(
-      `${BASE_URL}/profile`,
+      `${api}/profile`,
       {
         method: "GET",
 

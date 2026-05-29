@@ -10,9 +10,12 @@ import {
 } from "react-native";
 
 import { useTheme } from "@/src/context/ThemeContext";
+import { getAssets } from "@/src/services/asset.service";
+import { getCategories } from "@/src/services/category.service";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
+
 
 
 type Asset = {
@@ -20,10 +23,13 @@ type Asset = {
   name: string;
   serial_number: string;
   status: string;
-  asset_condition: string;
+  condition: string;
   warranty_period: number;
   image_url: string | null;
-  category_name: string;
+  category: {
+    id: string;
+    name: string;
+  };
 };
 
 export default function AssetsScreen() {
@@ -34,7 +40,6 @@ export default function AssetsScreen() {
   const [categories, setCategories ] = useState<any[]>([]);
   const [showCategories, setShowCategories] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
-
   const filteredAssets = assets.filter((item) => {
   const query = searchQuery.toLowerCase();
 
@@ -44,10 +49,11 @@ export default function AssetsScreen() {
 
   const matchesCategory =
     selectedCategory === "All" ||
-    item.category_name=== selectedCategory;
+    item.category?.name === selectedCategory;
 
   return matchesSearch && matchesCategory;
 });
+ const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
 
 useEffect(() => {
 
@@ -57,18 +63,19 @@ useEffect(() => {
 
       setLoading(true);
 
-      const localAssets = await getAssets();
-      setAssets(localAssets as Asset[]);
-      console.log( "LOCAL SQLITE ASSETS:",localAssets);
+      const resAssets = await getAssets();
+      setAssets(resAssets || []);
+      console.log( "ONLINE ASSETS:",resAssets);
 
-      const localCategories = await getCategories();
-      setCategories(localCategories);
-      console.log("LOCAL CATEGORIES", localCategories);
+      const resCategories = await getCategories();
+      setCategories(Array.isArray(resCategories) ? resCategories : []);
+
+      console.log("ONLINE CATEGORIES", resCategories);
 
     } catch (error) {
 
       console.log(
-        "LOAD SQLITE ASSETS ERROR:",
+        "LOAD ONLINE ASSETS ERROR:",
         error
       );
 
@@ -140,7 +147,7 @@ useEffect(() => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoriesContainer}
           >
-          {[{id: 0, name: "All"},...categories].map((item) => {
+          {categoryList.map((item) => {
             const active = selectedCategory === item.name;
 
             return (
@@ -181,7 +188,7 @@ useEffect(() => {
                   onPress={() =>
                     router.push({
                       pathname: "/(main)/assetsDetail",
-                      params: { asset: JSON.stringify(item), mode: "assigned"},
+                      params: { id: item.asset_id, mode: "assigned"},
                     })
                   }
                 >

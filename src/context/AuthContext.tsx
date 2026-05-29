@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { api } from "../api/client";
+import { getProfile } from "../database/profile.service";
 import { syncProfile } from "../services/syncProfile";
 type UserType = {
   employee_id: string;
@@ -61,16 +62,14 @@ export const AuthProvider = ({
         const storedToken =
           await SecureStore.getItemAsync("token");
 
-        // const storedUser =
-        //   await SecureStore.getItemAsync("user");
-
         if (storedToken) {
           setToken(storedToken);
-        }
 
-        // if (storedUser) {
-        //   setUser(JSON.parse(storedUser));
-        // }
+          const localUser = await getProfile();
+          if (localUser) {
+            setUser (localUser as UserType);
+          }
+        }
 
       } catch (error) {
         console.log(error);
@@ -90,45 +89,29 @@ export const AuthProvider = ({
 
     try {
 
-      const response = await fetch(
-        `${api}/login`,
+      const response = await api.post("/login",
         {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify({
             email,
             password,
-          }),
         }
       );
 
-      const data = await response.json();
-      console.log("====>",data)
-      if (!response.ok) {
-        return false;
-      }
+      const data = await response.data;
+      console.log("====>",data);
 
       await SecureStore.setItemAsync(
         "token",
         data.token
       );
 
-      // await SecureStore.setItemAsync(
-      //   "user",
-      //   JSON.stringify(data.user)
-      // );
-
       setToken(data.token);
-      setUser(data.user);
+
+      await syncProfile(data.token); 
+      const localUser = await getProfile();
+      setUser (localUser as UserType);
 
       // await syncAssets(data.token);     
       // await syncCategories(data.token); 
-      await syncProfile(data.token);   
       return true;
 
     } catch (error) {
@@ -141,8 +124,6 @@ export const AuthProvider = ({
   const logout = async () => {
 
     await SecureStore.deleteItemAsync("token");
-
-    // await SecureStore.deleteItemAsync("user");
 
     setToken(null);
     setUser(null);

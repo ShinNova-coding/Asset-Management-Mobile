@@ -60,7 +60,7 @@ export async function getProfile() {
 
     const result =
       await db.getFirstAsync(`
-        SELECT * FROM users
+        SELECT * FROM users LIMIT 1
       `);
 
     return result;

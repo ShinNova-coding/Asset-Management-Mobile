@@ -1,5 +1,7 @@
 import HeaderBar from "@/src/components/HeaderBar";
 import { useTheme } from "@/src/context/ThemeContext";
+import { returnAsset } from "@/src/services/asset.service";
+import { requestAsset } from "@/src/services/request.service";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -19,21 +21,24 @@ type Asset = {
   name: string;
   serial_number: string;
   status: string;
-  asset_condition: string;
-  category_name: string;
+  condition: string;
+  category: {
+    id: string;
+    name: string;
+  };
   warranty_period: number;
   image_url: string | null;
 };
 
 export default function AssetDetailScreen() {
   const {colors, isDark} = useTheme();
-  const { asset: assetParam, mode } = useLocalSearchParams();
+  const { id, mode } = useLocalSearchParams();
   const router = useRouter();
   const [note, setNote] = useState("");
 
   const asset: Asset = assetParam? JSON.parse(assetParam as string) : null;
   const [status, setStatus] = useState (asset?.status || "");
-  const handleReturn = () => {
+  const handleReturn = async () => {
     Alert.alert(
       "Return Asset",
       "Are you sure to return this asset?",
@@ -44,13 +49,19 @@ export default function AssetDetailScreen() {
         },
         {
           text: "Return",
-          onPress: () => {
+          onPress: async () => {
+            try {
+              await returnAsset(asset.asset_id);
             setStatus("Returned");
 
             Alert.alert(
               "Success",
               "Asset returned successfully."
             );
+          }catch (error) {
+            console.log(error);
+            Alert.alert("Error", "Failed to return asset.")
+          }
           },
         },
       ]
@@ -77,14 +88,14 @@ export default function AssetDetailScreen() {
               <Text style={styles.activeBadgeText}>{status}</Text>
             </View>
             <View style={[styles.badge, styles.conditionBadge]}>
-              <Text style={styles.conditionBadgeText}>Condition: {asset.asset_condition}</Text>
+              <Text style={styles.conditionBadgeText}>Condition: {asset.condition}</Text>
             </View>
           </View>
         </View>
         <View style={styles.infoGrid}>
           <View style={[styles.infoBox, { backgroundColor: colors.card }]}>
             <Text style={styles.infoLabel}>Category</Text>
-            <Text style={[styles.infoValue, { color: colors.text }]}>{asset.category_name}</Text>
+            <Text style={[styles.infoValue, { color: colors.text }]}>{asset.category?.name}</Text>
           </View>
           <View style={[styles.infoBox, { backgroundColor: colors.card }]}>
             <Text style={styles.infoLabel}>Warranty</Text>
@@ -158,8 +169,19 @@ export default function AssetDetailScreen() {
 
          <TouchableOpacity
           style={styles.requestButton}
-          onPress={() => {
-            alert("Asset request submitted");
+          onPress={async() => {
+            if (!note.trim()) {
+              Alert.alert( "Required ", "Please enter request note.");
+              return;
+            }
+            try {
+              await requestAsset (asset.asset_id, note);
+              Alert.alert( "Success", "Asset request submitted.");
+              setNote("");
+            }catch(error) {
+              console.log(error);
+                  Alert.alert("Error","Failed to submit request." );
+            }
           }}
            >
               <Ionicons

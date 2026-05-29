@@ -1,7 +1,7 @@
-import { BASE_URL } from "../URL/api";
+import { api } from "../api/client";
 export async function getAssets() {
-   const response = await fetch(`${BASE_URL}/assets`);
-   return response.json();
+   const response = await api.get("/asset");
+   return response.data.data?.data ?? [];
 }
 
 

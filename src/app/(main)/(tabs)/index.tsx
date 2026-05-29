@@ -10,8 +10,8 @@ import {
 
 import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
-import { getAssets } from "@/src/database/asset.service";
-import { getCategories } from "@/src/database/category.service";
+import { getAssets } from "@/src/services/asset.service";
+import { getCategories } from "@/src/services/category.service";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 
@@ -20,10 +20,13 @@ type Asset = {
   name: string;
   serial_number: string;
   status: string;
-  asset_condition: string;
+  condition: string;
   warranty_period: number;
   image_url: string | null;
-  category_name: string;
+  category: {
+    id: string;
+    name: string;
+  };
 };
 
 export default function DashboardScreen() {
@@ -37,8 +40,10 @@ export default function DashboardScreen() {
    const filteredAssets = selectedCategory === "All" ? assets
         : assets.filter(
             (item) =>
-              item.category_name === selectedCategory
+              item.category?.name === selectedCategory
           );
+    const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
+          
     useEffect(() => {
     
       async function loadAssets() {
@@ -47,23 +52,21 @@ export default function DashboardScreen() {
     
           setLoading(true);
     
-          const localAssets = await getAssets();
-          setAssets(localAssets as Asset[]);
-          console.log( "LOCAL SQLITE ASSETS:",localAssets);
+          const resAssets= await getAssets();
+          setAssets(resAssets || []);
+          console.log( "ONLINE ASSETS:",resAssets);
     
-          const localCategories = await getCategories();
-          setCategories(localCategories);
-          console.log("LOCAL CATEGORIES", localCategories);
+          const resCategory = await getCategories();
+          setCategories(Array.isArray(resCategory) ? resCategory : []);
+          console.log("ONLINE CATEGORIES", resCategory);
     
-        } catch (error) {
-    
+        } catch (error) {   
           console.log(
-            "LOAD SQLITE ASSETS ERROR:",
+            "LOAD API ERROR:",
             error
           );
     
         } finally {
-    
           setLoading(false);
         }
       }
@@ -105,12 +108,6 @@ export default function DashboardScreen() {
       >
         Available Assets
       </Text>
-
-  {/* <TouchableOpacity>
-    <Text style={styles.viewAll}>
-      View All
-    </Text>
-  </TouchableOpacity> */}
      </View>
       <View>
       <ScrollView
@@ -118,7 +115,7 @@ export default function DashboardScreen() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoriesContainer}
         >
-        {[{id: 0, name: "All"},...categories].map((item) => {
+        {categoryList.map((item) => {
           const active = selectedCategory === item.name;
 
           return (
@@ -184,7 +181,7 @@ export default function DashboardScreen() {
       <View style={styles.assetInfoRow}>
         <View style={styles.conditionBadge}>
           <Text style={styles.conditionText}>
-            {item.asset_condition}
+            {item.condition}
           </Text>
         </View>
         <View style={styles.availableBadge}>
