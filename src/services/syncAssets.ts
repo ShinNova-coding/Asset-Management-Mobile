@@ -1,43 +1,43 @@
-import { saveAssets } from "../database/asset.service";
-import { BASE_URL } from "../URL/api";
+// import { saveAssets } from "../database/asset.service";
+// import { BASE_URL } from "../URL/api";
 
-export async function syncAssets(
-  token: string
-) {
+// export async function syncAssets(
+//   token: string
+// ) {
 
-  try {
+//   try {
 
-    const response = await fetch(
-      `${BASE_URL}/asset`,
-      {
-        method: "GET",
+//     const response = await fetch(
+//       `${BASE_URL}/asset`,
+//       {
+//         method: "GET",
 
-        headers: {
-          Accept: "application/json",
+//         headers: {
+//           Accept: "application/json",
 
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+//           Authorization: `Bearer ${token}`,
+//         },
+//       }
+//     );
 
-    const json = await response.json();
+//     const json = await response.json();
 
-    if (json.success) {
+//     if (json.success) {
         
-      await saveAssets(
-        json.data.data
-      );
+//       await saveAssets(
+//         json.data.data
+//       );
 
-      console.log(
-        "Assets synced successfully"
-      );
-    }
+//       console.log(
+//         "Assets synced successfully"
+//       );
+//     }
 
-  } catch (error) {
+//   } catch (error) {
 
-    console.log(
-      "SYNC ASSETS ERROR:",
-      error
-    );
-  }
-}
+//     console.log(
+//       "SYNC ASSETS ERROR:",
+//       error
+//     );
+//   }
+// }

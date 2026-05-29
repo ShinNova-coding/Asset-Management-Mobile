@@ -21,8 +21,7 @@ export async function syncProfile(
       }
     );
 
-    const json =
-      await response.json();
+    const json = await response.json();
 
     if (json.success) {
 

@@ -1,47 +1,47 @@
-import { saveCategories } from "../database/category.service";
+// import { saveCategories } from "../database/category.service";
 
-const BASE_URL =
-  "http://192.168.100.197:1010";
+// const BASE_URL =
+//   "http://192.168.100.197:1010";
 
-export async function syncCategories(
-  token: string
-) {
+// export async function syncCategories(
+//   token: string
+// ) {
 
-  try {
+//   try {
 
-    const response = await fetch(
-      `${BASE_URL}/api/category`,
-      {
-        method: "GET",
+//     const response = await fetch(
+//       `${BASE_URL}/api/category`,
+//       {
+//         method: "GET",
 
-        headers: {
-          Accept: "application/json",
+//         headers: {
+//           Accept: "application/json",
 
-          Authorization:
-            `Bearer ${token}`,
-        },
-      }
-    );
+//           Authorization:
+//             `Bearer ${token}`,
+//         },
+//       }
+//     );
 
-    const json =
-      await response.json();
+//     const json =
+//       await response.json();
 
-    if (json.success) {
+//     if (json.success) {
 
-      await saveCategories(
-        json.data
-      );
+//       await saveCategories(
+//         json.data
+//       );
 
-      console.log(
-        "Categories synced successfully"
-      );
-    }
+//       console.log(
+//         "Categories synced successfully"
+//       );
+//     }
 
-  } catch (error) {
+//   } catch (error) {
 
-    console.log(
-      "SYNC CATEGORIES ERROR:",
-      error
-    );
-  }
-}
+//     console.log(
+//       "SYNC CATEGORIES ERROR:",
+//       error
+//     );
+//   }
+// }

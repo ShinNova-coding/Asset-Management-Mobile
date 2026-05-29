@@ -5,10 +5,8 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { syncAssets } from "../services/syncAssets";
-import { syncCategories } from "../services/syncCategories";
+import { api } from "../api/client";
 import { syncProfile } from "../services/syncProfile";
-import { BASE_URL } from "../URL/api";
 type UserType = {
   employee_id: string;
   name: string;
@@ -63,16 +61,16 @@ export const AuthProvider = ({
         const storedToken =
           await SecureStore.getItemAsync("token");
 
-        const storedUser =
-          await SecureStore.getItemAsync("user");
+        // const storedUser =
+        //   await SecureStore.getItemAsync("user");
 
         if (storedToken) {
           setToken(storedToken);
         }
 
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
+        // if (storedUser) {
+        //   setUser(JSON.parse(storedUser));
+        // }
 
       } catch (error) {
         console.log(error);
@@ -93,7 +91,7 @@ export const AuthProvider = ({
     try {
 
       const response = await fetch(
-        `${BASE_URL}/login`,
+        `${api}/login`,
         {
           method: "POST",
 
@@ -120,16 +118,16 @@ export const AuthProvider = ({
         data.token
       );
 
-      await SecureStore.setItemAsync(
-        "user",
-        JSON.stringify(data.user)
-      );
+      // await SecureStore.setItemAsync(
+      //   "user",
+      //   JSON.stringify(data.user)
+      // );
 
       setToken(data.token);
       setUser(data.user);
 
-      await syncAssets(data.token);      //Sync assets to SQlite
-      await syncCategories(data.token); 
+      // await syncAssets(data.token);     
+      // await syncCategories(data.token); 
       await syncProfile(data.token);   
       return true;
 
@@ -144,7 +142,7 @@ export const AuthProvider = ({
 
     await SecureStore.deleteItemAsync("token");
 
-    await SecureStore.deleteItemAsync("user");
+    // await SecureStore.deleteItemAsync("user");
 
     setToken(null);
     setUser(null);

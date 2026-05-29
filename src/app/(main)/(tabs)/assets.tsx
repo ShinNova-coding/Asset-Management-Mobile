@@ -10,8 +10,6 @@ import {
 } from "react-native";
 
 import { useTheme } from "@/src/context/ThemeContext";
-import { getAssets } from "@/src/database/asset.service";
-import { getCategories } from "@/src/database/category.service";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
