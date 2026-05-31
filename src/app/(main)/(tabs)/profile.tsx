@@ -47,13 +47,9 @@ useEffect(() => {
 
   async function loadProfile() {
 
-    const localProfile =
-      await getProfile();
+    const localProfile = await getProfile();
 
-    console.log(
-      "LOCAL PROFILE:",
-      localProfile
-    );
+    console.log("LOCAL PROFILE:", localProfile);
 
     setProfile(localProfile);
   }
@@ -61,6 +57,7 @@ useEffect(() => {
   loadProfile();
 
 }, []);
+
 // const fetchProfile = async() => {
 //   try{
 //     const response = await fetch("http://192.168.100.180:1010/api/profile",)

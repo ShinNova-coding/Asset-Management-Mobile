@@ -1,10 +1,10 @@
 import HeaderBar from "@/src/components/HeaderBar";
 import { useTheme } from "@/src/context/ThemeContext";
-import { returnAsset } from "@/src/services/asset.service";
-import { requestAsset } from "@/src/services/request.service";
+import { getAssetById } from "@/src/services/asset.service";
+import { requestAsset, returnAsset } from "@/src/services/request.service";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -35,9 +35,65 @@ export default function AssetDetailScreen() {
   const { id, mode } = useLocalSearchParams();
   const router = useRouter();
   const [note, setNote] = useState("");
+  const [asset, setAsset] = useState<Asset | null>(null);
+  const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const asset: Asset = assetParam? JSON.parse(assetParam as string) : null;
-  const [status, setStatus] = useState (asset?.status || "");
+  useEffect(() => {
+
+  async function loadAssetDetail() {
+
+    try {
+
+      setLoading(true);
+
+      const res = await getAssetById(id as string);
+
+      setAsset(res);
+      setStatus(res.status);
+
+      console.log("ASSET DETAIL:", res);
+
+    } catch (error) {
+
+      console.log(
+        "LOAD ASSET DETAIL ERROR:",
+        error
+      );
+
+      Alert.alert(
+        "Error",
+        "Failed to load asset."
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
+  }
+
+  if (id) {
+    loadAssetDetail();
+  }
+
+}, [id]);
+
+if (loading) {
+  return (
+    <View style={styles.container}>
+      <Text>Loading...</Text>
+    </View>
+  );
+}
+
+if (!asset) {
+  return (
+    <View style={styles.container}>
+      <Text>Asset not found</Text>
+    </View>
+  );
+}
+
   const handleReturn = async () => {
     Alert.alert(
       "Return Asset",
@@ -68,11 +124,6 @@ export default function AssetDetailScreen() {
     );
   };
 
-  if (!assetParam) {
-    return (
-      <View style={styles.container}><Text>Asset not found</Text></View>
-    );
-  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>

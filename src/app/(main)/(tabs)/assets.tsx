@@ -201,26 +201,20 @@ useEffect(() => {
                       <View
                         style={[
                           styles.statusBadge,
-                          item.status === "available"
-                            ? styles.availableBadge
-                            : styles.assignedBadge,
+                          item.status === "available"? styles.availableBadge : styles.assignedBadge,
                         ]}
                       >
                         <Text
                           style={[
                             styles.statusText,
-                            item.status === "available"
-                              ? styles.availableText
-                              : styles.assignedText,
+                            item.status === "available"? styles.availableText : styles.assignedText,
                           ]}
                         >
                           {item.status}
                         </Text>
                       </View>
                     </View>
-
                     <Text style={styles.serial}>SN: {item.serial_number}</Text>
-
                     <View style={styles.bottomRow}>
                       <View style={styles.warrantyRow}>
                         <Ionicons name="refresh-circle-outline" size={16} color="#777" />

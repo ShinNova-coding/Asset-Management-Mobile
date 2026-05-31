@@ -4,6 +4,11 @@ export async function getAssets() {
    return response.data.data?.data ?? [];
 }
 
+export async function getAssetById(id: string) {
+  const response = await api.get(`/assets/${id}`);
+  return response.data.data;
+}
+
 
 
 

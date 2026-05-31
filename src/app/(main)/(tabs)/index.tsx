@@ -37,12 +37,8 @@ export default function DashboardScreen() {
    const [selectedCategory, setSelectedCategory] = useState("All");
    const [loading, setLoading] = useState(false);
 
-   const filteredAssets = selectedCategory === "All" ? assets
-        : assets.filter(
-            (item) =>
-              item.category?.name === selectedCategory
-          );
-    const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
+   const filteredAssets = selectedCategory === "All" ? assets : assets.filter((item) =>item.category?.name === selectedCategory);
+   const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
           
     useEffect(() => {
     
