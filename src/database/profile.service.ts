@@ -1,14 +1,15 @@
 import { db } from "./db";
 
-export async function saveProfile(
-  user: any
-) {
+export async function saveProfile(user: any) {
 
-  try {
+    console.log("SAVE PROFILE DATA:", user);
+    await db.runAsync(`
+      DELETE FROM users`);
+
 
     await db.runAsync(
       `
-      INSERT OR REPLACE INTO users (
+      INSERT INTO users (
         employee_id,
         name,
         email,
@@ -32,26 +33,16 @@ export async function saveProfile(
         user.joined_date,
         user.image_url?.replace(
           "http://localhost",
-          "http://192.168.100.197:1010"
+          "http://192.168.100.185:1010"
         ),
         user.preview_url?.replace(
           "http://localhost",
-          "http://192.168.100.197:1010"
+          "http://192.168.100.185:1010"
         ),
       ]
     );
 
-    console.log(
-      "Profile saved locally"
-    );
-
-  } catch (error) {
-
-    console.log(
-      "SAVE PROFILE ERROR:",
-      error
-    );
-  }
+    console.log("Profile saved locally");
 }
 
 export async function getProfile() {
@@ -62,6 +53,7 @@ export async function getProfile() {
       await db.getFirstAsync(`
         SELECT * FROM users LIMIT 1
       `);
+    console.log("USERS:", result);
 
     return result;
 

@@ -9,13 +9,13 @@ import {
   View
 } from "react-native";
 
+import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
-import { getAssets } from "@/src/services/asset.service";
+import { getAssignedAssets } from "@/src/services/asset.service";
 import { getCategories } from "@/src/services/category.service";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-
 
 
 type Asset = {
@@ -33,6 +33,7 @@ type Asset = {
 };
 
 export default function AssetsScreen() {
+  const {user } = useAuth();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,15 +63,19 @@ useEffect(() => {
     try {
 
       setLoading(true);
-
-      const resAssets = await getAssets();
-      setAssets(resAssets || []);
-      console.log( "ONLINE ASSETS:",resAssets);
+      if (!user?.employee_id) return;
+      
+      console.log("CURRENT USER:", user);
+      console.log("EMPLOYEE ID:", user?.employee_id);
+      
+      const assignedAssets = await getAssignedAssets(user.employee_id);
+      setAssets(assignedAssets || []);
+      console.log( "ONLINE Assigned ASSETS:",assignedAssets);
 
       const resCategories = await getCategories();
       setCategories(Array.isArray(resCategories) ? resCategories : []);
 
-      console.log("ONLINE CATEGORIES", resCategories);
+      // console.log("ONLINE CATEGORIES", resCategories);
 
     } catch (error) {
 
@@ -87,7 +92,7 @@ useEffect(() => {
 
   loadAssets();
 
-}, []);
+}, [user]);
   
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -171,7 +176,6 @@ useEffect(() => {
         </ScrollView> )}
       </View>
       
-      <View>
       <FlatList
               data={filteredAssets}
               keyExtractor={(item) =>
@@ -227,7 +231,6 @@ useEffect(() => {
                 </TouchableOpacity>
               )}
             />
-            </View>
 
       {/* <FlatList
         data={assets}

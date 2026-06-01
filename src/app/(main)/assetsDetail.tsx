@@ -108,7 +108,7 @@ if (!asset) {
           onPress: async () => {
             try {
               await returnAsset(asset.asset_id);
-            setStatus("Returned");
+              setStatus("Returned");
 
             Alert.alert(
               "Success",
@@ -153,8 +153,8 @@ if (!asset) {
             <Text style={[styles.infoValue, { color: colors.text }]}>{asset.warranty_period}Months</Text>
           </View>
         </View>
-{mode ==="assigned" ? (
-  <>
+        {mode ==="assigned" ? (
+        <>
 
         <TouchableOpacity
           style={[

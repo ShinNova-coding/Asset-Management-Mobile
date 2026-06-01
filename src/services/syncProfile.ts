@@ -1,40 +1,28 @@
-import { api } from "../api/client";
+// import { api } from "../api/client";
+import axios from "axios";
 import { saveProfile } from "../database/profile.service";
 
-export async function syncProfile(
-  token: string
-) {
 
+export async function syncProfile(token: string) {
   try {
-
-    const response = await fetch(
-      `${api}/profile`,
+    const response = await axios.get(
+      "http://192.168.100.185:1010/api/profile",
       {
-        method: "GET",
-
         headers: {
-          Accept: "application/json",
-
-          Authorization:
-            `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
 
-    const json = await response.json();
-
-    if (json.success) {
-
-      await saveProfile(
-        json.data
-      );
-
-      console.log(
-        "Profile synced successfully"
-      );
+    if (response.data.success) {
+      await saveProfile(response.data.data);
+      console.log( "Profile synced successfully");
+      console.log("PROFILE RESPONSE:",JSON.stringify(response.data, null, 2)
+);
     }
-
-  } catch (error) {
+  } 
+    
+   catch (error) {
 
     console.log(
       "SYNC PROFILE ERROR:",

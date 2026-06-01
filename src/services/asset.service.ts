@@ -9,6 +9,12 @@ export async function getAssetById(id: string) {
   return response.data.data;
 }
 
+export async function getAssignedAssets(employeeId: string) {
+   const response = await api.get(`/assignment/${employeeId}/asset`);
+   return response.data.data;
+}
+
+
 
 
 

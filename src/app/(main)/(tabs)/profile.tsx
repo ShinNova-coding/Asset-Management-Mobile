@@ -1,10 +1,12 @@
 import { useTheme } from "@/src/context/ThemeContext";
-import { getProfile } from "@/src/database/profile.service";
 import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -14,19 +16,46 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { api } from "../../../api/client";
 import { useAuth } from "../../../context/AuthContext";
+import { syncProfile } from "../../../services/syncProfile";
+
+export async function uploadProfileImage ( imageUri: string) {
+   const base64 = await FileSystem.readAsStringAsync(
+    imageUri,
+    {
+      encoding: FileSystem.EncodingType.Base64,
+    }
+  );
+  console.log("BASE64 LENGTH:", base64.length);
+  const response = await api.post(
+    "/profile/edit",
+    {
+      image: base64,
+    }
+  );
+  return response.data;
+}
 
 export default function ProfileScreen() {
   
-  const { logout, user } = useAuth();
+  const [uploading, setUploading ] = useState(false);
+  const { logout, user, refreshUser, token } = useAuth();
   const { isDark, colors, setScheme } = useTheme();
-  const[profile, setProfile] = useState<any>(null);
-  
-  // const profileImage = user?.preview_url?.replace("http://localhost", "http://192.168.100.180:1010")
-  // console.log ("IMAGE URL :", String(profileImage));
+  // const[profile, setProfile] = useState<any>(null);
+  const profile = user;
+  const [previewImage, setPreviewImage ] = useState<string | null> (null);
+  const imageUri =
+    previewImage ??
+    (profile?.preview_url
+      ? `${profile.preview_url}?t=${Date.now()}`
+      : profile?.image_url
+      ? `${profile.image_url}?t=${Date.now()}`
+      : "https://via.placeholder.com/150");
+
   console.log("USER DATA:", user);
   
-const pickImage = async () => {
+  const pickImage = async () => {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
     
   if (!permission.granted) {
@@ -35,34 +64,49 @@ const pickImage = async () => {
   }
 
   const result =await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 1,
+      quality: 0.8,
     });
 
+    if( result.canceled) return;
+
+      setUploading(true);   
+      const uri = result.assets[0].uri;
+
+      try {
+      await uploadProfileImage(uri);
+      if (!token) return;
+      await syncProfile(token);
+      await new Promise(r => setTimeout(r, 200));
+      await refreshUser();
+      setPreviewImage(null);
+
+      Alert.alert ("Success", "Profile photo updated.");
+    }catch (error: any) {
+      console.log("FULL ERROR :",error);
+      Alert.alert ("Error",JSON.stringify(error.response?.data));
+    }finally {
+      setUploading (false);
+    }
 };
 
-useEffect(() => {
+// useEffect(() => {
 
-  async function loadProfile() {
+//   async function loadProfile() {
 
-    const localProfile = await getProfile();
+//     const localProfile = await getProfile();
 
-    console.log("LOCAL PROFILE:", localProfile);
+//     console.log("LOCAL PROFILE:", localProfile);
 
-    setProfile(localProfile);
-  }
-
-  loadProfile();
-
-}, []);
-
-// const fetchProfile = async() => {
-//   try{
-//     const response = await fetch("http://192.168.100.180:1010/api/profile",)
+//     setProfile(localProfile);
+//     setPreviewImage(null);
 //   }
-// }
+
+//   loadProfile();
+
+// }, []);
 
   return (
     
@@ -71,43 +115,37 @@ useEffect(() => {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
        
         <View style={[styles.profileCard, { backgroundColor: colors.card }]}>
-          {/* <View style={styles.imageContainer}>
-            <Image
-              source={{ uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400" }}
-              style={styles.profileImage}
-            />
-            <View style={styles.verifiedBadge}>
-              <Ionicons name="checkmark-seal" size={18} color="white" />
-            </View>
-          </View> */}
           <View style={styles.imageContainer}>
               <Image
-                source={{ uri: profile?.image_url || "https://via.placeholder.com/150"}}
+                key={profile?.preview_url} 
+                source={{ uri: imageUri }}
                 style={styles.profileImage}
               />
 
               <TouchableOpacity
+                disabled ={uploading}
                 style={[
                   styles.editButton,
                   { backgroundColor: colors.primary },
                 ]}
                 onPress={pickImage}
                 activeOpacity={0.8}
-              >
+              >{uploading ? ( <ActivityIndicator color="white" />) : (
                 <Ionicons
-                  name="pencil"
+                  name= "pencil"
                   size={16}
                   color="white"
                 />
+              )}
+
               </TouchableOpacity>
             </View>
 
           <Text style={[styles.userName, { color: colors.text }]}>{profile?.name}</Text>
-          <Text style={[styles.userRole, { color: colors.subText }]}>{profile?.position || "Employee"}</Text>
           
           <View style={[styles.deptBadge, { backgroundColor: isDark ? '#2D3748' : '#EEF2FF' }]}>
             <Ionicons name="business" size={14} color={colors.primary} />
-            <Text style={[styles.deptText, { color: colors.primary }]}>{profile?.roles?.[0]?.name || "Employee"}</Text>
+            <Text style={[styles.deptText, { color: colors.primary }]}>{profile?.position || "Employee"}</Text>
           </View>
 
           <View style={styles.statsRow}>

@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { api } from "../api/client";
+import { db } from "../database/db";
 import { getProfile } from "../database/profile.service";
 import { syncProfile } from "../services/syncProfile";
 type UserType = {
@@ -18,7 +19,6 @@ type UserType = {
   joined_date: string;
   image_url: string | null;
   preview_url: string | null;
-
   roles: {
     id: number;
     name: string;
@@ -29,23 +29,22 @@ type AuthContextType = {
   token: string | null;
   user: UserType | null;
   isLoading: boolean;
-
   login: (
     email: string,
     password: string
   ) => Promise<boolean>;
-
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 };
 
-const AuthContext =
-  createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
+export async function clearProfile() {
+  await db.runAsync(`
+    DELETE FROM users
+  `);
+}
 
-export const AuthProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
 
   const [token, setToken] = useState<string | null>(null);
 
@@ -53,22 +52,26 @@ export const AuthProvider = ({
 
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshUser = async () => {
+    const localUser = await getProfile();
+    setUser(localUser as UserType);
+  };
+
   useEffect(() => {
 
     const loadSession = async () => {
 
       try {
 
-        const storedToken =
-          await SecureStore.getItemAsync("token");
+        const storedToken = await SecureStore.getItemAsync("token");
 
         if (storedToken) {
           setToken(storedToken);
-
-          const localUser = await getProfile();
-          if (localUser) {
-            setUser (localUser as UserType);
-          }
+           await refreshUser(); 
+          // const localUser = await getProfile();
+          //   if (localUser) {
+          //     setUser (localUser as UserType);
+          //   }
         }
 
       } catch (error) {
@@ -99,10 +102,8 @@ export const AuthProvider = ({
       const data = await response.data;
       console.log("====>",data);
 
-      await SecureStore.setItemAsync(
-        "token",
-        data.token
-      );
+      await SecureStore.setItemAsync("token",data.token );
+      await SecureStore.setItemAsync("employee_id", data.user.employee_id);
 
       setToken(data.token);
 
@@ -110,6 +111,7 @@ export const AuthProvider = ({
       const localUser = await getProfile();
       setUser (localUser as UserType);
 
+      
       // await syncAssets(data.token);     
       // await syncCategories(data.token); 
       return true;
@@ -124,6 +126,7 @@ export const AuthProvider = ({
   const logout = async () => {
 
     await SecureStore.deleteItemAsync("token");
+    await clearProfile();
 
     setToken(null);
     setUser(null);
@@ -137,6 +140,7 @@ export const AuthProvider = ({
         isLoading,
         login,
         logout,
+        refreshUser,
       }}
     >
       {children}
@@ -146,8 +150,7 @@ export const AuthProvider = ({
 
 export const useAuth = () => {
 
-  const context =
-    useContext(AuthContext);
+  const context = useContext(AuthContext);
 
   if (!context) {
     throw new Error(
