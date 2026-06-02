@@ -1,7 +1,15 @@
 import { api } from "../api/client";
 
-export async function requestAsset(assetId: string, note: string) {
-  const response = await api.post("/asset-request", {asset_id: assetId, note,});
+export async function requestAsset(
+  assetId: string,
+  note: string
+) {
+  const response = await api.post(
+    `/asset/${assetId}/request`,
+    {
+      note,
+    }
+  );
 
   return response.data;
 }

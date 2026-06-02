@@ -8,11 +8,13 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  Keyboard,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -148,8 +150,11 @@ if (!asset) {
 
 
   return (
+
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <HeaderBar title="Asset Details" backButtonAction={()=> router.back()}/>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>       
       
         <View style={[styles.imageCard, { backgroundColor: colors.card }]}>
@@ -242,6 +247,7 @@ if (!asset) {
 
          <TouchableOpacity
           style={styles.requestButton}
+          disabled={status === "requested"}
           onPress={async() => {
             if (!note.trim()) {
               Alert.alert( "Required ", "Please enter request note.");
@@ -249,14 +255,16 @@ if (!asset) {
             }
             try {
               await requestAsset (asset.asset_id, note);
-              Alert.alert( "Success", "Asset request submitted.");
-              setNote("");
+              Alert.alert( "Success", "Your request has been submitted to Admin.");
+              // setNote("");
+              setStatus("requested")
             }catch(error) {
               console.log(error);
                   Alert.alert("Error","Failed to submit request." );
             }
-          }}
-           >
+          }
+         }
+        >
               <Ionicons
                 name="add-circle-outline"
                 size={20}
@@ -264,13 +272,15 @@ if (!asset) {
               />
 
               <Text style={styles.reportButtonText}>
-                Request Asset
+                  {status === "requested" ? "Request Submitted" : "Request Asset"}
               </Text>
           </TouchableOpacity>
           </>
           )}
       </ScrollView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
+
   );
 }
 

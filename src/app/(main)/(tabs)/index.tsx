@@ -12,6 +12,7 @@ import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
 import { getAssets } from "@/src/services/asset.service";
 import { getCategories } from "@/src/services/category.service";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { getUser } from "../../../services/user.service";
@@ -37,7 +38,7 @@ export default function DashboardScreen() {
    const [emp, setEmp] = useState<any>(null);
    const [categories, setCategories ] = useState<any[]>([]);
    const [selectedCategory, setSelectedCategory] = useState("All");
-   const [loading, setLoading] = useState(false);
+   const [loading, setLoading] = useState(true);
 
    const filteredAssets = selectedCategory === "All" ? assets : assets.filter((item) =>item.category?.name === selectedCategory);
    const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
@@ -77,6 +78,23 @@ export default function DashboardScreen() {
       loadAssets();
     
     }, []);
+
+    if (loading) {
+  return (
+    <View style={styles.stateContainer}>
+      <Ionicons
+        name="cube-outline"
+        size={60}
+        color={colors.primary}
+      />
+      <Text style={[
+          styles.stateTitle,
+          { color: colors.text },
+        ]}>Loading...
+      </Text>
+    </View>
+  );
+}
 
   return (
     <ScrollView style={[styles.container, {backgroundColor: colors.background}]}>
@@ -397,4 +415,15 @@ conditionText: {
     fontWeight: "600",
     color: "#333",
   },
+  stateContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 30,
+},
+stateTitle: {
+  fontSize: 22,
+  fontWeight: "700",
+  marginTop: 16,
+},
 });
