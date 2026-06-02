@@ -91,6 +91,36 @@ export default function ProfileScreen() {
     }
 };
 
+const handleLogout = () => {
+
+  Alert.alert(
+    "Logout",
+    "Are you sure you want to logout?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+
+          try {
+
+            await logout();
+
+          } catch (error) {
+
+            console.log(error);
+
+          }
+        },
+      },
+    ]
+  );
+};
+
 useEffect(() => {
 
   async function loadProfile() {
@@ -216,10 +246,9 @@ useEffect(() => {
           </TouchableOpacity>
           </View>
 
-        <TouchableOpacity onPress={async () => {
-              await logout();
-            }}
-             style={[styles.logoutButton, { backgroundColor: isDark ? '#451212' : '#FFF1F2', borderColor: isDark ? '#7F1D1D' : '#FFE4E6' }]}>
+        <TouchableOpacity onPress={handleLogout}
+             style={[styles.logoutButton, { backgroundColor: isDark ? '#451212' : '#FFF1F2', borderColor: isDark ? '#7F1D1D' : '#FFE4E6' }]}
+             >
               <Ionicons name="log-out-outline" size={22} color="#EF4444" />
               <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>

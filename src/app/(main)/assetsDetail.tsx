@@ -37,7 +37,7 @@ export default function AssetDetailScreen() {
   const [note, setNote] = useState("");
   const [asset, setAsset] = useState<Asset | null>(null);
   const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
 
@@ -49,6 +49,7 @@ export default function AssetDetailScreen() {
 
       const res = await getAssetById(id as string);
 
+      console.log("ASSET DETAIL:", res);
       setAsset(res);
       setStatus(res.status);
 
@@ -75,21 +76,42 @@ export default function AssetDetailScreen() {
   if (id) {
     loadAssetDetail();
   }
+  console.log("ASSET ID:", id);
+  
 
 }, [id]);
 
+
 if (loading) {
   return (
-    <View style={styles.container}>
-      <Text>Loading...</Text>
+    <View style={styles.stateContainer}>
+      <Ionicons
+        name="cube-outline"
+        size={60}
+        color={colors.primary}
+      />
+      <Text style={[
+          styles.stateTitle,
+          { color: colors.text },
+        ]}>Loading Asset...
+      </Text>
     </View>
   );
 }
 
 if (!asset) {
   return (
-    <View style={styles.container}>
-      <Text>Asset not found</Text>
+    <View style={styles.stateContainer}>
+      <Ionicons
+        name="search-outline"
+        size={70}
+        color="#9CA3AF"
+      />
+      <Text style={[
+          styles.stateTitle,
+          { color: colors.text },
+        ]}>Asset not found
+      </Text>
     </View>
   );
 }
@@ -359,4 +381,17 @@ reportIssueButton: {
   gap: 8,
   marginBottom: 20,
 },
+
+stateContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 30,
+},
+stateTitle: {
+  fontSize: 22,
+  fontWeight: "700",
+  marginTop: 16,
+},
+
 });

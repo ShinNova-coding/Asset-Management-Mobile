@@ -38,11 +38,11 @@ export async function saveProfile(user: any) {
         user.joined_date,
         user.image_url?.replace(
           "http://localhost",
-          "http://192.168.100.185:1010"
+          "http://192.168.18.9:1010"
         ),
         user.preview_url?.replace(
           "http://localhost",
-          "http://192.168.100.185:1010"
+          "http://192.168.18.9:1010"
         ),
       ]
     );

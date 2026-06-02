@@ -6,7 +6,7 @@ export async function getAssets() {
 }
 
 export async function getAssetById(id: string) {
-  const response = await api.get(`/assets/${id}`);
+  const response = await api.get(`/asset/${id}`);
   return response.data.data;
 }
 

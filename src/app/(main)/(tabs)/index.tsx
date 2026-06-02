@@ -51,9 +51,9 @@ export default function DashboardScreen() {
         try {
     
           setLoading(true);
-          const onlineUser = await getUser(user?.employee_id || "Emp");
-          console.log( "ONLINE USER:",onlineUser.data);
-          setEmp(onlineUser.data);
+          const onlineUser = await getUser(user?.employee_id ?? "");
+          console.log( "ONLINE DASHBOARD USER:",onlineUser);
+          setEmp(onlineUser);
 
           const resAssets= await getAssets();
           setAssets(resAssets || []);
@@ -153,9 +153,7 @@ export default function DashboardScreen() {
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() => {
-        router.push({
-          pathname: "/(main)/assetsDetail",
-          params: { asset: JSON.stringify(item), mode: "available"},
+        router.push({ pathname: "/(main)/assetsDetail", params:  {id: item.asset_id, mode: "available", },
         });
       }}
       style={[

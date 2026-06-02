@@ -8,6 +8,7 @@ import React, {
 import { api } from "../api/client";
 import { db } from "../database/db";
 import { getProfile } from "../database/profile.service";
+import { logoutUser } from "../services/auth.service";
 import { syncProfile } from "../services/syncProfile";
 import { getUser } from "../services/user.service";
 type UserType = {
@@ -61,7 +62,7 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
 
     console.log("REFRESH USER:", onlineUser);
 
-    setUser(onlineUser.data);
+    setUser(onlineUser);
   };
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
          const localUser = await getProfile();
          const OnlineUser = await getUser(storedEmployeeId);
          setToken(storedToken);
-         setUser(OnlineUser.data);
+         setUser(OnlineUser);
          
       } catch (error) {
         console.log(error);
@@ -129,6 +130,14 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
   };
 
   const logout = async () => {
+
+      try {
+
+        await logoutUser();
+
+      } catch (error) {
+        console.log( "LOGOUT API FAILED:", error );
+      }
 
     await SecureStore.deleteItemAsync("token");
     await SecureStore.deleteItemAsync("employee_id");
