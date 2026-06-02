@@ -2,6 +2,11 @@ import { db } from "./db";
 
 export async function saveProfile(user: any) {
 
+     if (!user) {
+    console.log("saveProfile received null/undefined user");
+    return;
+  }
+
     console.log("SAVE PROFILE DATA:", user);
     await db.runAsync(`
       DELETE FROM users`);

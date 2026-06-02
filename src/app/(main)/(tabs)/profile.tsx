@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -18,6 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { api } from "../../../api/client";
 import { useAuth } from "../../../context/AuthContext";
+import { getProfile } from "../../../database/profile.service";
 import { syncProfile } from "../../../services/syncProfile";
 
 export async function uploadProfileImage ( imageUri: string) {
@@ -42,8 +43,7 @@ export default function ProfileScreen() {
   const [uploading, setUploading ] = useState(false);
   const { logout, user, refreshUser, token } = useAuth();
   const { isDark, colors, setScheme } = useTheme();
-  // const[profile, setProfile] = useState<any>(null);
-  const profile = user;
+  const [profile, setProfile] = useState<any>(null);
   const [previewImage, setPreviewImage ] = useState<string | null> (null);
   const imageUri =
     previewImage ??
@@ -53,7 +53,6 @@ export default function ProfileScreen() {
       ? `${profile.image_url}?t=${Date.now()}`
       : "https://via.placeholder.com/150");
 
-  console.log("USER DATA:", user);
   
   const pickImage = async () => {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -92,21 +91,21 @@ export default function ProfileScreen() {
     }
 };
 
-// useEffect(() => {
+useEffect(() => {
 
-//   async function loadProfile() {
+  async function loadProfile() {
 
-//     const localProfile = await getProfile();
+    const localProfile = await getProfile();
 
-//     console.log("LOCAL PROFILE:", localProfile);
+    // console.log("LOCAL PROFILE:", localProfile);
 
-//     setProfile(localProfile);
-//     setPreviewImage(null);
-//   }
+    setProfile(localProfile);
+    setPreviewImage(null);
+  }
 
-//   loadProfile();
+  loadProfile();
 
-// }, []);
+}, []);
 
   return (
     

@@ -82,7 +82,6 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
     };
 
     loadSession();
-
   }, []);
 
   const login = async (
@@ -108,8 +107,7 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
       setToken(data.token);
 
       await syncProfile(data.token); 
-      const localUser = await getProfile();
-      setUser (localUser as UserType);
+      await refreshUser();
 
       
       // await syncAssets(data.token);     
@@ -126,6 +124,7 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
   const logout = async () => {
 
     await SecureStore.deleteItemAsync("token");
+    await SecureStore.deleteItemAsync("employee_id");
     await clearProfile();
 
     setToken(null);
