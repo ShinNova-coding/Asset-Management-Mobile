@@ -9,6 +9,7 @@ import { api } from "../api/client";
 import { db } from "../database/db";
 import { getProfile } from "../database/profile.service";
 import { syncProfile } from "../services/syncProfile";
+import { getUser } from "../services/user.service";
 type UserType = {
   employee_id: string;
   name: string;
@@ -53,11 +54,14 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = async () => {
-    const localUser = await getProfile();
+    const employeeId = await SecureStore.getItemAsync("employee_id");
+    if (!employeeId) return;
 
-    console.log("REFRESH USER:", localUser);
+    const onlineUser = await getUser(employeeId);
 
-    setUser(localUser as UserType);
+    console.log("REFRESH USER:", onlineUser);
+
+    setUser(onlineUser.data);
   };
 
   useEffect(() => {
@@ -67,12 +71,15 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
       try {
 
         const storedToken = await SecureStore.getItemAsync("token");
-
+         const storedEmployeeId = await SecureStore.getItemAsync("employee_id");
+         
          if (! storedToken) return;
+         if (!storedEmployeeId) return;
 
          const localUser = await getProfile();
+         const OnlineUser = await getUser(storedEmployeeId);
          setToken(storedToken);
-         setUser(localUser as UserType);
+         setUser(OnlineUser.data);
          
       } catch (error) {
         console.log(error);

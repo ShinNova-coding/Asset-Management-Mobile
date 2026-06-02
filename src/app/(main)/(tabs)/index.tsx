@@ -14,6 +14,7 @@ import { getAssets } from "@/src/services/asset.service";
 import { getCategories } from "@/src/services/category.service";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
+import { getUser } from "../../../services/user.service";
 
 type Asset = {
   asset_id: string;
@@ -33,6 +34,7 @@ export default function DashboardScreen() {
    const {user } = useAuth();
    const {colors, isDark} = useTheme();
    const [assets, setAssets] = useState<Asset[]>([]);
+   const [emp, setEmp] = useState<any>(null);
    const [categories, setCategories ] = useState<any[]>([]);
    const [selectedCategory, setSelectedCategory] = useState("All");
    const [loading, setLoading] = useState(false);
@@ -49,6 +51,9 @@ export default function DashboardScreen() {
         try {
     
           setLoading(true);
+          const onlineUser = await getUser(user?.employee_id || "Emp");
+          console.log( "ONLINE USER:",onlineUser.data);
+          setEmp(onlineUser.data);
 
           const resAssets= await getAssets();
           setAssets(resAssets || []);
@@ -77,8 +82,7 @@ export default function DashboardScreen() {
     <ScrollView style={[styles.container, {backgroundColor: colors.background}]}>
 
       <Text style={[styles.header,{color: colors.text}]}>
-        {/* {user?.name} */}
-        Hello
+        {emp?.name}
       </Text>
 
       <View style={styles.statsRow}>

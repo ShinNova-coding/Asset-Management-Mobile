@@ -1,4 +1,5 @@
 import { api } from "../api/client";
+
 export async function getAssets() {
    const response = await api.get("/asset");
    return response.data.data?.data ?? [];
