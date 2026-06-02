@@ -45,12 +45,11 @@ export default function ProfileScreen() {
   const { isDark, colors, setScheme } = useTheme();
   const [profile, setProfile] = useState<any>(null);
   const [previewImage, setPreviewImage ] = useState<string | null> (null);
+  const [imageVersion, setImageVersion] = useState(Date.now());
   const imageUri =
     previewImage ??
-    (profile?.preview_url
-      ? `${profile.preview_url}?t=${Date.now()}`
-      : profile?.image_url
-      ? `${profile.image_url}?t=${Date.now()}`
+    (profile?.preview_url ? `${profile.preview_url}?t=${imageVersion}`
+      : profile?.image_url ? `${profile.image_url}?t=${imageVersion}`
       : "https://via.placeholder.com/150");
 
   
@@ -77,8 +76,14 @@ export default function ProfileScreen() {
       try {
       await uploadProfileImage(uri);
       if (!token) return;
+
       await syncProfile(token);
-      await new Promise(r => setTimeout(r, 200));
+
+      const updatedProfile = await getProfile();
+      setProfile(updatedProfile);
+
+      setImageVersion(Date.now());
+
       await refreshUser();
       setPreviewImage(null);
 
@@ -146,7 +151,7 @@ useEffect(() => {
         <View style={[styles.profileCard, { backgroundColor: colors.card }]}>
           <View style={styles.imageContainer}>
               <Image
-                key={profile?.preview_url} 
+                key={imageVersion} 
                 source={{ uri: imageUri }}
                 style={styles.profileImage}
               />
