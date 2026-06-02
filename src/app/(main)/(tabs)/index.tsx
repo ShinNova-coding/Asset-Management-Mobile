@@ -14,7 +14,6 @@ import { getAssets } from "@/src/services/asset.service";
 import { getCategories } from "@/src/services/category.service";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { getProfile } from "../../../database/profile.service";
 
 type Asset = {
   asset_id: string;
@@ -37,11 +36,12 @@ export default function DashboardScreen() {
    const [categories, setCategories ] = useState<any[]>([]);
    const [selectedCategory, setSelectedCategory] = useState("All");
    const [loading, setLoading] = useState(false);
-   const [profile, setProfile] = useState<any>(null);
 
    const filteredAssets = selectedCategory === "All" ? assets : assets.filter((item) =>item.category?.name === selectedCategory);
    const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
           
+   console.log("DASHBOARD USER:", user);
+
     useEffect(() => {
     
       async function loadAssets() {
@@ -49,10 +49,6 @@ export default function DashboardScreen() {
         try {
     
           setLoading(true);
-          
-          const resProfile = await getProfile();
-          setProfile (resProfile);
-          console.log ("LOCAL PROFILE:", resProfile);
 
           const resAssets= await getAssets();
           setAssets(resAssets || []);
@@ -81,7 +77,7 @@ export default function DashboardScreen() {
     <ScrollView style={[styles.container, {backgroundColor: colors.background}]}>
 
       <Text style={[styles.header,{color: colors.text}]}>
-        {profile?.name}
+        {user?.name}
       </Text>
 
       <View style={styles.statsRow}>

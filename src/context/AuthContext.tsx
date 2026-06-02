@@ -54,6 +54,9 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
 
   const refreshUser = async () => {
     const localUser = await getProfile();
+
+    console.log("REFRESH USER:", localUser);
+
     setUser(localUser as UserType);
   };
 
@@ -108,7 +111,7 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
 
       await syncProfile(data.token); 
       await refreshUser();
-
+      console.log("AUTH USER AFTER REFRESH");
       
       // await syncAssets(data.token);     
       // await syncCategories(data.token); 
