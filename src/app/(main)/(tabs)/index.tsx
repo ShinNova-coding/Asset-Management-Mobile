@@ -39,13 +39,8 @@ export default function DashboardScreen() {
 
    const filteredAssets = selectedCategory === "All" ? assets : assets.filter((item) =>item.category?.name === selectedCategory);
    const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
-   
-   if (!user) {
-      return (
-     <Text>Loading user...</Text>
-     );
-   }
-   console.log("DASHBOARD USER:", user);
+          
+  //  console.log("DASHBOARD USER:", user);
 
     useEffect(() => {
     
@@ -82,7 +77,8 @@ export default function DashboardScreen() {
     <ScrollView style={[styles.container, {backgroundColor: colors.background}]}>
 
       <Text style={[styles.header,{color: colors.text}]}>
-        {user?.name}
+        {/* {user?.name} */}
+        Hello
       </Text>
 
       <View style={styles.statsRow}>
