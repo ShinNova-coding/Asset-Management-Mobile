@@ -68,15 +68,12 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
 
         const storedToken = await SecureStore.getItemAsync("token");
 
-        if (storedToken) {
-          setToken(storedToken);
-           await refreshUser(); 
-          // const localUser = await getProfile();
-          //   if (localUser) {
-          //     setUser (localUser as UserType);
-          //   }
-        }
+         if (! storedToken) return;
 
+         const localUser = await getProfile();
+         setToken(storedToken);
+         setUser(localUser as UserType);
+         
       } catch (error) {
         console.log(error);
       } finally {

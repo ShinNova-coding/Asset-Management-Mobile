@@ -39,7 +39,12 @@ export default function DashboardScreen() {
 
    const filteredAssets = selectedCategory === "All" ? assets : assets.filter((item) =>item.category?.name === selectedCategory);
    const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
-          
+   
+   if (!user) {
+      return (
+     <Text>Loading user...</Text>
+     );
+   }
    console.log("DASHBOARD USER:", user);
 
     useEffect(() => {

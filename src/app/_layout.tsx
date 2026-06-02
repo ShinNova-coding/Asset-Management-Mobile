@@ -15,7 +15,7 @@ function RootNavigator() {
 
   const segments = useSegments();
 
-  if (isLoading) {
+  if (isLoading ) {
     return null;
   }
 
