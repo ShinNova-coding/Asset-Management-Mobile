@@ -14,8 +14,10 @@ export async function syncProfile(token: string) {
       }
     );
 
+     console.log( "FULL PROFILE RESPONSE:",JSON.stringify(response.data, null, 2));
+
     if (response.data.success) {
-      await saveProfile(response.data.data);
+      await saveProfile(response.data.data);  
       console.log( "Profile synced successfully");
       console.log("PROFILE RESPONSE:",JSON.stringify(response.data, null, 2)
 );

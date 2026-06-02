@@ -50,7 +50,7 @@ export default function DashboardScreen() {
     
           const resAssets= await getAssets();
           setAssets(resAssets || []);
-          console.log( "ONLINE ASSETS:",resAssets);
+          // console.log( "ONLINE ASSETS:",resAssets);
     
           const resCategory = await getCategories();
           setCategories(Array.isArray(resCategory) ? resCategory : []);
