@@ -4,19 +4,20 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
-import { getAssets } from "@/src/services/asset.service";
+import { getAssignedAssets } from "@/src/services/asset.service";
 import { getCategories } from "@/src/services/category.service";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { API_URL } from "../../../api/client";
 import DashboardSkeleton from "../../../components/skeletons/DashboardSkeleton";
-import { getUser } from "../../../services/user.service";
 
 type Asset = {
   asset_id: string;
@@ -53,45 +54,65 @@ export default function DashboardScreen() {
    const [categories, setCategories ] = useState<any[]>([]);
    const [selectedCategory, setSelectedCategory] = useState("All");
    const [loading, setLoading] = useState(true);
+   const [searchQuery, setSearchQuery] = useState("");
+   const [showCategories, setShowCategories] = useState(false);
 
-   const filteredAssets = selectedCategory === "All" ? assets : assets.filter((item) =>item.category?.name === selectedCategory);
+  const filteredAssets = assets.filter((item) => {
+  const query = searchQuery.toLowerCase();
+
+  const matchesSearch =
+    item.name.toLowerCase().includes(query) ||
+    item.serial_number.toLowerCase().includes(query);
+
+  const matchesCategory =
+    selectedCategory === "All" ||
+    item.category?.name === selectedCategory;
+
+  return matchesSearch && matchesCategory;
+});
    const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
           
   //  console.log("DASHBOARD USER:", user);
 
-    useEffect(() => {
-    
-      async function loadAssets() {
-    
-        try {
-    
-          setLoading(true);
-          const onlineUser = await getUser(user?.employee_id ?? "");
-          console.log( "ONLINE DASHBOARD USER:",onlineUser);
-          setEmp(onlineUser);
+useEffect(() => {
 
-          const resAssets= await getAssets();
-          setAssets(resAssets || []);
-          console.log( "ONLINE ASSETS:",resAssets);
-    
-          const resCategory = await getCategories();
-          setCategories(Array.isArray(resCategory) ? resCategory : []);
-          console.log("ONLINE CATEGORIES", resCategory);
-    
-        } catch (error) {   
-          console.log(
-            "LOAD API ERROR:",
-            error
-          );
-    
-        } finally {
-          setLoading(false);
-        }
-      }
-    
-      loadAssets();
-    
-    }, []);
+  async function loadAssets() {
+
+    try {
+
+      setLoading(true);
+      
+      if (!user?.employee_id) return;
+      
+      console.log("CURRENT USER:", user);
+      console.log("EMPLOYEE ID:", user?.employee_id);
+      setEmp(user);
+      
+      const assignedAssets = await getAssignedAssets(user.employee_id);
+      setAssets(assignedAssets || []);
+      console.log( "ONLINE Assigned ASSETS:",assignedAssets);
+
+      const resCategories = await getCategories();
+      setCategories(Array.isArray(resCategories) ? resCategories : []);
+
+      // console.log("ONLINE CATEGORIES", resCategories);
+
+    } catch (error) {
+
+      console.log(
+        "LOAD ONLINE ASSETS ERROR:",
+        error
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
+  }
+
+  loadAssets();
+
+}, [user]);
 
     if (loading) {
   return <DashboardSkeleton />;
@@ -128,36 +149,78 @@ export default function DashboardScreen() {
           { color: colors.text },
         ]}
       >
-        Available Assets
+        Assigned Assets
       </Text>
      </View>
+     <View style= {styles.searchRow}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
+        <Ionicons
+          name="search"
+          size={20}
+          color={colors.subText}
+        />
+        <TextInput
+          placeholder="Search assets by name or SN..."
+          placeholderTextColor={colors.subText}
+          style={[styles.searchInput, { color: colors.text }]}
+          value= {searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
+          <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() =>
+            setShowCategories(!showCategories)
+          }
+          style={[
+            styles.filterButton,
+            {
+              backgroundColor: showCategories
+                ? colors.primary
+                : colors.card,
+            },
+          ]}
+          >
+          <Ionicons
+            name="options-outline"
+            size={22}
+            color={
+              showCategories
+                ? "white"
+                : colors.text
+            }
+          />
+        </TouchableOpacity>
+      </View>
       <View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoriesContainer}
-        >
-        {categoryList.map((item) => {
-          const active = selectedCategory === item.name;
+        {showCategories && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoriesContainer}
+          >
+          {categoryList.map((item) => {
+            const active = selectedCategory === item.name;
 
-          return (
-            <TouchableOpacity
-              key={item.id.toString()}
-              onPress={() =>setSelectedCategory(item.name)}
-              style={[
-                styles.categoryButton,
-                { backgroundColor: selectedCategory === item.name ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
-              ]}
-            >
-              <Text
-                style={{ color: selectedCategory === item.name ? "white" : colors.subText }}
+            return (
+              <TouchableOpacity
+                key={item.id.toString()}
+                onPress={() =>setSelectedCategory(item.name)}
+                style={[
+                  styles.categoryButton,
+                  { backgroundColor: selectedCategory === item.name ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
+                ]}
               >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+                <Text
+                  style={{ color: selectedCategory === item.name ? "white" : colors.subText }}
+                >
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+          
+            );
+          })}
+        </ScrollView> )}
       </View>
 
 <FlatList
@@ -172,7 +235,7 @@ export default function DashboardScreen() {
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() => {
-        router.push({ pathname: "/(main)/assetsDetail", params:  {id: item.asset_id, mode: "available", },
+        router.push({ pathname: "/(main)/assetsDetail", params:  {id: item.asset_id, },
         });
       }}
       style={[
@@ -237,7 +300,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 15,
-    marginBottom: 20,
+    marginBottom: 15,
   },
 
   statCard: {
@@ -265,7 +328,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 5,
+    marginBottom: 10,
   },
 
   sectionTitle: {
@@ -273,10 +336,40 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#111",
   },
+  searchRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 10,
+},
+  searchContainer: {
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+  borderRadius: 16,
+  paddingHorizontal: 14,
+  height: 50,
+},
+
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 14,
+  },
+
+filterButton: {
+  width: 50,
+  height: 50,
+  borderRadius: 16,
+  marginLeft: 12,
+  justifyContent: "center",
+  alignItems: "center",
+},
 
   categoriesContainer: {
   paddingVertical: 14,
   paddingRight: 10,
+  marginTop: -6,
+  marginBottom: -6,
 },
 
 categoryButton: {

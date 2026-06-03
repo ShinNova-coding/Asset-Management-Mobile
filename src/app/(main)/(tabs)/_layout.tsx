@@ -35,34 +35,6 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="assets"
-        options={{
-          title: "Assets",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="cube"
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-
-      {/* <Tabs.Screen
-        name="requests"
-        options={{
-          title: "Requests",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="clipboard"
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      /> */}
-
-      <Tabs.Screen
         name="notifications"
         options={{
           title: "Notifications",
