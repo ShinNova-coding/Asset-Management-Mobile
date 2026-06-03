@@ -15,7 +15,7 @@ export async function requestAsset(
 }
 
 export async function returnAsset(assetId: string) {
-  const response = await api.post("/asset-return", {asset_id: assetId,});
+  const response = await api.post(`/assignment/${assetId}/return`);
 
   return response.data;
 }

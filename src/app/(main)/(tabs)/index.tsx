@@ -12,9 +12,10 @@ import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
 import { getAssets } from "@/src/services/asset.service";
 import { getCategories } from "@/src/services/category.service";
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
+import { API_URL } from "../../../api/client";
+import DashboardSkeleton from "../../../components/skeletons/DashboardSkeleton";
 import { getUser } from "../../../services/user.service";
 
 type Asset = {
@@ -30,6 +31,19 @@ type Asset = {
     name: string;
   };
 };
+
+export function normalizeImageUrl(
+  url?: string | null
+) : string {
+  if (!url) {
+    return "https://via.placeholder.com/150";
+  }
+
+  return url.replace(
+    "http://localhost",
+    API_URL
+  );
+}
 
 export default function DashboardScreen() {
    const {user } = useAuth();
@@ -58,7 +72,7 @@ export default function DashboardScreen() {
 
           const resAssets= await getAssets();
           setAssets(resAssets || []);
-          // console.log( "ONLINE ASSETS:",resAssets);
+          console.log( "ONLINE ASSETS:",resAssets);
     
           const resCategory = await getCategories();
           setCategories(Array.isArray(resCategory) ? resCategory : []);
@@ -80,20 +94,7 @@ export default function DashboardScreen() {
     }, []);
 
     if (loading) {
-  return (
-    <View style={styles.stateContainer}>
-      <Ionicons
-        name="cube-outline"
-        size={60}
-        color={colors.primary}
-      />
-      <Text style={[
-          styles.stateTitle,
-          { color: colors.text },
-        ]}>Loading...
-      </Text>
-    </View>
-  );
+  return <DashboardSkeleton />;
 }
 
   return (
@@ -182,7 +183,7 @@ export default function DashboardScreen() {
       ]}
     >
       <Image
-        source={{ uri: item.image_url || undefined }}
+        source={{ uri: normalizeImageUrl(item.image_url) }}
         style={styles.assetImage}
         resizeMode="contain"
       />
@@ -205,7 +206,7 @@ export default function DashboardScreen() {
         </View>
         <View style={styles.availableBadge}>
           <Text style={styles.availableText}>
-            {item.status === "available" ? "Available" : "Assigned"}
+            {item.status}
           </Text>
         </View>
       </View>

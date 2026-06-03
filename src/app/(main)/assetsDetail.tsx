@@ -9,6 +9,8 @@ import {
   Alert,
   Image,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -18,6 +20,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { API_URL } from "../../api/client";
+import AssetDetailSkeleton from "../../components/skeletons/AssetDetailSkeleton";
+
 type Asset = {
   asset_id: string;
   name: string;
@@ -31,6 +36,19 @@ type Asset = {
   warranty_period: number;
   image_url: string | null;
 };
+
+export function normalizeImageUrl(
+  url?: string | null
+) : string {
+  if (!url) {
+    return "https://via.placeholder.com/150";
+  }
+
+  return url.replace(
+    "http://localhost",
+    API_URL
+  );
+}
 
 export default function AssetDetailScreen() {
   const {colors, isDark} = useTheme();
@@ -83,23 +101,27 @@ export default function AssetDetailScreen() {
 
 }, [id]);
 
+      if (loading) {
+        return <AssetDetailSkeleton />;
+      }
 
-if (loading) {
-  return (
-    <View style={styles.stateContainer}>
-      <Ionicons
-        name="cube-outline"
-        size={60}
-        color={colors.primary}
-      />
-      <Text style={[
-          styles.stateTitle,
-          { color: colors.text },
-        ]}>Loading Asset...
-      </Text>
-    </View>
-  );
-}
+
+// if (loading) {
+//   return (
+//     <View style={styles.stateContainer}>
+//       <Ionicons
+//         name="cube-outline"
+//         size={60}
+//         color={colors.primary}
+//       />
+//       <Text style={[
+//           styles.stateTitle,
+//           { color: colors.text },
+//         ]}>Loading Asset...
+//       </Text>
+//     </View>
+//   );
+// }
 
 if (!asset) {
   return (
@@ -151,14 +173,19 @@ if (!asset) {
 
   return (
 
+      <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <HeaderBar title="Asset Details" backButtonAction={()=> router.back()}/>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>       
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>       
       
         <View style={[styles.imageCard, { backgroundColor: colors.card }]}>
-          <Image source={{ uri: asset.image_url || undefined }} style={styles.detailImage} resizeMode="contain" />
+          <Image source={{ uri: normalizeImageUrl(asset.image_url) }} style={styles.detailImage} resizeMode="contain" />
           <Text style={[styles.mainTitle, { color: colors.text }]}>{asset.name}</Text>
           <Text style={[styles.subTitle, { color: colors.subText }]}>SN-{asset.serial_number}</Text>           
           <View style={styles.badgeRow}>
@@ -180,6 +207,7 @@ if (!asset) {
             <Text style={[styles.infoValue, { color: colors.text }]}>{asset.warranty_period}Months</Text>
           </View>
         </View>
+
         {mode ==="assigned" ? (
         <>
 
@@ -246,7 +274,7 @@ if (!asset) {
                  />
 
          <TouchableOpacity
-          style={styles.requestButton}
+          style={[ styles.requestButton, status === "requested" && {backgroundColor: "#9CA3AF",},]}
           disabled={status === "requested"}
           onPress={async() => {
             if (!note.trim()) {
@@ -280,7 +308,7 @@ if (!asset) {
       </ScrollView>
       </TouchableWithoutFeedback>
     </SafeAreaView>
-
+   </KeyboardAvoidingView>
   );
 }
 

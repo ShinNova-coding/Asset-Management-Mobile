@@ -130,9 +130,12 @@ useEffect(() => {
 
   async function loadProfile() {
 
+    if (!token) return;
+
+    await syncProfile(token);
     const localProfile = await getProfile();
 
-    // console.log("LOCAL PROFILE:", localProfile);
+    console.log("LOCAL PROFILE:", localProfile);
 
     setProfile(localProfile);
     setPreviewImage(null);
@@ -140,7 +143,7 @@ useEffect(() => {
 
   loadProfile();
 
-}, []);
+}, [token]);
 
   return (
     

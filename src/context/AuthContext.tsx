@@ -77,7 +77,7 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
          if (! storedToken) return;
          if (!storedEmployeeId) return;
 
-         const localUser = await getProfile();
+         await getProfile();
          const OnlineUser = await getUser(storedEmployeeId);
          setToken(storedToken);
          setUser(OnlineUser);

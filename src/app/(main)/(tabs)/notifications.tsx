@@ -1,6 +1,6 @@
 import { useTheme } from "@/src/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SectionList,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { SafeAreaView } from "react-native-safe-area-context";
+import NotiSkeleton from "../../../components/skeletons/NotiSkeleton";
 
 export default function NotificationScreen() {
 
@@ -55,6 +56,19 @@ export default function NotificationScreen() {
   },
 ]);
   const { colors, isDark } = useTheme();
+
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setLoading(false);
+  }, 1000);
+
+  return () => clearTimeout(timer);
+}, []);
+      if (loading) {
+        return <NotiSkeleton />;
+      }
   
   const renderIcon = (type: string) => {
     switch (type) {

@@ -3,7 +3,7 @@ import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image, ScrollView,
   StyleSheet,
@@ -11,6 +11,8 @@ import {
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { API_URL } from "../../api/client";
+import ContactInfoSkeleton from "../../components/skeletons/ContactInfoSkeleton";
 
 interface ContactData {
   employeeId: string;
@@ -24,18 +26,24 @@ interface ContactData {
 
 export default function ContactInfoScreen() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const { colors, isDark } = useTheme();
 
   const { user } = useAuth();
 
+  console.log ("CONTACT INFO USER:", user);
+  
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1000);
 
-  // if (loading) {
-  //   return (
-  //     <SafeAreaView style={[styles.container, { backgroundColor: colors.background, justifyContent: "center" }]}>
-  //       <ActivityIndicator size="large" color={colors.primary} />
-  //     </SafeAreaView>
-  //   );
-  // }
+      return () => clearTimeout(timer);
+    }, []);
+
+    if (loading) {
+      return <ContactInfoSkeleton />;
+    }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -49,7 +57,7 @@ export default function ContactInfoScreen() {
     uri:
       user?.preview_url?.replace(
         "http://localhost",
-        "http://192.168.100.180:1010"
+        API_URL
       ),
   }}
   style={{
@@ -68,7 +76,7 @@ export default function ContactInfoScreen() {
             </View>
             <View style={styles.statusBadge}>
               <View style={styles.dot} />
-              <Text style={styles.statusText}>Active Employee</Text>
+              <Text style={styles.statusText}>{user?.status}</Text>
             </View>
           </View>
         </View>

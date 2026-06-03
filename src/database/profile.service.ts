@@ -1,6 +1,8 @@
+import { API_URL } from "../api/client";
 import { db } from "./db";
 
 export async function saveProfile(user: any) {
+
 
      if (!user) {
     console.log("saveProfile received null/undefined user");
@@ -38,11 +40,11 @@ export async function saveProfile(user: any) {
         user.joined_date,
         user.image_url?.replace(
           "http://localhost",
-          "http://192.168.18.9:1010"
+          API_URL
         ),
         user.preview_url?.replace(
           "http://localhost",
-          "http://192.168.18.9:1010"
+          API_URL
         ),
       ]
     );

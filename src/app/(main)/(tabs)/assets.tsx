@@ -16,7 +16,8 @@ import { getCategories } from "@/src/services/category.service";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-
+import { API_URL } from "../../../api/client";
+import AssetsSkeleton from "../../../components/skeletons/AssetsSkeleton";
 
 type Asset = {
   asset_id: string;
@@ -32,6 +33,19 @@ type Asset = {
   };
 };
 
+export function normalizeImageUrl(
+  url?: string | null
+) : string {
+  if (!url) {
+    return "https://via.placeholder.com/150";
+  }
+
+  return url.replace(
+    "http://localhost",
+    API_URL
+  );
+}
+
 export default function AssetsScreen() {
   const {user } = useAuth();
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -41,6 +55,7 @@ export default function AssetsScreen() {
   const [categories, setCategories ] = useState<any[]>([]);
   const [showCategories, setShowCategories] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  
   const filteredAssets = assets.filter((item) => {
   const query = searchQuery.toLowerCase();
 
@@ -63,6 +78,7 @@ useEffect(() => {
     try {
 
       setLoading(true);
+      
       if (!user?.employee_id) return;
       
       console.log("CURRENT USER:", user);
@@ -93,6 +109,11 @@ useEffect(() => {
   loadAssets();
 
 }, [user]);
+
+      if (loading) {
+        return <AssetsSkeleton />;
+      }
+
   
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -196,7 +217,7 @@ useEffect(() => {
                     })
                   }
                 >
-                  <Image source={{ uri: item.image_url || undefined }} style={styles.assetImage} /> 
+                  <Image source={{ uri: normalizeImageUrl(item.image_url) }} style={styles.assetImage} /> 
 
                   <View style={styles.assetContent}>
                     <View style={styles.topRow}>
