@@ -25,7 +25,8 @@ export async function saveProfile(user: any) {
         phone_number,
         joined_date,
         image_url,
-        preview_url
+        preview_url,
+        roles
       )
 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -46,6 +47,7 @@ export async function saveProfile(user: any) {
           "http://localhost",
           API_URL
         ),
+        user.roles ? JSON.stringify(user.roles) : null,
       ]
     );
 
@@ -57,12 +59,17 @@ export async function getProfile() {
   try {
 
     const result =
-      await db.getFirstAsync(`
+      await db.getFirstAsync<any>(`
         SELECT * FROM users LIMIT 1
       `);
-    console.log("USERS:", result);
+      if (!result) return null;
 
-    return result;
+    console.log("USERS FROM SQLITE:", result);
+     
+    return {
+    ...result,
+    roles: result.roles ? JSON.parse(result.roles) : [{ id: 0, name: result.position || "Employee" }]
+  };
 
   } catch (error) {
 

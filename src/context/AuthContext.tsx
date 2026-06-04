@@ -65,32 +65,55 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
     setUser(onlineUser);
   };
 
-  useEffect(() => {
-
-    const loadSession = async () => {
-
-      try {
-
-        const storedToken = await SecureStore.getItemAsync("token");
-         const storedEmployeeId = await SecureStore.getItemAsync("employee_id");
-         
-         if (! storedToken) return;
-         if (!storedEmployeeId) return;
-
-         await getProfile();
-         const OnlineUser = await getUser(storedEmployeeId);
-         setToken(storedToken);
-         setUser(OnlineUser);
-         
-      } catch (error) {
-        console.log(error);
-      } finally {
+ useEffect(() => {
+  const loadSession = async () => {
+    try {
+      const storedToken = await SecureStore.getItemAsync("token");
+      const storedEmployeeId = await SecureStore.getItemAsync("employee_id");
+       
+      if (!storedToken || !storedEmployeeId) {
         setIsLoading(false);
+        return;
       }
-    };
 
-    loadSession();
-  }, []);
+      // 1. Establish the session token immediately
+      setToken(storedToken);
+
+      // 2. Fetch cached profile data straight out of your SQLite database
+      const localProfile = await getProfile();
+
+        if (localProfile) {
+          const structuredUser: UserType = {
+            ...localProfile,
+            // Safely verify fallback definitions match UserType properties completely
+            roles: localProfile.roles || [
+              { id: 0, name: localProfile.position || "Employee" }
+            ]
+          };
+          setUser(structuredUser);
+        }
+
+      // 3. Stop the global loading spinner so screens can safely display cached data
+      setIsLoading(false);
+
+      // 4. Update the background state from the live API quietly
+      try {
+        const onlineUser = await getUser(storedEmployeeId);
+        if (onlineUser) {
+          setUser(onlineUser);
+        }
+      } catch (apiError) {
+        console.log("Silent background user refresh omitted:", apiError);
+      }
+       
+    } catch (error) {
+      console.log("Critical Session Init Failure:", error);
+      setIsLoading(false);
+    }
+  };
+
+  loadSession();
+}, []);
 
   const login = async (
     email: string,

@@ -17,7 +17,8 @@ export const initDatabase = async () => {
         phone_number TEXT,
         joined_date TEXT,
         image_url TEXT,
-        preview_url TEXT
+        preview_url TEXT,
+        roles TEXT
       );
     `);
 
