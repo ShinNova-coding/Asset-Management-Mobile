@@ -1,7 +1,7 @@
 import HeaderBar from "@/src/components/HeaderBar";
+import { useAuth } from "@/src/context/AuthContext";
 import { useTheme } from "@/src/context/ThemeContext";
 import { getAssetById } from "@/src/services/asset.service";
-import { requestAsset, returnAsset } from "@/src/services/request.service";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -14,14 +14,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL } from "../../api/client";
 import AssetDetailSkeleton from "../../components/skeletons/AssetDetailSkeleton";
+import { returnAsset } from "../../services/return.service";
 
 type Asset = {
   asset_id: string;
@@ -52,12 +52,13 @@ export function normalizeImageUrl(
 
 export default function AssetDetailScreen() {
   const {colors, isDark} = useTheme();
-  const { id, mode } = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   const router = useRouter();
   const [note, setNote] = useState("");
   const [asset, setAsset] = useState<Asset | null>(null);
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
 
@@ -153,7 +154,7 @@ if (!asset) {
           text: "Return",
           onPress: async () => {
             try {
-              await returnAsset(asset.asset_id);
+              await returnAsset(asset.asset_id, user?.employee_id ??"");
               setStatus("Returned");
 
             Alert.alert(
@@ -208,9 +209,6 @@ if (!asset) {
           </View>
         </View>
 
-        {mode ==="assigned" ? (
-        <>
-
         <TouchableOpacity
           style={[
             styles.returnButton,
@@ -244,67 +242,6 @@ if (!asset) {
           <Ionicons name="warning-outline" size={20} color="white" />
           <Text style={styles.reportButtonText}>Report an Issue</Text>
         </TouchableOpacity>
-        </>
-) : (          <>
-                 <Text
-                   style={[
-                     styles.label,
-                     { color: colors.subText },
-                   ]}
-                 >
-                   NOTE FOR ASSET REQUEST
-                 </Text>
-         
-                 <TextInput
-                   multiline
-                   value={note}
-                   onChangeText={setNote}
-                   placeholder="Please provide details for your request..."
-                   placeholderTextColor={colors.subText}
-                   style={[
-                     styles.textArea,
-                     {
-                       backgroundColor: colors.card,
-                       color: colors.text,
-                       borderColor: isDark
-                         ? "#334155"
-                         : "#E5E7EB",
-                     },
-                   ]}
-                 />
-
-         <TouchableOpacity
-          style={[ styles.requestButton, status === "requested" && {backgroundColor: "#9CA3AF",},]}
-          disabled={status === "requested"}
-          onPress={async() => {
-            if (!note.trim()) {
-              Alert.alert( "Required ", "Please enter request note.");
-              return;
-            }
-            try {
-              await requestAsset (asset.asset_id, note);
-              Alert.alert( "Success", "Your request has been submitted to Admin.");
-              // setNote("");
-              setStatus("requested")
-            }catch(error) {
-              console.log(error);
-                  Alert.alert("Error","Failed to submit request." );
-            }
-          }
-         }
-        >
-              <Ionicons
-                name="add-circle-outline"
-                size={20}
-                color="white"
-              />
-
-              <Text style={styles.reportButtonText}>
-                  {status === "requested" ? "Request Submitted" : "Request Asset"}
-              </Text>
-          </TouchableOpacity>
-          </>
-          )}
       </ScrollView>
       </TouchableWithoutFeedback>
     </SafeAreaView>

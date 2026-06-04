@@ -4,20 +4,20 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "../context/AuthContext";
-import { ThemeProvider } from "../context/ThemeContext";
+import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { initDatabase } from "../database/db";
 
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
 
-  const { token, isLoading } = useAuth();
+  const { token } = useAuth();
 
   const segments = useSegments();
 
-  if (isLoading ) {
-    return null;
-  }
+  const { isLoading } = useTheme();
+  if (isLoading ) return null;
+  
 
   const inAuthGroup =
     segments[0] === "(auth)";
@@ -62,11 +62,13 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
+      
         <AuthProvider>
-          <RootNavigator />
+          <ThemeProvider>
+            <RootNavigator />
+          </ThemeProvider>
         </AuthProvider>
-      </ThemeProvider>
+      
     </GestureHandlerRootView>
   );
 }

@@ -205,7 +205,7 @@ useEffect(() => {
               <Ionicons name="call-outline" size={22} color={colors.primary} />
             </View>
             <View style={styles.menuTextContent}>
-              <Text style={[styles.menuTitle, { color: colors.text }]}>Contact Info</Text>
+              <Text style={[styles.menuTitle, { color: colors.text }]}>Profile Info</Text>
               <Text style={[styles.menuSubTitle, { color: colors.subText }]}>Manage corporate details</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.subText} />

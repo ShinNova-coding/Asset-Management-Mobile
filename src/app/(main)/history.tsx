@@ -2,82 +2,86 @@ import HeaderBar from "@/src/components/HeaderBar";
 import { useTheme } from "@/src/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    View,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { getAssignmentHistory } from "../../services/history.service";
 
-const activities = [
-  {
-    id: 1,
-    type: "return",
-    title: "Returned Asset",
-    asset: "MacBook Pro M3",
-    time: "Today • 10:25 AM",
-  },
-
-  {
-    id: 2,
-    type: "assignment",
-    title: "Asset Assigned",
-    asset: "iPhone 15 Pro",
-    time: "Yesterday • 3:42 PM",
-  },
-
-  {
-    id: 3,
-    type: "issue",
-    title: "Issue Reported",
-    asset: "iPad Air",
-    time: "2 days ago",
-  },
-
-  {
-    id: 4,
-    type: "assignment",
-    title: "Asset Assigned",
-    asset: "Dell Monitor",
-    time: "May 18 • 11:12 AM",
-  },
-    {
-    id: 5,
-    type: "return",
-    title: "Returned Asset",
-    asset: "MacBook Pro M3",
-    time: "Today • 10:25 AM",
-  },
-
-  {
-    id: 6,
-    type: "assignment",
-    title: "Asset Assigned",
-    asset: "iPhone 15 Pro",
-    time: "Yesterday • 3:42 PM",
-  },
-
-  {
-    id: 7,
-    type: "issue",
-    title: "Issue Reported",
-    asset: "iPad Air",
-    time: "2 days ago",
-  },
-
-  {
-    id: 8,
-    type: "assignment",
-    title: "Asset Assigned",
-    asset: "Dell Monitor",
-    time: "May 18 • 11:12 AM",
-  },
-];
+type Activity = {
+  id: string;
+  type: "assignment" | "return" | "issue";
+  title: string;
+  asset: string;
+  date: string;
+};
 
 export default function HistoryScreen() {
   const { colors, isDark } = useTheme();
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+  loadHistory();
+}, []);
+
+const loadHistory = async () => {
+  try {
+    setLoading(true);
+
+    const history =
+      await getAssignmentHistory();
+
+    const transformed =
+      history.map((item: any) => ({
+        id: item.id.toString(),
+
+        type:
+          item.status === "returned"
+            ? "return"
+            : "assignment",
+
+        title:
+          item.status === "returned"
+            ? "Returned Asset"
+            : "Asset Assigned",
+
+        asset: item.asset.name,
+
+        date:
+          item.status === "returned"
+            ? item.returned_date
+            : item.assigned_date,
+      }));
+
+    setActivities(transformed);
+
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+if (!activities.length) {
+  return (
+    <View style={styles.emptyContainer}>
+      <Ionicons
+        name="time-outline"
+        size={70}
+        color="#9CA3AF"
+      />
+
+      <Text>
+        No activity history found
+      </Text>
+    </View>
+  );
+}
 
   const getActivityStyle = (type: string) => {
     switch (type) {
@@ -203,7 +207,7 @@ export default function HistoryScreen() {
                   </Text>
 
                   <Text style={styles.timeText}>
-                    {item.time}
+                    {item.date}
                   </Text>
                 </View>
               </View>
@@ -274,4 +278,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "500",
   },
+  emptyContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 30,
+},
 });
