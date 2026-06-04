@@ -75,44 +75,34 @@ export default function DashboardScreen() {
   //  console.log("DASHBOARD USER:", user);
 
 useEffect(() => {
-
   async function loadAssets() {
+    // 1. Return immediately if user is missing BEFORE changing any loading state
+    if (!user?.employee_id) {
+      return;
+    }
 
     try {
-
       setLoading(true);
-      
-      if (!user?.employee_id) return;
-      
-      console.log("CURRENT USER:", user);
-      console.log("EMPLOYEE ID:", user?.employee_id);
       setEmp(user);
       
-      const assignedAssets = await getAssignedAssets(user.employee_id);
-      setAssets(assignedAssets || []);
-      console.log( "ONLINE Assigned ASSETS:",assignedAssets);
+      // Execute network requests concurrently
+      const [assignedAssets, resCategories] = await Promise.all([
+        getAssignedAssets(user.employee_id),
+        getCategories()
+      ]);
 
-      const resCategories = await getCategories();
+      setAssets(assignedAssets || []);
       setCategories(Array.isArray(resCategories) ? resCategories : []);
 
-      // console.log("ONLINE CATEGORIES", resCategories);
-
     } catch (error) {
-
-      console.log(
-        "LOAD ONLINE ASSETS ERROR:",
-        error
-      );
-
+      console.log("LOAD ONLINE ASSETS ERROR:", error);
     } finally {
-
       setLoading(false);
     }
   }
 
   loadAssets();
-
-}, [user]);
+}, [user]); // Re-runs cleanly as soon as the authenticated user shifts into state
 
     if (loading) {
   return <DashboardSkeleton />;
