@@ -11,13 +11,15 @@ SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
 
-  const { token } = useAuth();
+  const { token, isLoading: authLoading } = useAuth();
+
+  const {isLoading: themeLoading } = useTheme();
 
   const segments = useSegments();
 
-  const { isLoading } = useTheme();
-  if (isLoading ) return null;
-  
+  if (authLoading || themeLoading ){ 
+    return null;
+  }
 
   const inAuthGroup =
     segments[0] === "(auth)";
@@ -62,12 +64,14 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      
+
+       
         <AuthProvider>
-          <ThemeProvider>
+         <ThemeProvider>
             <RootNavigator />
           </ThemeProvider>
         </AuthProvider>
+        
       
     </GestureHandlerRootView>
   );
