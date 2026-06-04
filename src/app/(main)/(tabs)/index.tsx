@@ -75,199 +75,140 @@ export default function DashboardScreen() {
   //  console.log("DASHBOARD USER:", user);
 
 useEffect(() => {
-  async function loadAssets() {
-    // 1. Return immediately if user is missing BEFORE changing any loading state
-    if (!user?.employee_id) {
-      return;
+    async function loadAssets() {
+      if (!user?.employee_id) return;
+
+      try {
+        setLoading(true);
+        const [assignedAssets, resCategories] = await Promise.all([
+          getAssignedAssets(user.employee_id),
+          getCategories()
+        ]);
+
+        // 🧠 Map backend 'id' or 'asset_code' safely to prevent key errors
+        const mappedAssets = (assignedAssets || []).map((asset: any) => ({
+          ...asset,
+          asset_id: asset.id || asset.asset_code, 
+        }));
+
+        setAssets(mappedAssets);
+        setCategories(Array.isArray(resCategories) ? resCategories : []);
+      } catch (error) {
+        console.log("LOAD ONLINE ASSETS ERROR:", error);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    try {
-      setLoading(true);
-      setEmp(user);
-      
-      // Execute network requests concurrently
-      const [assignedAssets, resCategories] = await Promise.all([
-        getAssignedAssets(user.employee_id),
-        getCategories()
-      ]);
-
-      setAssets(assignedAssets || []);
-      setCategories(Array.isArray(resCategories) ? resCategories : []);
-
-    } catch (error) {
-      console.log("LOAD ONLINE ASSETS ERROR:", error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  loadAssets();
-}, [user]); // Re-runs cleanly as soon as the authenticated user shifts into state
+    loadAssets();
+  }, [user]);// Re-runs cleanly as soon as the authenticated user shifts into state
 
     if (loading) {
   return <DashboardSkeleton />;
 }
 
   return (
-    <ScrollView style={[styles.container, {backgroundColor: colors.background}]}>
 
-      <Text style={[styles.header,{color: colors.text}]}>
-        {emp?.name}
-      </Text>
 
-      <View style={styles.statsRow}>
-        <View style={[styles.statCard,{backgroundColor: colors.card}]}>
-          <Text style={[styles.statTitle,{color: colors.subText}]}>TOTAL</Text>
-          <Text style={[styles.statNumber,{color: colors.primary}]}>4</Text>
-        </View>
-
-        <View style={[styles.statCard,{backgroundColor: colors.card}]}>
-          <Text style={[styles.statTitle,{color: colors.subText}]}>REPAIR</Text>
-          <Text style={[styles.statNumber,{color: colors.primary}]}>1</Text>
-        </View>
-
-        <View style={[styles.statCard,{backgroundColor: colors.card}]}>
-          <Text style={[styles.statTitle,{color: colors.subText}]}>ASSIGNED</Text>
-          <Text style={[styles.statNumber,{color: colors.primary}]}>3</Text>
-        </View>
-      </View>
-
-      <View style={styles.sectionRow}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          { color: colors.text },
-        ]}
-      >
-        Assigned Assets
-      </Text>
-     </View>
-     <View style= {styles.searchRow}>
-      <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
-        <Ionicons
-          name="search"
-          size={20}
-          color={colors.subText}
-        />
-        <TextInput
-          placeholder="Search assets by name or SN..."
-          placeholderTextColor={colors.subText}
-          style={[styles.searchInput, { color: colors.text }]}
-          value= {searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-          <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() =>
-            setShowCategories(!showCategories)
-          }
-          style={[
-            styles.filterButton,
-            {
-              backgroundColor: showCategories
-                ? colors.primary
-                : colors.card,
-            },
-          ]}
-          >
-          <Ionicons
-            name="options-outline"
-            size={22}
-            color={
-              showCategories
-                ? "white"
-                : colors.text
-            }
-          />
-        </TouchableOpacity>
-      </View>
-      <View>
-        {showCategories && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesContainer}
-          >
-          {categoryList.map((item) => {
-            const active = selectedCategory === item.name;
-
-            return (
-              <TouchableOpacity
-                key={item.id.toString()}
-                onPress={() =>setSelectedCategory(item.name)}
-                style={[
-                  styles.categoryButton,
-                  { backgroundColor: selectedCategory === item.name ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }
-                ]}
-              >
-                <Text
-                  style={{ color: selectedCategory === item.name ? "white" : colors.subText }}
-                >
-                  {item.name}
-                </Text>
-              </TouchableOpacity>
-          
-            );
-          })}
-        </ScrollView> )}
-      </View>
-
+<View style={[styles.container, { backgroundColor: colors.background }]}>
 <FlatList
-  data={filteredAssets}
-  numColumns={2}
-  scrollEnabled={false}
-  columnWrapperStyle={{
-    justifyContent: "space-between",
-  }}
-  keyExtractor={(item) => item.asset_id.toString()}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={() => {
-        router.push({ pathname: "/(main)/assetsDetail", params:  {id: item.asset_id, },
-        });
-      }}
-      style={[
-        styles.assetGridCard,
-        {
-          backgroundColor: colors.card,
-        },
-      ]}
-    >
-      <Image
-        source={{ uri: normalizeImageUrl(item.image_url) }}
-        style={styles.assetImage}
-        resizeMode="contain"
+        data={filteredAssets}
+        numColumns={2}
+        keyExtractor={(item) => item.asset_id.toString()}
+        columnWrapperStyle={{ justifyContent: "space-between" }}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <>
+            <Text style={[styles.header, { color: colors.text, marginTop: 16 }]}>
+              {user?.name}
+            </Text>
+
+            {/* Stats Row Block */}
+            <View style={styles.statsRow}>
+              <View style={[styles.statCard, { backgroundColor: colors.card }]}>
+                <Text style={[styles.statTitle, { color: colors.subText }]}>TOTAL</Text>
+                <Text style={[styles.statNumber, { color: colors.primary }]}>{filteredAssets.length}</Text>
+              </View>
+              <View style={[styles.statCard, { backgroundColor: colors.card }]}>
+                <Text style={[styles.statTitle, { color: colors.subText }]}>REPAIR</Text>
+                <Text style={[styles.statNumber, { color: colors.primary }]}>
+                  {filteredAssets.filter(a => a.condition?.toLowerCase() === 'repair').length}
+                </Text>
+              </View>
+              <View style={[styles.statCard, { backgroundColor: colors.card }]}>
+                <Text style={[styles.statTitle, { color: colors.subText }]}>ASSIGNED</Text>
+                <Text style={[styles.statNumber, { color: colors.primary }]}>{filteredAssets.length}</Text>
+              </View>
+            </View>
+
+            <View style={styles.sectionRow}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Assigned Assets</Text>
+            </View>
+
+            {/* Search Elements */}
+            <View style={styles.searchRow}>
+              <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
+                <Ionicons name="search" size={20} color={colors.subText} />
+                <TextInput
+                  placeholder="Search assets by name or SN..."
+                  placeholderTextColor={colors.subText}
+                  style={[styles.searchInput, { color: colors.text }]}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setShowCategories(!showCategories)}
+                style={[styles.filterButton, { backgroundColor: showCategories ? colors.primary : colors.card }]}
+              >
+                <Ionicons name="options-outline" size={22} color={showCategories ? "white" : colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Horizontal Filter Categories Scroll */}
+            {showCategories && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
+                {categoryList.map((item) => (
+                  <TouchableOpacity
+                    key={item.id.toString()}
+                    onPress={() => setSelectedCategory(item.name)}
+                    style={[styles.categoryButton, { backgroundColor: selectedCategory === item.name ? colors.primary : (isDark ? "#334155" : "#E8EAF6") }]}
+                  >
+                    <Text style={{ color: selectedCategory === item.name ? "white" : colors.subText }}>
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </>
+        }
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => {
+              router.push({ pathname: "/(main)/assetsDetail", params: { id: item.asset_id } });
+            }}
+            style={[styles.assetGridCard, { backgroundColor: colors.card }]}
+          >
+            <Image source={{ uri: normalizeImageUrl(item.image_url) }} style={styles.assetImage} resizeMode="contain" />
+            <Text numberOfLines={1} style={[styles.gridAssetName, { color: colors.text }]}>
+              {item.name}
+            </Text>
+            <View style={styles.assetInfoRow}>
+              <View style={styles.conditionBadge}>
+                <Text style={styles.conditionText}>{item.condition}</Text>
+              </View>
+              <View style={styles.availableBadge}>
+                <Text style={styles.availableText}>{item.status}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
       />
-
-      <Text
-        numberOfLines={1}
-        style={[
-          styles.gridAssetName,
-          { color: colors.text },
-        ]}
-      >
-        {item.name}
-      </Text>
-
-      <View style={styles.assetInfoRow}>
-        <View style={styles.conditionBadge}>
-          <Text style={styles.conditionText}>
-            {item.condition}
-          </Text>
-        </View>
-        <View style={styles.availableBadge}>
-          <Text style={styles.availableText}>
-            {item.status}
-          </Text>
-        </View>
-      </View>
-
-    </TouchableOpacity>
-  )}
-/>
-    </ScrollView>
+</View>
+  
   );
 }
 
