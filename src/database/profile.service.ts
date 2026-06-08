@@ -17,6 +17,7 @@ export async function saveProfile(user: any) {
     await db.runAsync(
       `
       INSERT INTO users (
+        id,
         employee_id,
         name,
         email,
@@ -29,9 +30,10 @@ export async function saveProfile(user: any) {
         roles
       )
 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
+        user.id,
         user.employee_id,
         user.name,
         user.email,

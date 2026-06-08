@@ -1,15 +1,18 @@
 import * as SQLite from "expo-sqlite";
 
-export const db = SQLite.openDatabaseSync(
-  "itams.db"
-);
+export const db = SQLite.openDatabaseSync("itams.db");
 
 export const initDatabase = async () => {
   try {
 
     await db.execAsync(`
+     DROP TABLE IF EXISTS users;
+`);
+
+    await db.execAsync(`
       CREATE TABLE IF NOT EXISTS users (
-        employee_id TEXT PRIMARY KEY NOT NULL,
+        id TEXT PRIMARY KEY,
+        employee_id TEXT,
         name TEXT,
         email TEXT,
         position TEXT,
@@ -22,7 +25,7 @@ export const initDatabase = async () => {
       );
     `);
 
-    console.log("Database initialized successfully");
+    console.log("Database initialized successfully with primary key ID");
 
   } catch (error) {
 

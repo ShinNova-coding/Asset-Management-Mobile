@@ -1,6 +1,6 @@
 import { api } from "../api/client";
-export async function getUser(employeeId: string) {
-  const response = await api.get(`/user/${employeeId}`);
+export async function getUser(userId: string) {
+  const response = await api.get(`/user/${userId}`);
 
   console.log("RAW USER RESPONSE:", response.data);
 

@@ -12,6 +12,7 @@ import { logoutUser } from "../services/auth.service";
 import { syncProfile } from "../services/syncProfile";
 import { getUser } from "../services/user.service";
 type UserType = {
+  id: string;
   employee_id: string;
   name: string;
   email: string;
@@ -55,59 +56,53 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = async () => {
-    const employeeId = await SecureStore.getItemAsync("employee_id");
-    if (!employeeId) return;
+    const userId = await SecureStore.getItemAsync("user_id");
+    if (!userId) return;
 
-    const onlineUser = await getUser(employeeId);
+    const onlineUser = await getUser(userId);
+     console.log("USER ID:", userId);
+    // console.log("REFRESH USER:", onlineUser);
 
-    console.log("REFRESH USER:", onlineUser);
-
+    if (onlineUser && onlineUser.id && !onlineUser.message){
     setUser(onlineUser);
+    }
   };
 
  useEffect(() => {
   const loadSession = async () => {
     try {
       const storedToken = await SecureStore.getItemAsync("token");
-      const storedEmployeeId = await SecureStore.getItemAsync("employee_id");
+      const storedUserId = await SecureStore.getItemAsync("user_id");
        
-      if (!storedToken || !storedEmployeeId) {
+      if (!storedToken || !storedUserId) {
         setIsLoading(false);
         return;
       }
 
-      // 1. Establish the session token immediately
       setToken(storedToken);
 
-      // 2. Fetch cached profile data straight out of your SQLite database
       const localProfile = await getProfile();
 
-        if (localProfile) {
-          const structuredUser: UserType = {
-            ...localProfile,
-            // Safely verify fallback definitions match UserType properties completely
-            roles: localProfile.roles || [
-              { id: 0, name: localProfile.position || "Employee" }
-            ]
-          };
-          setUser(structuredUser);
+        if (localProfile && localProfile.id) {
+          // const structuredUser: UserType = {
+          //   ...localProfile,
+          //   roles: localProfile.roles || [
+          //     { id: 0, name: localProfile.position || "Employee" }
+          //   ]
+          // };
+          setUser(localProfile);
         }
 
-      // 3. Stop the global loading spinner so screens can safely display cached data
       setIsLoading(false);
-
-      // 4. Update the background state from the live API quietly
-      try {
-        const onlineUser = await getUser(storedEmployeeId);
-        if (onlineUser) {
+   
+      if (storedUserId.includes("-")){
+        const onlineUser = await getUser(storedUserId);
+        if (onlineUser && onlineUser.id && !onlineUser.message) {
           setUser(onlineUser);
         }
-      } catch (apiError) {
-        console.log("Silent background user refresh omitted:", apiError);
       }
-       
     } catch (error) {
-      console.log("Critical Session Init Failure:", error);
+      console.log(" Session Init Failure:", error);
       setIsLoading(false);
     }
   };
@@ -115,36 +110,30 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
   loadSession();
 }, []);
 
-  const login = async (
-    email: string,
-    password: string
-  ) => {
+  const login = async ( email: string, password: string ) => {
 
     try {
 
-      const response = await api.post("/login",
-        {
-            email,
-            password,
-        }
-      );
+      const response = await api.post("/login",{ email, password, });
 
       const data = await response.data;
-      console.log("====>",data);
+      if (!data.success || !data.user?.id) {
+        console.log("Login execution refused by API backend rules");
+        return false;
+      }
+      console.log("====> Server verification matched", data);
 
       await SecureStore.setItemAsync("token",data.token );
+      await SecureStore.setItemAsync("user_id", data.user.id)
       await SecureStore.setItemAsync("employee_id", data.user.employee_id);
 
       setToken(data.token);
 
       await syncProfile(data.token); 
       await refreshUser();
-      console.log("AUTH USER AFTER REFRESH");
-      
-      // await syncAssets(data.token);     
-      // await syncCategories(data.token); 
-      return true;
+      // console.log("AUTH USER AFTER REFRESH");
 
+      return true;
     } catch (error) {
 
       console.log("LOGIN ERROR:",error);
@@ -163,6 +152,7 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
       }
 
     await SecureStore.deleteItemAsync("token");
+    await SecureStore.deleteItemAsync("user_id")
     await SecureStore.deleteItemAsync("employee_id");
     await clearProfile();
 

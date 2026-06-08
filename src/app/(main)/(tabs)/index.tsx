@@ -20,7 +20,8 @@ import { API_URL } from "../../../api/client";
 import DashboardSkeleton from "../../../components/skeletons/DashboardSkeleton";
 
 type Asset = {
-  asset_id: string;
+  id: string;
+  asset_code: string;
   name: string;
   serial_number: string;
   status: string;
@@ -76,16 +77,18 @@ export default function DashboardScreen() {
 
 useEffect(() => {
     async function loadAssets() {
-      if (!user?.employee_id) return;
+      if (!user || !user.id || typeof user.id !== 'string') {
+        console.log("Dashboard rendering paused: Awaiting valid User Profile initialization context.");
+        return;
+      }
 
       try {
         setLoading(true);
         const [assignedAssets, resCategories] = await Promise.all([
-          getAssignedAssets(user.employee_id),
+          getAssignedAssets(),
           getCategories()
         ]);
 
-        //  Map backend 'id' or 'asset_code' safely to prevent key errors
         const mappedAssets = (assignedAssets || []).map((asset: any) => ({
           ...asset,
           asset_id: asset.id || asset.asset_code, 
@@ -114,7 +117,7 @@ useEffect(() => {
 <FlatList
         data={filteredAssets}
         numColumns={2}
-        keyExtractor={(item) => item.asset_id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         columnWrapperStyle={{ justifyContent: "space-between" }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
@@ -186,7 +189,7 @@ useEffect(() => {
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={() => {
-              router.push({ pathname: "/(main)/assetsDetail", params: { id: item.asset_id } });
+              router.push({ pathname: "/(main)/assetsDetail", params: { id: item.id } });
             }}
             style={[styles.assetGridCard, { backgroundColor: colors.card }]}
           >
