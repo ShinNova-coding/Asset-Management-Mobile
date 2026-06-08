@@ -51,10 +51,10 @@ export default function DashboardScreen() {
    const {user } = useAuth();
    const {colors, isDark} = useTheme();
    const [assets, setAssets] = useState<Asset[]>([]);
-   const [emp, setEmp] = useState<any>(null);
+  //  const [emp, setEmp] = useState<any>(null);
    const [categories, setCategories ] = useState<any[]>([]);
    const [selectedCategory, setSelectedCategory] = useState("All");
-   const [loading, setLoading] = useState(true);
+   const [loading, setLoading] = useState(false);
    const [searchQuery, setSearchQuery] = useState("");
    const [showCategories, setShowCategories] = useState(false);
 
@@ -77,8 +77,8 @@ export default function DashboardScreen() {
 
 useEffect(() => {
     async function loadAssets() {
-      if (!user || !user.id || typeof user.id !== 'string') {
-        console.log("Dashboard rendering paused: Awaiting valid User Profile initialization context.");
+      if (!user || !user.id) {
+        setLoading(false);
         return;
       }
 
@@ -102,11 +102,12 @@ useEffect(() => {
         setLoading(false);
       }
     }
+    console.log ("USER CHANGED:", user);
 
     loadAssets();
   }, [user]);
 
-    if (loading) {
+    if (!user) {
   return <DashboardSkeleton />;
 }
 

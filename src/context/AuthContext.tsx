@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { api } from "../api/client";
 import { db } from "../database/db";
-import { getProfile } from "../database/profile.service";
 import { logoutUser } from "../services/auth.service";
 import { syncProfile } from "../services/syncProfile";
 import { getUser } from "../services/user.service";
@@ -68,43 +67,29 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
     }
   };
 
- useEffect(() => {
+useEffect(() => {
   const loadSession = async () => {
-    try {
-      const storedToken = await SecureStore.getItemAsync("token");
-      const storedUserId = await SecureStore.getItemAsync("user_id");
-       
-      if (!storedToken || !storedUserId) {
-        setIsLoading(false);
-        return;
-      }
+    const token =
+      await SecureStore.getItemAsync("token");
 
-      setToken(storedToken);
+    const userId =
+      await SecureStore.getItemAsync("user_id");
 
-      const localProfile = await getProfile();
-
-        if (localProfile && localProfile.id) {
-          // const structuredUser: UserType = {
-          //   ...localProfile,
-          //   roles: localProfile.roles || [
-          //     { id: 0, name: localProfile.position || "Employee" }
-          //   ]
-          // };
-          setUser(localProfile);
-        }
-
+    if (!token || !userId) {
       setIsLoading(false);
-   
-      if (storedUserId.includes("-")){
-        const onlineUser = await getUser(storedUserId);
-        if (onlineUser && onlineUser.id && !onlineUser.message) {
-          setUser(onlineUser);
-        }
-      }
-    } catch (error) {
-      console.log(" Session Init Failure:", error);
-      setIsLoading(false);
+      return;
     }
+
+    setToken(token);
+
+    const onlineUser =
+      await getUser(userId);
+
+    if (onlineUser?.id) {
+      setUser(onlineUser);
+    }
+
+    setIsLoading(false);
   };
 
   loadSession();

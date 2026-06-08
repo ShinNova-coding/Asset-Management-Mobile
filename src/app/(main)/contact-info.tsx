@@ -39,7 +39,8 @@ export default function ContactInfoScreen() {
       }, 1000);
 
       return () => clearTimeout(timer);
-    }, []);
+    
+    }, [user]);
 
     if (loading) {
       return <ContactInfoSkeleton />;
