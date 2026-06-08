@@ -29,7 +29,7 @@ export async function saveProfile(user: any) {
         roles
       )
 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         user.employee_id,

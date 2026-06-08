@@ -72,7 +72,7 @@ export default function DashboardScreen() {
 });
    const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
           
-  //  console.log("DASHBOARD USER:", user);
+   console.log("DASHBOARD USER:", user);
 
 useEffect(() => {
     async function loadAssets() {
@@ -85,7 +85,7 @@ useEffect(() => {
           getCategories()
         ]);
 
-        // 🧠 Map backend 'id' or 'asset_code' safely to prevent key errors
+        //  Map backend 'id' or 'asset_code' safely to prevent key errors
         const mappedAssets = (assignedAssets || []).map((asset: any) => ({
           ...asset,
           asset_id: asset.id || asset.asset_code, 
@@ -101,7 +101,7 @@ useEffect(() => {
     }
 
     loadAssets();
-  }, [user]);// Re-runs cleanly as soon as the authenticated user shifts into state
+  }, [user]);
 
     if (loading) {
   return <DashboardSkeleton />;
@@ -123,7 +123,6 @@ useEffect(() => {
               {user?.name}
             </Text>
 
-            {/* Stats Row Block */}
             <View style={styles.statsRow}>
               <View style={[styles.statCard, { backgroundColor: colors.card }]}>
                 <Text style={[styles.statTitle, { color: colors.subText }]}>TOTAL</Text>
@@ -145,7 +144,6 @@ useEffect(() => {
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Assigned Assets</Text>
             </View>
 
-            {/* Search Elements */}
             <View style={styles.searchRow}>
               <View style={[styles.searchContainer, { backgroundColor: colors.card }]}>
                 <Ionicons name="search" size={20} color={colors.subText} />
