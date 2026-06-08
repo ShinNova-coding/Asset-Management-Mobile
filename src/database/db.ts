@@ -5,9 +5,6 @@ export const db = SQLite.openDatabaseSync("itams.db");
 export const initDatabase = async () => {
   try {
 
-    await db.execAsync(`
-     DROP TABLE IF EXISTS users;
-`);
 
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS users (

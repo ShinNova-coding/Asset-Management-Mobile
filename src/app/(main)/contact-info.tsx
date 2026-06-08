@@ -13,6 +13,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { API_URL } from "../../api/client";
 import ContactInfoSkeleton from "../../components/skeletons/ContactInfoSkeleton";
+import { getProfile } from "../../database/profile.service";
+import { syncProfile } from "../../services/syncProfile";
 
 interface ContactData {
   employeeId: string;
@@ -24,14 +26,22 @@ interface ContactData {
   // permissions: string[];
 }
 
-export default function ContactInfoScreen() {
+export default async function ContactInfoScreen() {
   const router = useRouter();
+  const {token } = useAuth();
   const [loading, setLoading] = useState(true);
   const { colors, isDark } = useTheme();
 
-  const { user } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
 
-  console.log ("CONTACT INFO USER:", user);
+        if (!token) return;
+  
+        await syncProfile(token);
+  
+        const updatedProfile = await getProfile();
+        setProfile(updatedProfile);
+
+  console.log ("CONTACT INFO USER:",profile);
   
     useEffect(() => {
       const timer = setTimeout(() => {
@@ -40,7 +50,7 @@ export default function ContactInfoScreen() {
 
       return () => clearTimeout(timer);
     
-    }, [user]);
+    }, [profile]);
 
     if (loading) {
       return <ContactInfoSkeleton />;
@@ -56,7 +66,7 @@ export default function ContactInfoScreen() {
 <Image
   source={{
     uri:
-      user?.preview_url?.replace(
+      profile?.preview_url?.replace(
         "http://localhost",
         API_URL
       ),
@@ -68,16 +78,16 @@ export default function ContactInfoScreen() {
   }}
 />
           </View>
-          <Text style={[styles.userName, { color: colors.text }]}>{user?.name}</Text>
-          <Text style={[styles.userRole, { color: colors.subText }]}>{user?.position || "Employee"}</Text>
+          <Text style={[styles.userName, { color: colors.text }]}>{profile?.name}</Text>
+          <Text style={[styles.userRole, { color: colors.subText }]}>{profile?.position || "Employee"}</Text>
           
           <View style={[styles.badgeRow, { marginTop: 10 }]}>
             <View style={styles.deptBadge}>
-              <Text style={styles.deptText}>{user?.roles?.[0]?.name || "Employee"}</Text>
+              <Text style={styles.deptText}>{profile?.roles?.[0]?.name || "Employee"}</Text>
             </View>
             <View style={styles.statusBadge}>
               <View style={styles.dot} />
-              <Text style={styles.statusText}>{user?.status}</Text>
+              <Text style={styles.statusText}>{profile?.status}</Text>
             </View>
           </View>
         </View>
@@ -90,15 +100,15 @@ export default function ContactInfoScreen() {
 
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Employee ID</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{user?.employee_id}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{profile?.employee_id}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Role</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{user?.roles?.[0]?.name}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{profile?.roles?.[0]?.name}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Position</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{user?.position}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{profile?.position}</Text>
           </View>
         </View>
 
@@ -110,11 +120,11 @@ export default function ContactInfoScreen() {
 
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Corporate Email</Text>
-            <Text style={[styles.value, { color: "#0070EB", fontWeight: "600" }]}>{user?.email}</Text>
+            <Text style={[styles.value, { color: "#0070EB", fontWeight: "600" }]}>{profile?.email}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Phone</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{user?.phone_number}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{profile?.phone_number}</Text>
           </View>
           <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
             <Text style={[styles.label, { color: colors.subText }]}>Office Location</Text>
