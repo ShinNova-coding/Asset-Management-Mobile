@@ -54,7 +54,7 @@ export default function DashboardScreen() {
   //  const [emp, setEmp] = useState<any>(null);
    const [categories, setCategories ] = useState<any[]>([]);
    const [selectedCategory, setSelectedCategory] = useState("All");
-   const [loading, setLoading] = useState(false);
+   const [loading, setLoading] = useState(true);
    const [searchQuery, setSearchQuery] = useState("");
    const [showCategories, setShowCategories] = useState(false);
 
@@ -71,13 +71,13 @@ export default function DashboardScreen() {
 
         return matchesSearch && matchesCategory;
   });
-
+  const isEmpty = !loading && filteredAssets.length === 0;
 
   const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
           
   console.log("DASHBOARD USER:", user);
 
-    const loadAssets = async () => {
+  const loadAssets = async () => {
     if (!user?.id) return;
 
     try {
@@ -91,7 +91,11 @@ export default function DashboardScreen() {
 
       setAssets(assignedAssets || []);
       setCategories(categories || []);
-    } finally {
+    }catch(error){
+      console.log("LOAD ASSETS ERROR:", error);
+      setAssets([]);
+    }
+     finally {
       setLoading(false);
     }
   };
@@ -102,12 +106,39 @@ export default function DashboardScreen() {
     }
   }, [user?.id]);
 
-    if (authLoading) {
+    if (loading) {
       return <DashboardSkeleton />;
     }
     if (!user){
       return null;
     }
+
+      if (isEmpty) {
+        return (
+          <View
+              style={[
+                styles.container,
+                { backgroundColor: colors.background },
+              ]}
+            >
+           <Text style={[styles.header, { color: colors.text,backgroundColor: colors.background }]}>
+              {user?.name}
+           </Text>
+          <View style={[styles.emptyContainer, { backgroundColor: colors.background }]}>
+            <Ionicons name="cube-outline" size={80} color={colors.subText} />
+
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              No Assigned Assets
+            </Text>
+
+            <Text style={[styles.emptySubtitle, { color: colors.subText }]}>
+              You don’t have any assets assigned yet.
+            </Text>
+          </View>
+          </View>
+        );
+      }
+
 
   return (
 
@@ -121,7 +152,7 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <>
-            <Text style={[styles.header, { color: colors.text, marginTop: 16 }]}>
+            <Text style={[styles.header, { color: colors.text, marginTop: 2 }]}>
               {user?.name}
             </Text>
 
@@ -450,5 +481,24 @@ stateTitle: {
   fontSize: 22,
   fontWeight: "700",
   marginTop: 16,
+},
+
+emptyContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 30,
+},
+
+emptyTitle: {
+  fontSize: 20,
+  fontWeight: "700",
+  marginTop: 12,
+},
+
+emptySubtitle: {
+  fontSize: 14,
+  textAlign: "center",
+  marginTop: 6,
 },
 });
