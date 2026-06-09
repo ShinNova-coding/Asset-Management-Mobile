@@ -11,7 +11,7 @@ SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
 
-  const { token, isLoading: authLoading } = useAuth();
+  const { token, isLoading: authLoading, user } = useAuth();
 
   const {isLoading: themeLoading } = useTheme();
 
@@ -28,7 +28,7 @@ function RootNavigator() {
   if (!token && !inAuthGroup) {
     return <Redirect href="/(auth)/login" />;
   }
-  if (token && inAuthGroup) {
+  if (token && user && inAuthGroup) {
     return <Redirect href="/(main)/(tabs)" />;
   }
 

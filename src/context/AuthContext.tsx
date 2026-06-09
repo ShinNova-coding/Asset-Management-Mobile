@@ -98,6 +98,10 @@ useEffect(() => {
   loadSession();
 }, []);
 
+useEffect(() => {
+  console.log("AUTH USER CHANGED:", user);
+}, [user]);
+
   const login = async ( email: string, password: string ) => {
 
     try {

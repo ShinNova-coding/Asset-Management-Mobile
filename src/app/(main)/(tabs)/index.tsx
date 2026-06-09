@@ -77,37 +77,37 @@ export default function DashboardScreen() {
           
   console.log("DASHBOARD USER:", user);
 
+    const loadAssets = async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoading(true);
+
+      const [assignedAssets, categories] =
+        await Promise.all([
+          getAssignedAssets(),
+          getCategories(),
+        ]);
+
+      setAssets(assignedAssets || []);
+      setCategories(categories || []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-      async function loadAssets() {
-        if (authLoading || !user?.id) return;
-
-        try {
-          setLoading(true);
-          const [assignedAssets, resCategories] = await Promise.all([
-            getAssignedAssets(),
-            getCategories()
-          ]);
-
-          // const mappedAssets = (assignedAssets || []).map((asset: any) => ({
-          //   ...asset,
-          //   asset_id: asset.id || asset.asset_code, 
-          // }));
-
-          setAssets(assignedAssets || []);
-          setCategories(resCategories || []);
-        } catch (error) {
-          console.log("LOAD ONLINE ASSETS ERROR:", error);
-        } finally {
-          setLoading(false);
-        }
-      }
-
+    if (user?.id) {
       loadAssets();
-    }, [user, authLoading]);
+    }
+  }, [user?.id]);
 
-    if (authLoading || !user) {
-  return <DashboardSkeleton />;
-}
+    if (authLoading) {
+      return <DashboardSkeleton />;
+    }
+    if (!user){
+      return null;
+    }
 
   return (
 
