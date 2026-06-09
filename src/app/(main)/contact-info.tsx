@@ -16,17 +16,8 @@ import ContactInfoSkeleton from "../../components/skeletons/ContactInfoSkeleton"
 import { getProfile } from "../../database/profile.service";
 import { syncProfile } from "../../services/syncProfile";
 
-interface ContactData {
-  employeeId: string;
-  role: string;
-  position: string;
-  corporateEmail: string;
-  phone: string;
-  officeLocation: string;
-  // permissions: string[];
-}
 
-export default async function ContactInfoScreen() {
+export default function ContactInfoScreen() {
   const router = useRouter();
   const {token } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -34,23 +25,31 @@ export default async function ContactInfoScreen() {
 
   const [profile, setProfile] = useState<any>(null);
 
-        if (!token) return;
-  
-        await syncProfile(token);
-  
-        const updatedProfile = await getProfile();
-        setProfile(updatedProfile);
-
-  console.log ("CONTACT INFO USER:",profile);
   
     useEffect(() => {
-      const timer = setTimeout(() => {
-        setLoading(false);
-      }, 1000);
+  async function loadProfile() {
 
-      return () => clearTimeout(timer);
+    if (!token) return;
+
+    try{
+        await syncProfile(token);
+        const localProfile = await getProfile();
+
+        console.log("CONTACTLOCAL PROFILE:", localProfile);
+        
+        setProfile(localProfile);
+        console.log ("CONTACT INFO USER:",profile);
+        // setPreviewImage(null);
+    }catch (error) {
+      console.error("Sync Error:", error);
+    }finally {
+      setLoading(false);
+    }
+  }
+
+  loadProfile();
     
-    }, []);
+  }, [token]);
 
     if (loading) {
       return <ContactInfoSkeleton />;
@@ -66,10 +65,8 @@ export default async function ContactInfoScreen() {
 <Image
   source={{
     uri:
-      profile?.preview_url?.replace(
-        "http://localhost",
-        API_URL
-      ),
+      profile?.preview_url? profile.preview_url.replace( "http://localhost",API_URL) 
+      : "https://via.placeholder.com/150" ,
   }}
   style={{
     width: 90,
@@ -83,7 +80,7 @@ export default async function ContactInfoScreen() {
           
           <View style={[styles.badgeRow, { marginTop: 10 }]}>
             <View style={styles.deptBadge}>
-              <Text style={styles.deptText}>{profile?.roles?.[0]?.name || "Employee"}</Text>
+              <Text style={styles.deptText}>{profile?.roles?.[0]?.name || "No Role Assigned"}</Text>
             </View>
             <View style={styles.statusBadge}>
               <View style={styles.dot} />
@@ -104,11 +101,11 @@ export default async function ContactInfoScreen() {
           </View>
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Role</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{profile?.roles?.[0]?.name}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{profile?.roles?.[0]?.name || "N/A"}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={[styles.label, { color: colors.subText }]}>Position</Text>
-            <Text style={[styles.value, { color: colors.text }]}>{profile?.position}</Text>
+            <Text style={[styles.value, { color: colors.text }]}>{profile?.position || "N/A"}</Text>
           </View>
         </View>
 
