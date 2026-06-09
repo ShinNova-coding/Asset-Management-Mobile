@@ -50,7 +50,7 @@ export default async function ContactInfoScreen() {
 
       return () => clearTimeout(timer);
     
-    }, [profile]);
+    }, []);
 
     if (loading) {
       return <ContactInfoSkeleton />;
