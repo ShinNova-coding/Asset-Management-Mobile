@@ -77,33 +77,33 @@ export default function DashboardScreen() {
           
   console.log("DASHBOARD USER:", user);
 
-useEffect(() => {
-    async function loadAssets() {
-      if (authLoading || !user?.id) return;
+  useEffect(() => {
+      async function loadAssets() {
+        if (authLoading || !user?.id) return;
 
-      try {
-        setLoading(true);
-        const [assignedAssets, resCategories] = await Promise.all([
-          getAssignedAssets(),
-          getCategories()
-        ]);
+        try {
+          setLoading(true);
+          const [assignedAssets, resCategories] = await Promise.all([
+            getAssignedAssets(),
+            getCategories()
+          ]);
 
-        // const mappedAssets = (assignedAssets || []).map((asset: any) => ({
-        //   ...asset,
-        //   asset_id: asset.id || asset.asset_code, 
-        // }));
+          // const mappedAssets = (assignedAssets || []).map((asset: any) => ({
+          //   ...asset,
+          //   asset_id: asset.id || asset.asset_code, 
+          // }));
 
-        setAssets(assignedAssets || []);
-        setCategories(resCategories || []);
-      } catch (error) {
-        console.log("LOAD ONLINE ASSETS ERROR:", error);
-      } finally {
-        setLoading(false);
+          setAssets(assignedAssets || []);
+          setCategories(resCategories || []);
+        } catch (error) {
+          console.log("LOAD ONLINE ASSETS ERROR:", error);
+        } finally {
+          setLoading(false);
+        }
       }
-    }
 
-    loadAssets();
-  }, [user, authLoading]);
+      loadAssets();
+    }, [user, authLoading]);
 
     if (authLoading || !user) {
   return <DashboardSkeleton />;

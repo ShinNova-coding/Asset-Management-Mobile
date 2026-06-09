@@ -80,6 +80,7 @@ useEffect(() => {
       return;
     }
 
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     setToken(token);
 
     const savedProfile = await getProfile();
@@ -104,6 +105,7 @@ useEffect(() => {
       const response = await api.post("/login",{ email, password, });
 
       const data = await response.data;
+
       if (!data.success || !data.user?.id) {
         console.log("Login execution refused by API backend rules");
         return false;
@@ -114,12 +116,16 @@ useEffect(() => {
       await SecureStore.setItemAsync("user_id", data.user.id)
       await SecureStore.setItemAsync("employee_id", data.user.employee_id);
 
+      api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+
       setToken(data.token);
+      // setUser(data.user);
 
       await syncProfile(data.token); 
-      // await refreshUser();
-      setUser(data.user);
-      console.log("LOGIN, USER SET: ", data.user)
+      const localProfile = await getProfile();
+      setUser(localProfile || data.user)
+      
+      console.log("LOGIN, USER SET: ", localProfile)
       return true;
 
     } catch (error) {
@@ -143,6 +149,7 @@ useEffect(() => {
     await SecureStore.deleteItemAsync("user_id")
     await SecureStore.deleteItemAsync("employee_id");
     await clearProfile();
+    delete api.defaults.headers.common["Authorization"];
 
     setToken(null);
     setUser(null);
