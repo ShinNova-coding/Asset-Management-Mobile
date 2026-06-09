@@ -41,7 +41,7 @@ export async function uploadProfileImage ( imageUri: string) {
 export default function ProfileScreen() {
   
   const [uploading, setUploading ] = useState(false);
-  const { logout, user, refreshUser, token } = useAuth();
+  const { logout, user, token } = useAuth();
   const { isDark, colors, setScheme } = useTheme();
   const [profile, setProfile] = useState<any>(null);
   const [previewImage, setPreviewImage ] = useState<string | null> (null);
@@ -84,7 +84,7 @@ export default function ProfileScreen() {
 
       setImageVersion(Date.now());
 
-      await refreshUser();
+      // await refreshUser();
       setPreviewImage(null);
 
       Alert.alert ("Success", "Profile photo updated.");

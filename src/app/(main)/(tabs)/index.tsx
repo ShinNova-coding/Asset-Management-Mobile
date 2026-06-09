@@ -48,7 +48,7 @@ export function normalizeImageUrl(
 }
 
 export default function DashboardScreen() {
-   const {user } = useAuth();
+   const {user, isLoading: authLoading } = useAuth();
    const {colors, isDark} = useTheme();
    const [assets, setAssets] = useState<Asset[]>([]);
   //  const [emp, setEmp] = useState<any>(null);
@@ -59,28 +59,27 @@ export default function DashboardScreen() {
    const [showCategories, setShowCategories] = useState(false);
 
   const filteredAssets = assets.filter((item) => {
-  const query = searchQuery.toLowerCase();
+        const query = searchQuery.toLowerCase();
 
-  const matchesSearch =
-    item.name.toLowerCase().includes(query) ||
-    item.serial_number.toLowerCase().includes(query);
+        const matchesSearch =
+          item.name.toLowerCase().includes(query) ||
+          item.serial_number.toLowerCase().includes(query);
 
-  const matchesCategory =
-    selectedCategory === "All" ||
-    item.category?.name === selectedCategory;
+        const matchesCategory =
+          selectedCategory === "All" ||
+          item.category?.name === selectedCategory;
 
-  return matchesSearch && matchesCategory;
-});
-   const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
+        return matchesSearch && matchesCategory;
+  });
+
+
+  const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
           
-   console.log("DASHBOARD USER:", user);
+  console.log("DASHBOARD USER:", user);
 
 useEffect(() => {
     async function loadAssets() {
-      if (!user || !user.id) {
-        setLoading(false);
-        return;
-      }
+      if (authLoading || !user?.id) return;
 
       try {
         setLoading(true);
@@ -89,25 +88,24 @@ useEffect(() => {
           getCategories()
         ]);
 
-        const mappedAssets = (assignedAssets || []).map((asset: any) => ({
-          ...asset,
-          asset_id: asset.id || asset.asset_code, 
-        }));
+        // const mappedAssets = (assignedAssets || []).map((asset: any) => ({
+        //   ...asset,
+        //   asset_id: asset.id || asset.asset_code, 
+        // }));
 
-        setAssets(mappedAssets);
-        setCategories(Array.isArray(resCategories) ? resCategories : []);
+        setAssets(assignedAssets || []);
+        setCategories(resCategories || []);
       } catch (error) {
         console.log("LOAD ONLINE ASSETS ERROR:", error);
       } finally {
         setLoading(false);
       }
     }
-    console.log ("USER CHANGED:", user);
 
     loadAssets();
-  }, [user]);
+  }, [user, authLoading]);
 
-    if (!user) {
+    if (authLoading || !user) {
   return <DashboardSkeleton />;
 }
 

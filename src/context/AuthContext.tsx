@@ -9,7 +9,8 @@ import { api } from "../api/client";
 import { db } from "../database/db";
 import { logoutUser } from "../services/auth.service";
 import { syncProfile } from "../services/syncProfile";
-import { getUser } from "../services/user.service";
+// import { getUser } from "../services/user.service";
+import { getProfile } from "../database/profile.service";
 type UserType = {
   id: string;
   employee_id: string;
@@ -36,7 +37,7 @@ type AuthContextType = {
     password: string
   ) => Promise<boolean>;
   logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  // refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -54,26 +55,25 @@ export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshUser = async () => {
-    const userId = await SecureStore.getItemAsync("user_id");
-    if (!userId) return;
+  // const refreshUser = async () => {
+  //   const userId = await SecureStore.getItemAsync("user_id");
+  //   if (!userId) return;
 
-    const onlineUser = await getUser(userId);
-     console.log("USER ID:", userId);
-    // console.log("REFRESH USER:", onlineUser);
+  //   const onlineUser = await getUser(userId);
+  //    console.log("USER ID:", userId);
+  //   // console.log("REFRESH USER:", onlineUser);
 
-    if (onlineUser && onlineUser.id && !onlineUser.message){
-    setUser(onlineUser);
-    }
-  };
+  //   if (onlineUser && onlineUser.id && !onlineUser.message){
+  //   setUser(onlineUser);
+  //   }
+  // };
 
 useEffect(() => {
   const loadSession = async () => {
-    const token =
-      await SecureStore.getItemAsync("token");
 
-    const userId =
-      await SecureStore.getItemAsync("user_id");
+    try{
+    const token = await SecureStore.getItemAsync("token");
+    const userId =await SecureStore.getItemAsync("user_id");
 
     if (!token || !userId) {
       setIsLoading(false);
@@ -82,14 +82,16 @@ useEffect(() => {
 
     setToken(token);
 
-    const onlineUser =
-      await getUser(userId);
+    const savedProfile = await getProfile();
 
-    if (onlineUser?.id) {
-      setUser(onlineUser);
+    if (savedProfile) {
+      setUser(savedProfile);
     }
-
+  }catch (error) {
+    console.error("Session Load Error: ", error)
+  }finally {
     setIsLoading(false);
+  }
   };
 
   loadSession();
@@ -115,10 +117,11 @@ useEffect(() => {
       setToken(data.token);
 
       await syncProfile(data.token); 
-      await refreshUser();
-      // console.log("AUTH USER AFTER REFRESH");
-
+      // await refreshUser();
+      setUser(data.user);
+      console.log("LOGIN, USER SET: ", data.user)
       return true;
+
     } catch (error) {
 
       console.log("LOGIN ERROR:",error);
@@ -153,7 +156,7 @@ useEffect(() => {
         isLoading,
         login,
         logout,
-        refreshUser,
+        // refreshUser,
       }}
     >
       {children}
