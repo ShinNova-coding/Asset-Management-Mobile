@@ -13,7 +13,10 @@ export async function getAssignedAssets() {
 }
 
 export async function getAssetById(id: string) {
-  const response = await api.get(`/asset/${id}`);
+  console.log("REQUEST ID:", id);
+  console.log("REQUEST URL:", `/asset/id?id=${id}`);
+
+  const response = await api.get("/asset/id", {params: {id}});
   return response.data.data;
 }
 

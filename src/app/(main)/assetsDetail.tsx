@@ -24,7 +24,8 @@ import AssetDetailSkeleton from "../../components/skeletons/AssetDetailSkeleton"
 import { returnAsset } from "../../services/return.service";
 
 type Asset = {
-  asset_id: string;
+  id: string;
+  asset_code: string;
   name: string;
   serial_number: string;
   status: string;
@@ -107,23 +108,6 @@ export default function AssetDetailScreen() {
       }
 
 
-// if (loading) {
-//   return (
-//     <View style={styles.stateContainer}>
-//       <Ionicons
-//         name="cube-outline"
-//         size={60}
-//         color={colors.primary}
-//       />
-//       <Text style={[
-//           styles.stateTitle,
-//           { color: colors.text },
-//         ]}>Loading Asset...
-//       </Text>
-//     </View>
-//   );
-// }
-
 if (!asset) {
   return (
     <View style={styles.stateContainer}>
@@ -154,7 +138,7 @@ if (!asset) {
           text: "Return",
           onPress: async () => {
             try {
-              await returnAsset(asset.asset_id, user?.employee_id ??"");
+              await returnAsset(asset.id, user?.employee_id ??"");
               setStatus("Returned");
 
             Alert.alert(
@@ -235,7 +219,7 @@ if (!asset) {
           onPress={() =>
             router.push({
               pathname: "/(main)/reportIssue",
-              params: { id: asset.asset_id },
+              params: { id: asset.id },
             })
           }
         >
