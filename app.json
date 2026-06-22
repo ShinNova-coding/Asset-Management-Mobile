@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "ITAMS-SDK52",
-    "slug": "ITAMS-SDK52",
+    "name": "ITAMS",
+    "slug": "ITAMS",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    
     "scheme": "itamssdk52",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -38,7 +38,9 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-sqlite",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

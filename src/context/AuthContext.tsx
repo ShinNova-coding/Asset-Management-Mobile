@@ -1,0 +1,193 @@
+import * as SecureStore from "expo-secure-store";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { api } from "../api/client";
+import { db } from "../database/db";
+import { logoutUser } from "../services/auth.service";
+import { syncProfile } from "../services/syncProfile";
+// import { getUser } from "../services/user.service";
+import { getProfile } from "../database/profile.service";
+import { registerForPushNotifications } from "../services/notification.service";
+type UserType = {
+  id: string;
+  employee_id: string;
+  name: string;
+  email: string;
+  position: string | null;
+  status: string;
+  phone_number: string | null;
+  joined_date: string;
+  image_url: string | null;
+  preview_url: string | null;
+  roles: {
+    id: number;
+    name: string;
+  }[];
+};
+
+type AuthContextType = {
+  token: string | null;
+  user: UserType | null;
+  isLoading: boolean;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<boolean>;
+  logout: () => Promise<void>;
+  // refreshUser: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextType | null>(null);
+export async function clearProfile() {
+  await db.runAsync(`
+    DELETE FROM users
+  `);
+}
+
+export const AuthProvider = ({children,}: {children: React.ReactNode;}) => {
+
+  const [token, setToken] = useState<string | null>(null);
+
+  const [user, setUser] = useState<UserType | null>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  // const refreshUser = async () => {
+  //   const userId = await SecureStore.getItemAsync("user_id");
+  //   if (!userId) return;
+
+  //   const onlineUser = await getUser(userId);
+  //    console.log("USER ID:", userId);
+  //   // console.log("REFRESH USER:", onlineUser);
+
+  //   if (onlineUser && onlineUser.id && !onlineUser.message){
+  //   setUser(onlineUser);
+  //   }
+  // };
+
+useEffect(() => {
+  const loadSession = async () => {
+
+    try{
+    const token = await SecureStore.getItemAsync("token");
+    const userId =await SecureStore.getItemAsync("user_id");
+
+    if (!token || !userId) {
+      setIsLoading(false);
+      return;
+    }
+
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    setToken(token);
+
+    const savedProfile = await getProfile();
+
+    if (savedProfile) {
+      setUser(savedProfile);
+    }
+  }catch (error) {
+    console.error("Session Load Error: ", error)
+  }finally {
+    setIsLoading(false);
+  }
+  };
+
+  loadSession();
+}, []);
+
+useEffect(() => {
+  console.log("AUTH USER CHANGED:", user);
+}, [user]);
+
+  const login = async ( email: string, password: string ) => {
+
+    try {
+
+      const response = await api.post("/login",{ email, password, });
+
+      const data = await response.data;
+
+      if (!data.success || !data.user?.id) {
+        console.log("Login execution refused by API backend rules");
+        return false;
+      }
+      console.log("====> Server verification matched", data);
+
+      await SecureStore.setItemAsync("token",data.token );
+      await SecureStore.setItemAsync("user_id", data.user.id)
+      await SecureStore.setItemAsync("employee_id", data.user.employee_id);
+
+      api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+
+      const pushToken = await registerForPushNotifications();
+      console.log("PUSH TOKEN:", pushToken);
+
+      setToken(data.token);
+      // setUser(data.user);
+
+      await syncProfile(data.token); 
+      const localProfile = await getProfile();
+      setUser(localProfile || data.user)
+      
+      console.log("LOGIN, USER SET: ", localProfile)
+      return true;
+
+    } catch (error) {
+
+      console.log("LOGIN ERROR:",error);
+      return false;
+    }
+  };
+
+  const logout = async () => {
+
+      try {
+
+        await logoutUser();
+
+      } catch (error) {
+        console.log( "LOGOUT API FAILED:", error );
+      }
+
+    await SecureStore.deleteItemAsync("token");
+    await SecureStore.deleteItemAsync("user_id")
+    await SecureStore.deleteItemAsync("employee_id");
+    await clearProfile();
+    delete api.defaults.headers.common["Authorization"];
+
+    setToken(null);
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        isLoading,
+        login,
+        logout,
+        // refreshUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error(
+      "useAuth must be inside AuthProvider"
+    );
+  }
+
+  return context;
+};
