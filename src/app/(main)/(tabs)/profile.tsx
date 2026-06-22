@@ -22,7 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { api } from "../../../api/client";
 import SkeletonBox from "../../../components/skeletonBox";
 import { useAuth } from "../../../context/AuthContext";
-import { getProfile, saveProfile } from "../../../database/profile.service";
+import { getProfile, updateProfileImage } from "../../../database/profile.service";
 import { syncProfile } from "../../../services/syncProfile";
 
 type Asset = {
@@ -155,20 +155,29 @@ export default function ProfileScreen() {
 
         try {
           const uri = result.assets[0].uri;
-          const updatedUser = await uploadProfileImage(uri);
-          const formattedUser = {...updatedUser, roles: updatedUser.roles || [], };
-          await saveProfile(formattedUser)
-          setProfile(formattedUser)
 
-          // if (!token) return;
+            // immediately show selected image
+          if (profile) {
+            setProfile({
+              ...profile,
+              local_image_path: uri,
+            });
+          }
+          
+          const updatedImage = await uploadProfileImage(uri);
 
-          // await syncProfile(token);
+          const filename = `profile_${profile.id}.jpg`;
 
-          // const updatedProfile = await getProfile();
-          // setProfile(updatedProfile);
+          const localImagePath = FileSystem.documentDirectory + filename;
 
-          // setImageVersion(Date.now());
-          // setPreviewImage(null);
+
+          await FileSystem.downloadAsync( updatedImage.preview_url, localImagePath);
+
+          await updateProfileImage( updatedImage.image_url, updatedImage.preview_url, localImagePath);
+
+          const latestProfile = await getProfile();
+          setProfile(latestProfile);
+          
 
           Alert.alert ("Success", "Profile photo updated.");
         } catch (error) {
@@ -212,15 +221,20 @@ export default function ProfileScreen() {
       }
       if ( token) {
         await syncProfile(token);
-        const updatedProfile = await getProfile();
-        setProfile(updatedProfile);
+        
+        setProfile(await getProfile());
       }
 
+    }catch (error){
+      console.log("PROFILE LOAD ERROR:", error);
+    }
+    try {
       const data = await getAssignedAssets();
       setAssets(data || []);
     }catch (error){
-      console.log("PROFILE LOAD ERROR:", error);
-    }finally {
+      console.log("ASSET LOAD ERROR:", error);
+    }
+    finally {
       setAssetsLoading(false);
     }
     }

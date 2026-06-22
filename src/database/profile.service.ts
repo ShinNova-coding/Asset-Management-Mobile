@@ -51,6 +51,29 @@ export async function saveProfile(user: any) {
     console.log("Profile saved locally");
 }
 
+export async function updateProfileImage(
+  image_url: string,
+  preview_url: string,
+  local_image_path: string
+) {
+  await db.runAsync(
+    `
+    UPDATE users
+    SET
+      image_url = ?,
+      preview_url = ?,
+      local_image_path = ?
+    `,
+    [
+      image_url,
+      preview_url,
+      local_image_path,
+    ]
+  );
+
+  console.log("Profile image updated locally");
+}
+
 export async function getProfile() {
 
   try {

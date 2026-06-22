@@ -11,7 +11,6 @@ import { logoutUser } from "../services/auth.service";
 import { syncProfile } from "../services/syncProfile";
 // import { getUser } from "../services/user.service";
 import { getProfile } from "../database/profile.service";
-import { registerForPushNotifications } from "../services/notification.service";
 type UserType = {
   id: string;
   employee_id: string;
@@ -123,8 +122,8 @@ useEffect(() => {
 
       api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
-      const pushToken = await registerForPushNotifications();
-      console.log("PUSH TOKEN:", pushToken);
+      // const pushToken = await registerForPushNotifications();
+      // console.log("PUSH TOKEN:", pushToken);
 
       setToken(data.token);
       // setUser(data.user);

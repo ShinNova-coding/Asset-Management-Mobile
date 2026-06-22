@@ -1,7 +1,11 @@
+import * as SecureStore from "expo-secure-store";
 import { api } from "../api/client";
 
 export async function getAssignedAssets() {
    try {
+
+    const token = await SecureStore.getItemAsync("token");
+    console.log("TOKEN =", token);
    const response = await api.get(`/assignment/asset`);
    // console.log("ASSIGNED ASSETS RESPONSE:", response.data.data);
    return response.data.data;
