@@ -11,6 +11,7 @@ import { logoutUser } from "../services/auth.service";
 import { syncProfile } from "../services/syncProfile";
 // import { getUser } from "../services/user.service";
 import { getProfile } from "../database/profile.service";
+import { registerForPushNotifications } from "../services/notification.service";
 type UserType = {
   id: string;
   employee_id: string;
@@ -99,7 +100,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  console.log("AUTH USER CHANGED:", user);
+  
 }, [user]);
 
   const login = async ( email: string, password: string ) => {
@@ -122,8 +123,14 @@ useEffect(() => {
 
       api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
-      // const pushToken = await registerForPushNotifications();
-      // console.log("PUSH TOKEN:", pushToken);
+      const pushToken = await registerForPushNotifications();
+      console.log("PUSH TOKEN:", pushToken);
+
+      if (pushToken) {
+            await api.post("/save-fcm-token", {
+                fcm_token: pushToken,
+            });
+        }
 
       setToken(data.token);
       // setUser(data.user);
@@ -132,7 +139,7 @@ useEffect(() => {
       const localProfile = await getProfile();
       setUser(localProfile || data.user)
       
-      console.log("LOGIN, USER SET: ", localProfile)
+      // console.log("LOGIN, USER SET: ", localProfile)
       return true;
 
     } catch (error) {

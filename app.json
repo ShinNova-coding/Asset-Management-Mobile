@@ -8,6 +8,13 @@
     "plugins": [
       "expo-router",
       [
+        "expo-notifications", 
+        {
+          "icon": "./src/assets/images/icon.png",
+          "color": "#0070EB"
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
@@ -25,7 +32,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.itams.app"
     },
     "android": {
       "adaptiveIcon": {

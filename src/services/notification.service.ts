@@ -13,6 +13,7 @@ Notifications.setNotificationHandler({
 
 
 export async function registerForPushNotifications() {
+
   if (!Device.isDevice) {
     console.log("Must use physical device");
     return null;
@@ -35,17 +36,16 @@ export async function registerForPushNotifications() {
     return null;
   }
 
-
-  const token = await Notifications.getExpoPushTokenAsync();
-
-  console.log("PUSH TOKEN:", token.data);
-
   if (Platform.OS === "android") {
     Notifications.setNotificationChannelAsync("default", {
       name: "default",
       importance: Notifications.AndroidImportance.MAX,
     });
   }
+
+  const token = await Notifications.getDevicePushTokenAsync();
+
+  console.log("FCM TOKEN:", token.data);
 
   return token.data;
 }
