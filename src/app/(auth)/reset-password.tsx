@@ -2,13 +2,13 @@ import { api } from "@/src/api/client";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function ResetPasswordScreen() {
@@ -19,6 +19,9 @@ export default function ResetPasswordScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  console.log("EMAIL:", email);
+  console.log("TOKEN:", token);
 
   const handleResetPassword = async () => {
     try {

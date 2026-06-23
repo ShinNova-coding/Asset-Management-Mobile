@@ -88,10 +88,6 @@ export default function DashboardScreen() {
     try {
       setLoading(true);
 
-      if (!user?.id){
-        setLoading(false);
-        return;
-      }
       setHasLoadError(false);
 
       const [assignedAssets, rescategories] =
@@ -101,7 +97,6 @@ export default function DashboardScreen() {
         ]);
 
       setAssets(assignedAssets || []);
-      // console.log("ASSIGNED ASSETS ===>",JSON.stringify(assignedAssets, null, 2));
       setCategories(rescategories || []);
 
     }catch(error){
