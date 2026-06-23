@@ -1,0 +1,50 @@
+import { NotificationItem } from "../types/notification";
+import { db } from "./db";
+
+export const insertNotification = async (
+  notification: NotificationItem
+) => {
+  await db.runAsync(
+    `
+    INSERT INTO notifications
+    (title,message,type,is_read,created_at)
+    VALUES (?,?,?,?,?)
+    `,
+    [
+      notification.title,
+      notification.message,
+      notification.type,
+      notification.is_read,
+      notification.created_at,
+    ]
+  );
+};
+
+export const getNotifications = async () => {
+  return await db.getAllAsync<NotificationItem>(
+    `
+    SELECT *
+    FROM notifications
+    ORDER BY created_at DESC
+    `
+  );
+};
+
+export const deleteNotification = async (id: number) => {
+  await db.runAsync(
+    `
+    DELETE FROM notifications
+    WHERE id = ?
+    `,
+    [id]
+  );
+};
+
+export const markAllAsRead = async () => {
+  await db.runAsync(
+    `
+    UPDATE notifications
+    SET is_read = 1
+    `
+  );
+};

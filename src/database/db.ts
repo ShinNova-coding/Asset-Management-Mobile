@@ -29,6 +29,17 @@ export const initDatabase = async () => {
 
     // console.log("USERS TABLE:", columns);
 
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        type TEXT NOT NULL,
+        is_read INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL
+      );
+    `);
+
     console.log("Database initialized successfully with primary key ID");
 
   } catch (error) {

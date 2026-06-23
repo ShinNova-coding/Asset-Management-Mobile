@@ -44,7 +44,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.ITAMS"
+      "package": "com.itams.app"
     },
     "web": {
       "output": "static",

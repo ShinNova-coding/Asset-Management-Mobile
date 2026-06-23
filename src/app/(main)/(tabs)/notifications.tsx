@@ -1,4 +1,10 @@
 import { useTheme } from "@/src/context/ThemeContext";
+import {
+  deleteNotification as deleteNotificationDB,
+  getNotifications,
+  markAllAsRead as markAllAsReadDB
+} from "@/src/database/notification.service";
+import { NotificationItem } from "@/src/types/notification";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
@@ -14,58 +20,36 @@ import NotiSkeleton from "../../../components/skeletons/NotiSkeleton";
 
 export default function NotificationScreen() {
 
-  const [notifications, setNotifications] = useState([
-  {
-    id: "1",
-    section: "Today",
-    unread: true,
-    type: "assigned",
-    title: "New Asset Assigned",
-    message: "Dell Monitor assigned to you.",
-    time: "10:24 AM",
-  },
-
-  {
-    id: "2",
-    section: "Today",
-    unread: true,
-    type: "urgent",
-    title: "Return Reminder",
-    message: "iPad return due in 3 days.",
-    time: "8:10 AM",
-  },
-
-  {
-    id: "3",
-    section: "Yesterday",
-    unread: false,
-    type: "repair",
-    title: "Repair Completed",
-    message: "MacBook repair completed.",
-    time: "4:32 PM",
-  },
-
-  {
-    id: "4",
-    section: "This Week",
-    unread: false,
-    type: "assigned",
-    title: "Asset Request Approved",
-    message: "Your iPhone request was approved.",
-    time: "Monday",
-  },
-]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const { colors, isDark } = useTheme();
+  const [loading, setLoading] = useState(true);
 
-const [loading, setLoading] = useState(true);
+  const loadNotifications = async () => {
+  const data = await getNotifications();
+  setNotifications(data);
+  };
 
-useEffect(() => {
-  const timer = setTimeout(() => {
-    setLoading(false);
-  }, 1000);
+  const handleDelete = async (id: number) => {
+  await deleteNotificationDB(id);
+  loadNotifications();
+};
 
-  return () => clearTimeout(timer);
-}, []);
+const handleMarkAllRead = async () => {
+  await markAllAsReadDB();
+  loadNotifications();
+};
+
+    useEffect(() => {
+      
+      loadNotifications();
+
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }, []);
+
       if (loading) {
         return <NotiSkeleton />;
       }
@@ -110,13 +94,13 @@ useEffect(() => {
     }
   };
 
-  const deleteNotification = (id: string) => {
-    setNotifications((notifications) => notifications.filter((item) => item.id !== id));
-  }
+  // const deleteNotification = (id: string) => {
+  //   setNotifications((notifications) => notifications.filter((item) => item.id !== id));
+  // }
 
-  const markAllAsRead = () => {
-    setNotifications((notifications) => notifications.map((item)=> ({ ...item, unread: false})));
-  }
+  // const markAllAsRead = () => {
+  //   setNotifications((notifications) => notifications.map((item)=> ({ ...item, unread: false})));
+  // }
   const groupedNotifications = [
   {
     title: "Today",
@@ -146,7 +130,7 @@ useEffect(() => {
       <View style={styles.titleRow}>
         <Text style={[styles.title, {color: colors.text}]}>Notifications</Text>
 
-        <TouchableOpacity onPress={markAllAsRead}>
+        <TouchableOpacity onPress={handleMarkAllRead}>
           <Text style={styles.markAll}>
             Mark all as read
           </Text>
@@ -174,7 +158,7 @@ useEffect(() => {
               renderRightActions={() => (
                 <TouchableOpacity
                   onPress={() =>
-                    deleteNotification(item.id)
+                    handleDelete(item.id!)
                   }
                   style={styles.deleteAction}
                 >
@@ -193,8 +177,8 @@ useEffect(() => {
           <TouchableOpacity
             activeOpacity={0.9}
             style={[
-              styles.card, { backgroundColor: item.unread ? isDark ? "#1E293B" : "#F8FBFF" : colors.card, borderColor: colors.background},
-              item.type === "urgent" && styles.urgentCard,
+              styles.card, { backgroundColor: item.is_read === 0 ? isDark ? "#1E293B" : "#F8FBFF" : colors.card, borderColor: colors.background},
+              // item.type === "urgent" && styles.urgentCard,
             ]}
           >
             {renderIcon(item.type)}
@@ -202,7 +186,7 @@ useEffect(() => {
             <View style={styles.content}>
               <View style={styles.topRow}>
                 <View style={styles.titleRowInner}>
-                   {item.unread && (
+                   {item.is_read===0 && (
                     <View style={styles.unreadDot} />
                    )}
                     <Text style={[styles.cardTitle, {color: colors.text}]}>
@@ -210,7 +194,10 @@ useEffect(() => {
                     </Text>
                 </View>
                 <Text style={[styles.time, {color: colors.subText}]}>
-                  {item.time}
+                  {new Date(item.created_at).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </Text>
               </View>
 

@@ -1,4 +1,5 @@
 import { useFonts } from "expo-font";
+import * as Notifications from "expo-notifications";
 import { Redirect, Stack, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
@@ -6,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { initDatabase } from "../database/db";
+import { insertNotification } from "../database/notification.service";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -57,6 +59,50 @@ export default function RootLayout() {
 
     prepare();
   }, [loaded]);
+
+  
+  useEffect(() => {
+
+  const receivedSubscription =
+    Notifications.addNotificationReceivedListener(
+     async (notification) => {
+          const title = notification.request.content.title || "";
+
+          const message = notification.request.content.body || "";
+
+          const lowerTitle = title.toLowerCase();
+
+           let type: "assigned" | "repair" = "assigned";
+
+          if ( lowerTitle.includes("maintenance")||lowerTitle.includes("repair") )
+             { 
+            type = "repair";
+             }
+
+          insertNotification({
+            title,
+            message,
+            type,
+            is_read: 0,
+            created_at: new Date().toISOString()
+          });
+          console.log("Notification saved");
+      }
+    );
+
+  const responseSubscription =
+    Notifications.addNotificationResponseReceivedListener(
+      response => {
+        console.log("User tapped notification:", response);
+      }
+    );
+
+  return () => {
+    receivedSubscription.remove();
+    responseSubscription.remove();
+  };
+
+}, []);
 
   if (!loaded) {
     return null;
