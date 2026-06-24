@@ -1,8 +1,11 @@
+import { getExpenses } from '@/src/services/expense.service';
+import { Expense } from '@/src/types/expense.type';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import dayjs from "dayjs";
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-    ScrollView,
+    FlatList,
     StyleSheet,
     Text,
     TextInput,
@@ -11,52 +14,176 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Types matching your backend data structure requirement
-interface ExpenseItem {
-  id: string;
-  title: string;
-  expense_date: string;
-  expense_type: string;
-  cost: string;
-  status: 'requested' | 'approved' | 'rejected';
-  icon: keyof typeof MaterialIcons.glyphMap;
-}
-
 export default function ExpenseHistoryScreen() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data representing the exact items shown in image_7ca17d.jpg
-  const expenseData: ExpenseItem[] = [
-    {
-      id: '1',
-      title: 'Claim form for taxi fee',
-      expense_date: '2026-02-02',
-      expense_type: 'Claim',
-      cost: '1,000,000 LAK',
-      status: 'requested',
-      icon: 'directions-car',
-    },
-    {
-      id: '2',
-      title: 'License renewal for IDE',
-      expense_date: '2026-01-28',
-      expense_type: 'Purchase',
-      cost: '4,250,000 LAK',
-      status: 'approved',
-      icon: 'image',
-    },
-  ];
+  const filteredExpenses = expenses.filter(item =>
+  item.title.toLowerCase()
+    .includes(searchQuery.toLowerCase())
+);
+
+  useEffect(() => {
+    fetchExpenses();
+    }, []);
+
+    const fetchExpenses = async () => {
+    try {
+        setLoading(true);
+
+        const data = await getExpenses();
+         console.log("EXPENSES ===>", data);
+
+        setExpenses(data);
+
+    } catch (error) {
+        console.log("GET EXPENSE ERROR", error);
+    } finally {
+        setLoading(false);
+    }
+    };
+
+        const pendingExpenses = expenses.filter(
+            item => item.status === "requested"
+        );
+
+        const approvedExpenses = expenses.filter(
+            item => item.status === "approved"
+        );
+
+        const pendingCost = pendingExpenses.reduce(
+            (sum, item) => sum + item.cost,
+            0
+        );
+
+        const approvedCost = approvedExpenses.reduce(
+            (sum, item) => sum + item.cost,
+            0
+        );
+
+        const pendingCount = pendingExpenses.length;
+
+        const approvedCount = approvedExpenses.length;
+
+        const renderExpenseItem = ({ item }: { item: Expense }) => (
+  <TouchableOpacity style={styles.listItem}>
+    <View style={styles.itemMainRow}>
+
+      {/* icon */}
+      <View style={styles.iconWrapper}>
+        <MaterialIcons
+          name="receipt-long"
+          size={22}
+          color="#1E62C9"
+        />
+      </View>
+
+      {/* details */}
+      <View style={styles.itemDetails}>
+
+        <Text style={styles.itemTitle}>
+          {item.title}
+        </Text>
+
+        <Text style={styles.itemDate}>
+          {dayjs(item.expense_date).format("DD MMM YYYY")}
+        </Text>
+
+        <Text
+          numberOfLines={2}
+          style={styles.description}
+        >
+          {item.description}
+        </Text>
+
+        <View style={styles.tagWrapper}>
+          <Text style={styles.tagText}>
+            {item.expense_type}
+          </Text>
+        </View>
+
+        <Text style={styles.itemCost}>
+          {item.cost.toLocaleString()} MMK
+        </Text>
+
+        <View
+          style={[
+            styles.statusBadge,
+            item.status === "requested"
+              ? styles.badgeRequested
+              : item.status === "approved"
+              ? styles.badgeApproved
+              : styles.badgeRejected
+          ]}
+        >
+          <Text
+            style={[
+              styles.statusText,
+              item.status === "requested"
+                ? styles.textRequested
+                : item.status === "approved"
+                ? styles.textApproved
+                : styles.textRejected
+            ]}
+          >
+            {item.status.toUpperCase()}
+          </Text>
+        </View>
+
+      </View>
+
+      <Feather
+        name="chevron-right"
+        size={20}
+        color="#999"
+      />
+
+    </View>
+  </TouchableOpacity>
+);
+
+const listHeader = useMemo(
+  () => (
+    <>
+      <View style={styles.statsContainer}>
+        ...
+      </View>
+
+      <View style={styles.searchSection}>
+        <Feather
+          name="search"
+          size={20}
+          color="#6C757D"
+          style={styles.searchIcon}
+        />
+
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search claims..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
+    </>
+  ),
+  [
+    pendingCost,
+    pendingCount,
+    approvedCost,
+    approvedCount,
+    searchQuery
+  ]
+);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header View */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <MaterialIcons name="archive" size={24} color="#1E62C9" style={styles.headerIcon} />
           <Text style={styles.headerTitle}>Expense Requests</Text>
         </View>
         
-        {/* Navigation Action to Form View */}
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => router.push('/requestExpense')}
@@ -64,87 +191,33 @@ export default function ExpenseHistoryScreen() {
           <Feather name="plus" size={24} color="#FFF" />
         </TouchableOpacity>
       </View>
+<FlatList
+  data={filteredExpenses}
+  keyExtractor={(item) => item.id}
+  renderItem={renderExpenseItem}
+  ListHeaderComponent={listHeader}
+  contentContainerStyle={styles.scrollContent}
+  showsVerticalScrollIndicator={false}
+  ListEmptyComponent={
+    !loading ? (
+      <View style={styles.emptyContainer}>
+        <Ionicons
+          name="receipt-outline"
+          size={70}
+          color="#B0B0B0"
+        />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Stat Cards Container */}
-        <View style={styles.statsContainer}>
-          {/* Card 1: Total Pending */}
-          <View style={styles.statCard}>
-            <Text style={styles.statLabel}>TOTAL PENDING</Text>
-            <Text style={styles.statAmount}>2,450,000 LAK</Text>
-            <Text style={[styles.statFooter, { color: '#1E62C9' }]}>3 Active Claims</Text>
-          </View>
+        <Text style={styles.emptyTitle}>
+          No expense requests
+        </Text>
 
-          {/* Card 2: Approved */}
-          <View style={styles.statCard}>
-            <Text style={styles.statLabel}>APPROVED (THIS MONTH)</Text>
-            <Text style={styles.statAmount}>15,200,000 LAK</Text>
-            <Text style={[styles.statFooter, { color: '#B25E25' }]}>Budget Remaining: 45%</Text>
-          </View>
-        </View>
-
-        {/* Search Bar */}
-        <View style={styles.searchSection}>
-          <Feather name="search" size={20} color="#6C757D" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search claims..."
-            placeholderTextColor="#8A92A6"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        {/* Filter Button */}
-        <TouchableOpacity style={styles.filterButton}>
-          <Ionicons name="filter" size={16} color="#333" />
-          <Text style={styles.filterText}>Filters</Text>
-        </TouchableOpacity>
-
-        {/* Expense Requests List */}
-        <View style={styles.listContainer}>
-          {expenseData.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.listItem}>
-              <View style={styles.itemMainRow}>
-                {/* Icon Wrapper */}
-                <View style={styles.iconWrapper}>
-                  <MaterialIcons name={item.icon} size={22} color="#1E62C9" />
-                </View>
-
-                {/* Meta details */}
-                <View style={styles.itemDetails}>
-                  <Text style={styles.itemTitle}>{item.title}</Text>
-                  <Text style={styles.itemDate}>{item.expense_date}</Text>
-                  
-                  <View style={styles.tagWrapper}>
-                    <Text style={styles.tagText}>{item.expense_type}</Text>
-                  </View>
-
-                  <Text style={styles.itemCost}>{item.cost}</Text>
-
-                  {/* Dynamic Badges Based on Backend Status Key */}
-                  <View style={[
-                    styles.statusBadge, 
-                    item.status === 'requested' ? styles.badgeRequested : styles.badgeApproved
-                  ]}>
-                    <Text style={[
-                      styles.statusText,
-                      item.status === 'requested' ? styles.textRequested : styles.textApproved
-                    ]}>
-                      {item.status === 'requested' ? 'Requested' : 'Approved'}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Right Chevron */}
-                <View style={styles.chevronWrapper}>
-                  <Feather name="chevron-right" size={20} color="#333" />
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+        <Text style={styles.emptyText}>
+          Tap + to create one
+        </Text>
+      </View>
+    ) : null
+  }
+/>
     </SafeAreaView>
   );
 }
@@ -263,19 +336,30 @@ const styles = StyleSheet.create({
     borderColor: '#EFF1F3',
     overflow: 'hidden',
   },
-  listItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#F4F5F7',
-    padding: 16,
+listItem: {
+  backgroundColor: "#FFF",
+  borderRadius: 16,
+  padding: 16,
+  marginBottom: 14,
+
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 1
   },
+  shadowOpacity: 0.05,
+  shadowRadius: 4,
+
+  elevation: 2
+},
   itemMainRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   iconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: '#E8F1FF',
     justifyContent: 'center',
     alignItems: 'center',
@@ -314,6 +398,11 @@ const styles = StyleSheet.create({
     color: '#111',
     marginBottom: 12,
   },
+  description:{
+    color:"#6C757D",
+    marginBottom:10,
+    fontSize:13
+},
   statusBadge: {
     alignSelf: 'flex-start',
     paddingHorizontal: 14,
@@ -342,4 +431,26 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     alignSelf: 'center',
   },
+  badgeRejected:{
+    backgroundColor:"#FDECEC"
+},
+
+textRejected:{
+    color:"#D93025"
+},
+emptyContainer:{
+ alignItems:"center",
+ marginTop:80
+},
+
+emptyTitle:{
+ marginTop:16,
+ fontSize:18,
+ fontWeight:"700"
+},
+
+emptyText:{
+ color:"#888",
+ marginTop:6
+},
 });

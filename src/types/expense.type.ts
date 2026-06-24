@@ -3,7 +3,7 @@ export interface Expense {
   title: string;
   expense_type: string;
   cost: number;
-  status: "requested" | "approved" | "rejected";
+  status: "requested" | "approved" | "canceled";
   description: string;
   expense_date: string;
   remark: string | null;
