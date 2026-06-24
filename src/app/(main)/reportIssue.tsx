@@ -53,34 +53,6 @@ const issueTypes = [
   },
 ];
 
-// const assetsData = [
-//   {
-//     id: 1,
-//     name: "MacBook Pro M3",
-//     serial: "IT-8842",
-//   },
-//   {
-//     id: 2,
-//     name: "iPhone 15 Pro",
-//     serial: "IT-1109",
-//   },
-//   {
-//     id: 3,
-//     name: "iPad Air",
-//     serial: "IT-9901",
-//   },
-//     {
-//     id: 7,
-//     name: "iPhone 15 Pro",
-//     serial: "IT-1109",
-//   },
-//   {
-//     id: 8,
-//     name: "iPad Air",
-//     serial: "IT-9901",
-//   },
-// ];
-
 export default function ReportIssueScreen() {
   const { colors, isDark } = useTheme();
   const router = useRouter();

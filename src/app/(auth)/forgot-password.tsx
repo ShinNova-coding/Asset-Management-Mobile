@@ -43,18 +43,18 @@ export default function ForgotPasswordScreen() {
       const response = await api.post("/forgot-password", {
         email: email.trim().toLowerCase(),
       });
-
+       console.log("FORGOT===>",response.data);
       // const data = response.data;
 
       // if (data.success) {
-        Alert.alert(
-          "Link Dispatched",
-          response.data.message ||
-          "A secure recovery link has been sent to your email. Please check your inbox.",
-          [{ text: "OK", onPress: () => router.push("/login"), }]
-          
-        );
-        console.log("Sending recovery link to:", email);
+      router.push({
+        pathname: "/reset-password",
+        params: {
+          email: email.trim().toLowerCase()
+        }
+      }
+      )
+        // console.log("Sending recovery link to:", email);
 
       // } else {
       //   Alert.alert("Account Not Found", data.message || "This email address is not registered in our database.");

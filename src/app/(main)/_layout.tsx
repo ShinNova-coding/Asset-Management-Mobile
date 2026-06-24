@@ -9,6 +9,7 @@ export default function AppLayout(){
             <Stack.Screen name="security" options= {{headerShown: false}} />
             <Stack.Screen name="about" options= {{headerShown: false}} />
             <Stack.Screen name="history" options= {{headerShown: false}} />
+            <Stack.Screen name="requestExpense" options= {{headerShown: false}} />
         </Stack>
     )
 }

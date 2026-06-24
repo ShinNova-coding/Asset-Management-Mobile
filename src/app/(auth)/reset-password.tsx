@@ -1,6 +1,7 @@
 import { api } from "@/src/api/client";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,14 +15,17 @@ import {
 export default function ResetPasswordScreen() {
   const router = useRouter();
 
-  const { token, email } = useLocalSearchParams<{ token: string; email: string; }>();
-
+  const { email } = useLocalSearchParams<{email: string; }>();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  console.log("EMAIL:", email);
-  console.log("TOKEN:", token);
+  useEffect(()=>{
+    console.log("EMAIL:", email);
+  },[email]);
+  
 
   const handleResetPassword = async () => {
     try {
@@ -37,9 +41,9 @@ export default function ResetPasswordScreen() {
 
       setLoading(true);
 
-      const response = await api.post("/reset-password", {email, password, password_confirmation: confirmPassword, token  });
+      const response = await api.post("/reset-password", {email, password, password_confirmation: confirmPassword, });
 
-      const result = await response.data;
+      const result = response.data;
 
       if (result.success) {
         Alert.alert(
@@ -55,8 +59,13 @@ export default function ResetPasswordScreen() {
       } else {
         Alert.alert("Error", result.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+      console.log({
+  email,
+  password,
+  password_confirmation: confirmPassword,
+});
       Alert.alert("Error", "Something went wrong");
     } finally {
       setLoading(false);
@@ -71,21 +80,45 @@ export default function ResetPasswordScreen() {
         {email}
       </Text>
 
+      <View style={styles.inputContainer}>
       <TextInput
         placeholder="New Password"
-        secureTextEntry
+        secureTextEntry ={! showPassword}
         value={password}
         onChangeText={setPassword}
         style={styles.input}
       />
+      <TouchableOpacity
+      onPress={() => setShowPassword(!showPassword)}
+      style={styles.eyeButton}
+      >
+      <Ionicons
+        name={showPassword ? "eye-off-outline" : "eye-outline"}
+        size={22}
+        color="#666"
+      />
+      </TouchableOpacity>
+      </View>
 
+      <View style={styles.inputContainer}>
       <TextInput
         placeholder="Confirm Password"
-        secureTextEntry
+        secureTextEntry = {!showConfirmPassword}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         style={styles.input}
       />
+      <TouchableOpacity
+        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+        style={styles.eyeButton}
+      >
+        <Ionicons
+          name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+          size={22}
+          color="#666"
+        />
+      </TouchableOpacity>
+    </View>
 
       <TouchableOpacity
         style={styles.button}
@@ -122,13 +155,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#666",
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-  },
+  // input: {
+  //   borderWidth: 1,
+  //   borderColor: "#ddd",
+  //   borderRadius: 10,
+  //   padding: 15,
+  //   marginBottom: 15,
+  // },
   button: {
     backgroundColor: "#007AFF",
     padding: 15,
@@ -140,4 +173,21 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
   },
+   inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    marginBottom: 15,
+    paddingHorizontal: 15,
+  },
+    input: {
+    flex: 1,
+    paddingVertical: 15,
+  },
+  eyeButton: {
+    paddingLeft: 10,
+  },
+
 });
