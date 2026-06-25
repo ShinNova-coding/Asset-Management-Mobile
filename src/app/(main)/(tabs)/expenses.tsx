@@ -3,8 +3,8 @@ import { getExpenses } from '@/src/services/expense.service';
 import { Expense } from '@/src/types/expense.type';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import dayjs from "dayjs";
-import { router } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -15,28 +15,44 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
 export default function ExpenseHistoryScreen() {
   const {colors, isDark} = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const onRefresh = async () => {
+  try {
+    setRefreshing(true);
+    await fetchExpenses();
+  } finally {
+    setRefreshing(false);
+  }
+};
 
   const filteredExpenses = expenses.filter(item =>
   item.title.toLowerCase()
     .includes(searchQuery.toLowerCase())
-);
+  );
+  
+  const showStats =
+  !isSearchFocused &&
+  searchQuery.trim().length === 0;
 
-  useEffect(() => {
-    fetchExpenses();
-    }, []);
+    useFocusEffect(
+    useCallback(() => {
+      fetchExpenses();
+      }, [])
+    );
 
     const fetchExpenses = async () => {
     try {
         setLoading(true);
 
         const data = await getExpenses();
-         console.log("EXPENSES ===>", data);
+        //  console.log("EXPENSES ===>", data);
 
         setExpenses(data);
 
@@ -70,7 +86,26 @@ export default function ExpenseHistoryScreen() {
         const approvedCount = approvedExpenses.length;
 
         const listHeader = useMemo(() => (
-            <>
+            <>         
+              <View style={[styles.searchSection,{backgroundColor: colors.card}]}>
+                <Feather
+                  name="search"
+                  size={20}
+                  color={colors.subText}
+                  style={styles.searchIcon}
+                />
+
+                <TextInput
+                  style={[styles.searchInput,{ color: colors.subText}]}
+                  placeholderTextColor={colors.subText}
+                  placeholder="Search claims..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  onFocus={()=> setIsSearchFocused(true)}
+                  onBlur={()=> setIsSearchFocused(false)}
+                />
+              </View>
+            {showStats && (
             <View style={styles.statsContainer}>
               <View style={[styles.statCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
                 <Text style={[styles.statLabel, {color: colors.text}]}>
@@ -109,23 +144,7 @@ export default function ExpenseHistoryScreen() {
                 </Text>
               </View>
             </View>
-
-              <View style={[styles.searchSection,{backgroundColor: colors.card}]}>
-                <Feather
-                  name="search"
-                  size={20}
-                  color={colors.subText}
-                  style={styles.searchIcon}
-                />
-
-                <TextInput
-                  style={[styles.searchInput,{ color: colors.subText}]}
-                  placeholderTextColor={colors.subText}
-                  placeholder="Search claims..."
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                />
-              </View>
+        )}
             </>
           ),
           [
@@ -134,12 +153,23 @@ export default function ExpenseHistoryScreen() {
             approvedCost,
             approvedCount,
             searchQuery,
-            colors
+            colors,
+            showStats
           ]
         );
 
         const renderExpenseItem = ({ item }: { item: Expense }) => (
-          <TouchableOpacity style={[styles.listItem, {backgroundColor: colors.card}]}>
+          <TouchableOpacity 
+              style={[styles.listItem, {backgroundColor: colors.card}]}
+              onPress={() =>
+                router.push({
+                  pathname: "/expenseDetail",
+                  params: {
+                    expense: JSON.stringify(item),
+                  },
+                })
+              }
+            >
             <View style={styles.itemMainRow}>
               <View style={styles.iconWrapper}>
                 <MaterialIcons
@@ -158,20 +188,7 @@ export default function ExpenseHistoryScreen() {
                   {dayjs(item.expense_date).format("DD MMM YYYY")}
                 </Text>
 
-                {/* <Text
-                  numberOfLines={2}
-                  style={[styles.description,{ color: colors.subText}]}
-                >
-                  {item.description}
-                </Text>
-
-                <View style={styles.tagWrapper}>
-                  <Text style={[styles.tagText,{color: colors.subText}]}>
-                    {item.expense_type}
-                  </Text>
-                </View> */}
-
-                <Text style={[styles.itemCost, {color: colors.text}]}>
+                <Text style={styles.itemCost}>
                   {item.cost.toLocaleString()} MMK
                 </Text>
 
@@ -212,7 +229,7 @@ export default function ExpenseHistoryScreen() {
 
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
       <View style={[styles.header, { backgroundColor: colors.head, borderBottomColor: colors.head, borderTopColor: colors.head}]}>
         <View style={styles.headerLeft}>
           <MaterialIcons name="archive" size={24} color="#1E62C9" style={styles.headerIcon} />
@@ -229,6 +246,8 @@ export default function ExpenseHistoryScreen() {
       <FlatList
         data={filteredExpenses}
         keyExtractor={(item) => item.id}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={renderExpenseItem}
         ListHeaderComponent={listHeader}
         contentContainerStyle={styles.scrollContent}
@@ -430,7 +449,7 @@ listItem: {
   itemCost: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#111',
+    color: '#1E62C9',
     marginBottom: 12,
   },
   description:{
@@ -440,8 +459,8 @@ listItem: {
 },
   statusBadge: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 12,
   },
   badgeRequested: {
@@ -451,7 +470,7 @@ listItem: {
     backgroundColor: '#E6F4EA',
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '700',
   },
   textRequested: {

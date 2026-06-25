@@ -19,7 +19,7 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import useIsOnline from "../../utils/useIsOnline";
 
 export default function NewExpenseScreen() {
  
@@ -30,6 +30,7 @@ export default function NewExpenseScreen() {
     const [voucher, setVoucher] = useState<string | null>(null);
     const [voucherPreview, setVoucherPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const isOnline = useIsOnline();
 
     const pickVoucher = async () => {
 
@@ -60,6 +61,14 @@ export default function NewExpenseScreen() {
     };
 
       const handleSubmit = async () => {
+
+        if (!isOnline) {
+          Alert.alert(
+            "No Internet Connection",
+            "You must be online to submit an expense request."
+          );
+          return;
+        }
 
         try{
 
@@ -219,12 +228,13 @@ export default function NewExpenseScreen() {
 
           <View style={styles.footerActions}>
             <TouchableOpacity
-            style={[styles.submitButton, loading && {opacity: 0.6}]}
+            style={[styles.submitButton, (loading || !isOnline) && {opacity: 0.6}]}
             disabled={loading}
             onPress={handleSubmit}
             >
                 <Text style={styles.submitButtonText}>
-                {loading ? "Submitting..." : "Submit Request"}
+                {loading ? "Submitting..."
+                  : "Submit Request"}
                 </Text>
             </TouchableOpacity>
           </View>

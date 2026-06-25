@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { api } from "../../api/client";
+import useIsOnline from "../../utils/useIsOnline";
 
 export default function SecurityScreen() {
   const router = useRouter();
@@ -24,71 +25,79 @@ export default function SecurityScreen() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const isOnline = useIsOnline();
 
   const handleUpdatePassword = async () => {
-  try {
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      Alert.alert("Error", "Please fill in all security fields.");
-      return;
-    }
 
-    if (newPassword !== confirmPassword) {
-      Alert.alert("Error", "New passwords do not match.");
-      return;
-    }
+            if (!isOnline) {
+              Alert.alert(
+                "No Internet Connection",
+                "You must be online to change password."
+              );
+              return;
+            }
+            try {
+              if (!currentPassword || !newPassword || !confirmPassword) {
+                Alert.alert("Error", "Please fill in all security fields.");
+                return;
+              }
 
-    if (newPassword.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters long.");
-      return;
-    }
+              if (newPassword !== confirmPassword) {
+                Alert.alert("Error", "New passwords do not match.");
+                return;
+              }
 
-    setLoading(true);
+              if (newPassword.length < 6) {
+                Alert.alert("Error", "Password must be at least 6 characters long.");
+                return;
+              }
 
-    const response = await api.post("/change-password", {
-      current_password: currentPassword,
-      new_password: newPassword,
-      new_password_confirmation: confirmPassword,
-    });
+              setLoading(true);
 
-    const result = response.data;
+              const response = await api.post("/change-password", {
+                current_password: currentPassword,
+                new_password: newPassword,
+                new_password_confirmation: confirmPassword,
+              });
 
-    if (result.success) {
-      Alert.alert("Success", "Password updated successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
-    } else {
-      Alert.alert("Error", result.message || "Failed to update password");
-    }
-  } catch (error: any) {
-  console.log(
-    "CHANGE PASSWORD ERROR:",
-    error?.response?.data || error
-  );
+              const result = response.data;
 
-  const message =
-    error?.response?.data?.message ||
-    "Something went wrong";
+              if (result.success) {
+                Alert.alert("Success", "Password updated successfully!", [
+                  {
+                    text: "OK",
+                    onPress: () => router.back(),
+                  },
+                ]);
+              } else {
+                Alert.alert("Error", result.message || "Failed to update password");
+              }
+            } catch (error: any) {
+            console.log(
+              "CHANGE PASSWORD ERROR:",
+              error?.response?.data || error
+            );
 
-  if (
-    message.toLowerCase().includes("current password")
-  ) {
-    setPasswordError(message);
-  } else {
-    Alert.alert("Error", message);
-  }
-} finally {
-    setLoading(false);
-  }
-};
+            const message =
+              error?.response?.data?.message ||
+              "Something went wrong";
+
+            if (
+              message.toLowerCase().includes("current password")
+            ) {
+              setPasswordError(message);
+            } else {
+              Alert.alert("Error", message);
+            }
+          } finally {
+              setLoading(false);
+            }
+          };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -123,7 +132,7 @@ export default function SecurityScreen() {
             {/* <View style={[styles.inputContainer, { borderColor: colors.border || "#DDD" }]}> */}
             <View style={[styles.inputContainer, { backgroundColor: colors.background, borderColor: passwordError
         ? "#DC2626"
-        : "#D1D5DB", }]}>
+        : colors.border }]}>
               <Ionicons name="key-outline" size={20} color="#999" />
               <TextInput
                 secureTextEntry={!showCurrent}
@@ -147,7 +156,7 @@ export default function SecurityScreen() {
                 ) : null}
 
             <Text style={[styles.inputLabel, { color: colors.subText }, styles.spaceTop]}>NEW PASSWORD</Text>
-            <View style={[styles.inputContainer, { backgroundColor: colors.background }]}>
+            <View style={[styles.inputContainer, { backgroundColor: colors.background, borderColor: colors.border }]}>
               <Ionicons name="lock-open-outline" size={20} color="#999" />
               <TextInput
                 secureTextEntry={!showNew}
@@ -162,9 +171,8 @@ export default function SecurityScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* CONFIRM NEW PASSWORD */}
             <Text style={[styles.inputLabel, { color: colors.subText }, styles.spaceTop]}>CONFIRM NEW PASSWORD</Text>
-            <View style={[styles.inputContainer, { backgroundColor: colors.background}]}>
+            <View style={[styles.inputContainer, { backgroundColor: colors.background, borderColor: colors.border}]}>
               <Ionicons name="checkmark-circle-outline" size={20} color="#999" />
               <TextInput
                 secureTextEntry={!showConfirm}
