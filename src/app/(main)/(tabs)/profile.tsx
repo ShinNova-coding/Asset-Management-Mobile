@@ -188,6 +188,15 @@ export default function ProfileScreen() {
   };
 
   const handleLogout = () => {
+
+            if (!isOnline) {
+              Alert.alert(
+                "No Internet Connection",
+                "You must be online to logout."
+              );
+              return;
+            }
+
     Alert.alert(
       "Logout",
       "Are you sure you want to logout?",
