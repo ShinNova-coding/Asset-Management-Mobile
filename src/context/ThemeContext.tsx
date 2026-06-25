@@ -10,6 +10,7 @@ export const Colors = {
     subText: "#6B7280",
     primary: "#0070EB",
     border: "#F3F4F6",
+    head: "rgb(210, 228, 255)-"
   },
   dark: {
     background: "#0F172A",
@@ -18,6 +19,7 @@ export const Colors = {
     subText: "#94A3B8",
     primary: "#0070EB",
     border: "#334155",
+    head: "#2D3748"
   }
 };
 

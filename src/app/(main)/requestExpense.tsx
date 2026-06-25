@@ -7,16 +7,16 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -59,93 +59,88 @@ export default function NewExpenseScreen() {
         }
     };
 
-const handleSubmit = async () => {
+      const handleSubmit = async () => {
 
- try{
+        try{
 
-    if (!title.trim()) {
-    Alert.alert("Title is required");
-    return;
-    }
+            if (!title.trim()) {
+            Alert.alert("Title is required");
+            return;
+            }
 
-    if (!cost) {
-    Alert.alert("Cost is required");
-    return;
-    }
+            if (!cost) {
+            Alert.alert("Cost is required");
+            return;
+            }
 
-    if (!description.trim()) {
-    Alert.alert(
-        "Description required",
-        "Please explain the purpose of this expense."
-    );
-    return;
-    }
+            if (!description.trim()) {
+            Alert.alert(
+                "Description required",
+                "Please explain the purpose of this expense."
+            );
+            return;
+            }
 
-    if (!voucher) {
-    Alert.alert("Please upload voucher image");
-    return;
-    }
+            if (!voucher) {
+            Alert.alert("Please upload voucher image");
+            return;
+            }
 
-    setLoading(true);
+            setLoading(true);
 
-    const payload = {
-      status:"requested",
-      cost:Number(cost.replace(/,/g,"")),
-      expense_date:dayjs().format("YYYY-M-D"),
-      title,
-      expense_type:"claim",
-      description,
-      voucher,
+            const payload = {
+              status:"requested",
+              cost:Number(cost.replace(/,/g,"")),
+              expense_date:dayjs().format("YYYY-M-D"),
+              title,
+              expense_type:"claim",
+              description,
+              voucher,
+            };
+
+            const response = await requestExpense(payload);
+
+            Alert.alert(
+              "Success",
+              response.message
+            );
+
+            router.back();
+
+        }catch(error){
+
+            console.log(error);
+
+            Alert.alert(
+              "Error",
+              "Unable to submit expense request."
+            );
+
+        }finally{
+            setLoading(false);
+        }
     };
 
-    const response = await requestExpense(payload);
-
-    Alert.alert(
-      "Success",
-      response.message
-    );
-
-    router.back();
-
- }catch(error){
-
-    console.log(error);
-
-    Alert.alert(
-      "Error",
-      "Unable to submit expense request."
-    );
-
- }finally{
-    setLoading(false);
- }
-};
-
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {backgroundColor: colors.background}]}>
       <HeaderBar title="Expenses" backButtonAction={()=> router.back()}/>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          
-          {/* Info Notice Blue Box */}
-          <View style={styles.infoBox}>
+          <View style={[styles.infoBox, {backgroundColor: colors.card, borderColor: colors.border}]}>
             <MaterialIcons name="info" size={20} color="#1E62C9" style={styles.infoIcon} />
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, {color: colors.subText}]}>
               Please provide accurate details for your expense claim. Ensure your receipt clearly shows the vendor name, date, and total amount.
             </Text>
           </View>
 
-          {/* Form Fields Container */}
-          <View style={styles.formCard}>
-            
-            {/* Expense Title */}
+          <View style={[styles.formCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>EXPENSE TITLE</Text>
+              <Text style={[styles.label,{color: colors.text}]}>EXPENSE TITLE</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input,{color: colors.text,backgroundColor: colors.background, borderColor: colors.border}]}
                 value={title}
                 onChangeText={setTitle}
                 placeholder="Enter expense title"
@@ -154,11 +149,11 @@ const handleSubmit = async () => {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>TOTAL COST</Text>
-              <View style={styles.costInputWrapper}>
-                <Text style={styles.currencyPrefix}>MMK</Text>
+              <Text style={[styles.label,{color: colors.text}]}>TOTAL COST</Text>
+              <View style={[styles.costInputWrapper,{backgroundColor: colors.background, borderColor: colors.border}]}>
+                <Text style={[styles.currencyPrefix,{color: colors.subText}]}>MMK</Text>
                 <TextInput
-                  style={styles.costInput}
+                  style={[styles.costInput,{color: colors.text}]}
                   value={cost}
                   onChangeText={setCost}
                   keyboardType="number-pad"
@@ -167,9 +162,9 @@ const handleSubmit = async () => {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>DESCRIPTION / PURPOSE</Text>
+              <Text style={[styles.label,{color: colors.text}]}>DESCRIPTION / PURPOSE</Text>
               <TextInput
-                style={styles.textArea}
+                style={[styles.textArea,{backgroundColor: colors.background, color: colors.text, borderColor: colors.border}]}
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Briefly explain the nature of this expense..."
@@ -181,8 +176,7 @@ const handleSubmit = async () => {
             </View>
           </View>
 
-          {/* Voucher / Receipt Section */}
-            <View style={styles.voucherSection}>
+          <View style={[styles.voucherSection, {backgroundColor: colors.card, borderColor: colors.border}]}>
             {voucherPreview ? (
                 <>
                 <Image
@@ -191,7 +185,7 @@ const handleSubmit = async () => {
                 />
 
                 <TouchableOpacity
-                    style={styles.uploadContainer}
+                    style={[styles.uploadContainer, {backgroundColor: colors.background}]}
                     onPress={pickVoucher}
                 >
                     <Feather
@@ -200,12 +194,12 @@ const handleSubmit = async () => {
                     color={colors.primary}
                     />
 
-                    <Text>Change Receipt Image</Text>
+                    <Text style= { [{color: colors.text}]}>Change Receipt Image</Text>
                 </TouchableOpacity>
                 </>
             ) : (
                 <TouchableOpacity
-                style={styles.uploadContainer}
+                style={[styles.uploadContainer, {backgroundColor: colors.background}]}
                 onPress={pickVoucher}
                 >
                 <Feather
@@ -214,14 +208,14 @@ const handleSubmit = async () => {
                     color={colors.primary}
                 />
 
-                <Text>Upload Receipt Image</Text>
+                <Text style= { [{color: colors.text}]}>Upload Receipt Image</Text>
 
                 <Text style={{ color: "#999", marginTop: 5 }}>
                     JPG, PNG (Max 5MB)
                 </Text>
                 </TouchableOpacity>
             )}
-            </View>
+          </View>
 
           <View style={styles.footerActions}>
             <TouchableOpacity

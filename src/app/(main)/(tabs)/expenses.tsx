@@ -1,3 +1,4 @@
+import { useTheme } from "@/src/context/ThemeContext";
 import { getExpenses } from '@/src/services/expense.service';
 import { Expense } from '@/src/types/expense.type';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -5,16 +6,18 @@ import dayjs from "dayjs";
 import { router } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+
 export default function ExpenseHistoryScreen() {
+  const {colors, isDark} = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,158 +69,190 @@ export default function ExpenseHistoryScreen() {
 
         const approvedCount = approvedExpenses.length;
 
+        const listHeader = useMemo(() => (
+            <>
+            <View style={styles.statsContainer}>
+              <View style={[styles.statCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
+                <Text style={[styles.statLabel, {color: colors.text}]}>
+                  TOTAL PENDING
+                </Text>
+
+                <Text style={[styles.statAmount, {color: colors.text}]}>
+                  {pendingCost.toLocaleString()} MMK
+                </Text>
+
+                <Text
+                  style={[
+                    styles.statFooter,
+                    { color: "#1E62C9" }
+                  ]}
+                >
+                  {pendingCount} Active Claims
+                </Text>
+              </View>
+              <View style={[styles.statCard, {backgroundColor: colors.card, borderColor: colors.border}]}>
+                <Text style={[styles.statLabel, {color: colors.text}]}>
+                  APPROVED
+                </Text>
+
+                <Text style={[styles.statAmount,{color: colors.text}]}>
+                  {approvedCost.toLocaleString()} MMK
+                </Text>
+
+                <Text
+                  style={[
+                    styles.statFooter,
+                    { color: "#137333" }
+                  ]}
+                >
+                  {approvedCount} Approved Claims
+                </Text>
+              </View>
+            </View>
+
+              <View style={[styles.searchSection,{backgroundColor: colors.card}]}>
+                <Feather
+                  name="search"
+                  size={20}
+                  color={colors.subText}
+                  style={styles.searchIcon}
+                />
+
+                <TextInput
+                  style={[styles.searchInput,{ color: colors.subText}]}
+                  placeholderTextColor={colors.subText}
+                  placeholder="Search claims..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+            </>
+          ),
+          [
+            pendingCost,
+            pendingCount,
+            approvedCost,
+            approvedCount,
+            searchQuery,
+            colors
+          ]
+        );
+
         const renderExpenseItem = ({ item }: { item: Expense }) => (
-  <TouchableOpacity style={styles.listItem}>
-    <View style={styles.itemMainRow}>
+          <TouchableOpacity style={[styles.listItem, {backgroundColor: colors.card}]}>
+            <View style={styles.itemMainRow}>
+              <View style={styles.iconWrapper}>
+                <MaterialIcons
+                  name="receipt-long"
+                  size={22}
+                  color="#1E62C9"
+                />
+              </View>
+              <View style={styles.itemDetails}>
 
-      {/* icon */}
-      <View style={styles.iconWrapper}>
-        <MaterialIcons
-          name="receipt-long"
-          size={22}
-          color="#1E62C9"
-        />
-      </View>
+                <Text style={[styles.itemTitle, {color: colors.text}]}>
+                  {item.title}
+                </Text>
 
-      {/* details */}
-      <View style={styles.itemDetails}>
+                <Text style={[styles.itemDate, {color: colors.subText}]}>
+                  {dayjs(item.expense_date).format("DD MMM YYYY")}
+                </Text>
 
-        <Text style={styles.itemTitle}>
-          {item.title}
-        </Text>
+                {/* <Text
+                  numberOfLines={2}
+                  style={[styles.description,{ color: colors.subText}]}
+                >
+                  {item.description}
+                </Text>
 
-        <Text style={styles.itemDate}>
-          {dayjs(item.expense_date).format("DD MMM YYYY")}
-        </Text>
+                <View style={styles.tagWrapper}>
+                  <Text style={[styles.tagText,{color: colors.subText}]}>
+                    {item.expense_type}
+                  </Text>
+                </View> */}
 
-        <Text
-          numberOfLines={2}
-          style={styles.description}
-        >
-          {item.description}
-        </Text>
+                <Text style={[styles.itemCost, {color: colors.text}]}>
+                  {item.cost.toLocaleString()} MMK
+                </Text>
 
-        <View style={styles.tagWrapper}>
-          <Text style={styles.tagText}>
-            {item.expense_type}
-          </Text>
-        </View>
+                <View
+                  style={[
+                    styles.statusBadge, 
+                    item.status === "requested"
+                      ? styles.badgeRequested
+                      : item.status === "approved"
+                      ? styles.badgeApproved
+                      : styles.badgeRejected
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusText,
+                      item.status === "requested"
+                        ? styles.textRequested
+                        : item.status === "approved"
+                        ? styles.textApproved
+                        : styles.textRejected
+                    ]}
+                  >
+                    {item.status.toUpperCase()}
+                  </Text>
+                </View>
+              </View>
 
-        <Text style={styles.itemCost}>
-          {item.cost.toLocaleString()} MMK
-        </Text>
+              <Feather
+                name="chevron-right"
+                size={20}
+                color="#999"
+              />
 
-        <View
-          style={[
-            styles.statusBadge,
-            item.status === "requested"
-              ? styles.badgeRequested
-              : item.status === "approved"
-              ? styles.badgeApproved
-              : styles.badgeRejected
-          ]}
-        >
-          <Text
-            style={[
-              styles.statusText,
-              item.status === "requested"
-                ? styles.textRequested
-                : item.status === "approved"
-                ? styles.textApproved
-                : styles.textRejected
-            ]}
-          >
-            {item.status.toUpperCase()}
-          </Text>
-        </View>
+            </View>
+          </TouchableOpacity>
+        );
 
-      </View>
-
-      <Feather
-        name="chevron-right"
-        size={20}
-        color="#999"
-      />
-
-    </View>
-  </TouchableOpacity>
-);
-
-const listHeader = useMemo(
-  () => (
-    <>
-      <View style={styles.statsContainer}>
-        ...
-      </View>
-
-      <View style={styles.searchSection}>
-        <Feather
-          name="search"
-          size={20}
-          color="#6C757D"
-          style={styles.searchIcon}
-        />
-
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search claims..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-    </>
-  ),
-  [
-    pendingCost,
-    pendingCount,
-    approvedCost,
-    approvedCount,
-    searchQuery
-  ]
-);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.head, borderBottomColor: colors.head, borderTopColor: colors.head}]}>
         <View style={styles.headerLeft}>
           <MaterialIcons name="archive" size={24} color="#1E62C9" style={styles.headerIcon} />
           <Text style={styles.headerTitle}>Expense Requests</Text>
-        </View>
-        
+        </View>        
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => router.push('/requestExpense')}
         >
-          <Feather name="plus" size={24} color="#FFF" />
+          <Feather name="plus" size={21} color="#FFF" />
         </TouchableOpacity>
       </View>
-<FlatList
-  data={filteredExpenses}
-  keyExtractor={(item) => item.id}
-  renderItem={renderExpenseItem}
-  ListHeaderComponent={listHeader}
-  contentContainerStyle={styles.scrollContent}
-  showsVerticalScrollIndicator={false}
-  ListEmptyComponent={
-    !loading ? (
-      <View style={styles.emptyContainer}>
-        <Ionicons
-          name="receipt-outline"
-          size={70}
-          color="#B0B0B0"
-        />
 
-        <Text style={styles.emptyTitle}>
-          No expense requests
-        </Text>
+      <FlatList
+        data={filteredExpenses}
+        keyExtractor={(item) => item.id}
+        renderItem={renderExpenseItem}
+        ListHeaderComponent={listHeader}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          !loading ? (
+            <View style={[styles.emptyContainer,{backgroundColor: colors.background}]}>
+              <Ionicons
+                name="receipt-outline"
+                size={70}
+                color="#B0B0B0"
+              />
 
-        <Text style={styles.emptyText}>
-          Tap + to create one
-        </Text>
-      </View>
-    ) : null
-  }
-/>
+              <Text style={styles.emptyTitle}>
+                No expense requests
+              </Text>
+
+              <Text style={styles.emptyText}>
+                Tap + to create one
+              </Text>
+            </View>
+          ) : null
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -233,7 +268,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: '#FFF',
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#EAECEF',
     marginTop: -50
@@ -252,8 +287,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#1E62C9',
-    width: 40,
-    height: 40,
+    width: 38.5,
+    height: 38.5,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -278,14 +313,14 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
     color: '#6C757D',
     letterSpacing: 0.5,
     marginBottom: 6,
   },
   statAmount: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: '800',
     color: '#111',
     marginBottom: 12,
@@ -393,7 +428,7 @@ listItem: {
     color: '#6C757D',
   },
   itemCost: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
     color: '#111',
     marginBottom: 12,
