@@ -6,7 +6,7 @@ import { saveProfile } from "../database/profile.service";
 export async function syncProfile(token: string) {
   try {
     const response = await axios.get(
-      "http://192.168.100.183:1010/api/profile",
+      "http://192.168.100.183:1011/api/profile",
       {
         headers: {
           Authorization: `Bearer ${token}`,

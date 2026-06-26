@@ -10,8 +10,8 @@ export async function getAssignmentHistory() {
 
 export async function getMaintenanceHistory() {
   const response = await api.get(
-    "/maintenance/history"
+    "/maintenance/asset"
   );
-
+  console.log("REPAIR History==>", response.data.data)
   return response.data.data;
 }

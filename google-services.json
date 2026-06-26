@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "333169246966",
+    "project_id": "itams-199df",
+    "storage_bucket": "itams-199df.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333169246966:android:59945d1ddf6c020775e2d7",
+        "android_client_info": {
+          "package_name": "com.itams.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSE6VhTLTm5lNemkQ2Cnn_tGil0pJNvrM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -182,7 +182,6 @@ if (!asset) {
           onPress: async () => {
             try {
               await returnAsset(asset.id);
-              console.log("Return assetid ===>", asset.id)
               setStatus("Returned");
 
             Alert.alert(

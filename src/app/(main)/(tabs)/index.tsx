@@ -84,7 +84,6 @@ export default function DashboardScreen() {
 
   const loadAssets = async () => {
     
-
     try {
       setLoading(true);
 
@@ -95,7 +94,8 @@ export default function DashboardScreen() {
           getAssignedAssets(),
           getCategories(),
         ]);
-
+       console.log("ASSIGNED ASSETS==>", assignedAssets)
+       console.log("CATEGORY==>", rescategories)
       setAssets(assignedAssets || []);
       setCategories(rescategories || []);
 
@@ -122,13 +122,13 @@ export default function DashboardScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (user?.id) {
+      if (!authLoading && user?.id) {
         loadAssets();
       }
     }, [user?.id])
  )
 
-    if (loading) {
+    if (authLoading || loading) {
       return <DashboardSkeleton />;
     }
     if (!user){
@@ -169,6 +169,57 @@ export default function DashboardScreen() {
         </View>
       );
    }
+
+         if (isGloballyEmpty) {
+        return (
+                  <ScrollView
+                    style={[
+                      styles.container,
+                      { backgroundColor: colors.background },
+                    ]}
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={colors.primary}
+                        colors={[colors.primary]}
+                      />
+                    }
+                  >
+                  <View style={styles.profileHeader}>
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarText}>
+                        {user?.name?.charAt(0)?.toUpperCase()}
+                      </Text>
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.companyName, { color: colors.subText }]}>
+                        AGGA.IO IT Asset System
+                      </Text>
+
+                      <Text style={[styles.userName, { color: colors.text }]}>
+                        {user?.name}
+                      </Text>
+
+                      <Text style={[styles.userRole, { color: colors.subText }]}>
+                        Welcome back 
+                      </Text>
+                    </View>
+                  </View>
+          <View style={[styles.emptyContainer, { backgroundColor: colors.background }]}>
+            <Ionicons name="cube-outline" size={80} color={colors.subText} />
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              No Assigned Assets
+            </Text>
+            <Text style={[styles.emptySubtitle, { color: colors.subText }]}>
+              You don’t have any assets assigned yet.
+            </Text>
+          </View>
+          </ScrollView>
+        );
+      }
 
     if (hasLoadError) {
       return (
@@ -225,57 +276,6 @@ export default function DashboardScreen() {
       );
     }
 
-      if (isGloballyEmpty) {
-        return (
-                  <ScrollView
-                    style={[
-                      styles.container,
-                      { backgroundColor: colors.background },
-                    ]}
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    refreshControl={
-                      <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        tintColor={colors.primary}
-                        colors={[colors.primary]}
-                      />
-                    }
-                  >
-                  <View style={styles.profileHeader}>
-                    <View style={styles.avatar}>
-                      <Text style={styles.avatarText}>
-                        {user?.name?.charAt(0)?.toUpperCase()}
-                      </Text>
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.companyName, { color: colors.subText }]}>
-                        AGGA.IO IT Asset System
-                      </Text>
-
-                      <Text style={[styles.userName, { color: colors.text }]}>
-                        {user?.name}
-                      </Text>
-
-                      <Text style={[styles.userRole, { color: colors.subText }]}>
-                        Welcome back 
-                      </Text>
-                    </View>
-                  </View>
-          <View style={[styles.emptyContainer, { backgroundColor: colors.background }]}>
-            <Ionicons name="cube-outline" size={80} color={colors.subText} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              No Assigned Assets
-            </Text>
-            <Text style={[styles.emptySubtitle, { color: colors.subText }]}>
-              You don’t have any assets assigned yet.
-            </Text>
-          </View>
-          </ScrollView>
-        );
-      }
-
 
   return (
 
@@ -319,7 +319,7 @@ export default function DashboardScreen() {
                     <View style={[styles.statCard, { backgroundColor: colors.card }]}>
                       <Text style={[styles.statTitle, { color: colors.subText }]}>REPAIR</Text>
                       <Text style={[styles.statNumber, { color: colors.primary }]}>
-                        {assets.filter(a => a.condition?.toLowerCase() === 'repair').length}
+                        {assets.filter(a => a.status === 'maintenance').length}
                       </Text>
                     </View>
                     <View style={[styles.statCard, { backgroundColor: colors.card }]}>

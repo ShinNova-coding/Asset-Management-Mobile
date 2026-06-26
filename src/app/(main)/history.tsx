@@ -1,6 +1,7 @@
 import HeaderBar from "@/src/components/HeaderBar";
 import { useTheme } from "@/src/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import dayjs from "dayjs";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,15 +12,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import HistorySkeleton from "../../components/skeletons/HistorySkeleton";
-import { getAssignmentHistory } from "../../services/history.service";
+import { getAssignmentHistory, getMaintenanceHistory } from "../../services/history.service";
 import useIsOnline from "../../utils/useIsOnline";
 
 type Activity = {
   id: string;
-  type: "assignment" | "return" | "issue";
+  type: "assignment" | "return" | "maintenance";
   title: string;
   asset: string;
   isDeleted: boolean;
+  rawDate: string;
   date: string;
 };
 
@@ -38,8 +40,9 @@ const loadHistory = async () => {
     setLoading(true);
 
     const history = await getAssignmentHistory();
+    const repairHistory = await getMaintenanceHistory();
 
-    const transformed = history.map((item: any) => ({
+    const assignmentActivities = history.map((item: any) => ({
         id: item.id.toString(),
 
         type:
@@ -56,13 +59,37 @@ const loadHistory = async () => {
 
         isDeleted: item.asset == null,
 
+        rawDate:
+        item.status === "returned"
+      ? item.returned_date
+      : item.assigned_date,
+
         date:
           item.status === "returned"
-            ? item.returned_date
-            : item.assigned_date,
+            ? dayjs(item.returned_date).format("DD MMM YYYY")
+            : dayjs(item.assigned_date).format("DD MMM YYYY"),
       }));
 
-    setActivities(transformed);
+      const maintenanceActivities = repairHistory.map((item: any) => ({
+        id: `maintenance-${item.id}`,
+        type: "maintenance",
+        title: "Asset Maintenance",
+        asset: item.name ?? "Unknown Asset",
+        isDeleted: false,
+        rawDate: item.updated_at,
+        date: dayjs(item.updated_at).format("DD MMM YYYY, h:mm A"),
+      }));
+
+        const allActivities = [
+            ...assignmentActivities,
+            ...maintenanceActivities,
+          ].sort(
+            (a, b) =>
+              dayjs(b.rawDate).valueOf() -
+              dayjs(a.rawDate).valueOf()
+          );
+
+    setActivities(allActivities);
 
   } catch (error) {
     console.log("HISTORY ERROR:",error);
@@ -139,7 +166,7 @@ const loadHistory = async () => {
           iconColor: "#0070EB",
         };
 
-      case "issue":
+      case "maintenance":
         return {
           icon: "warning-outline",
           bg: "#FEF2F2",
@@ -241,7 +268,7 @@ const loadHistory = async () => {
                   <Text
                     style={[
                       styles.assetName,
-                      { color: item.isDeleted? "#EF4444" : colors.text, fontStyle: item.isDeleted? "italic" : "normal" },
+                      { color: item.isDeleted? "#EF4444" : "#1E62C9", fontStyle: item.isDeleted? "italic" : "normal" },
                     ]}
                   >
                     {item.asset}
@@ -310,7 +337,7 @@ headerSection: {
   },
 
   assetName: {
-    fontSize: 15,
+    fontSize: 15.6,
     marginTop: 5,
     fontWeight: "500",
   },

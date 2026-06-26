@@ -6,13 +6,15 @@ export async function getAssignedAssets() {
 
     const token = await SecureStore.getItemAsync("token");
     console.log("TOKEN =", token);
+
    const response = await api.get(`/assignment/asset`);
-   // console.log("ASSIGNED ASSETS RESPONSE:", response.data.data);
-   return response.data.data;
+   return response.data.data || [];
    
-   }
-   catch (error: any){
-      console.log( "GET ASSIGNED ASSETS ERROR:", error?.response?.status, error?.response?.data);
+   }catch (error: any){
+      if (error?.response?.status === 404){
+         return [];
+      }
+      // console.log( "GET ASSIGNED ASSETS ERROR:", error?.response?.status, error?.response?.data);
       throw error;
    }
 }

@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export const Colors = {
   light: {
@@ -73,7 +74,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <ThemeContext.Provider value={{ isDark, colors: isDark ? Colors.dark : Colors.light, setScheme, isLoading,}}>
+      <SafeAreaView style={{flex:1}} edges={["bottom"]}>
       {children}
+      </SafeAreaView>
     </ThemeContext.Provider>
   );
 };
