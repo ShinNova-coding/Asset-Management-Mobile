@@ -15,7 +15,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("kmo@gmail.com");
   const [password, setPassword] = useState("password123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

@@ -1,6 +1,11 @@
+import * as SecureStore from "expo-secure-store";
 import { api } from "../api/client";
+
 export async function getCategories() {
    try{
+
+   const token = await SecureStore.getItemAsync("token");
+   console.log("TOKEN =", token);
    const response = await api.get("/category");
    return response.data?.data??[];
    }catch (error){

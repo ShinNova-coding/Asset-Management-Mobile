@@ -110,6 +110,7 @@ useEffect(() => {
       const response = await api.post("/login",{ email, password, });
 
       const data = await response.data;
+      console.log("data======",data)
 
       if (!data.success || !data.user?.id) {
         console.log("Login execution refused by API backend rules");

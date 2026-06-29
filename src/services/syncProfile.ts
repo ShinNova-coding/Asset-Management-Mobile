@@ -1,19 +1,11 @@
-// import { api } from "../api/client";
-import axios from "axios";
 import * as FileSystem from "expo-file-system/legacy";
+import { api, API_URL } from "../api/client";
 import { saveProfile } from "../database/profile.service";
 
 export async function syncProfile(token: string) {
   try {
-    const response = await axios.get(
-      "http://192.168.100.185:1011/api/profile",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
+    const response = await api.get("/profile");
+    console.log("syncproflie====",response)
     if (response.data.success) {
       const profile = response.data.data;
 
@@ -21,15 +13,14 @@ export async function syncProfile(token: string) {
 
       if (profile.preview_url) {
         const filename = `profile_${profile.id}.jpg`;
+        localImagePath = FileSystem.documentDirectory + filename;
 
-        localImagePath =
-          FileSystem.documentDirectory +
-          filename;
-
-        await FileSystem.downloadAsync(
-          profile.preview_url,
-          localImagePath
+        const imageUrl = profile.preview_url.replace(
+          /https?:\/\/[^/]+/,
+          API_URL
         );
+
+        await FileSystem.downloadAsync(imageUrl, localImagePath);
 
         console.log(
           "IMAGE SAVED:",
