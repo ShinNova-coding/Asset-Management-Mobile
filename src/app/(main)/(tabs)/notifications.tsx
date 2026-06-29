@@ -6,7 +6,8 @@ import {
 } from "@/src/database/notification.service";
 import { NotificationItem, NotificationType } from "@/src/types/notification";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
   SectionList,
   StyleSheet,
@@ -24,8 +25,6 @@ export default function NotificationScreen() {
   const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
 
-
-
   const loadNotifications = async () => {
   const data = await getNotifications();
 
@@ -42,16 +41,12 @@ const handleMarkAllRead = async () => {
   loadNotifications();
 };
 
-    useEffect(() => {
-      
-      loadNotifications();
-
-      const timer = setTimeout(() => {
+    useFocusEffect(
+      useCallback(() => {
+        loadNotifications();
         setLoading(false);
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }, []);
+      }, [])
+    );
 
       if (loading) {
         return <NotiSkeleton />;
@@ -92,6 +87,13 @@ const renderIcon = (type: NotificationType) => {
       return (
         <View style={[styles.iconContainer,{backgroundColor:"#DC2626"}]}>
           <Ionicons name="wallet" size={20} color="#fff"/>
+        </View>
+      );
+
+    case "asset_assigned":
+      return (
+        <View style={[styles.iconContainer,{backgroundColor:"#3B82F6"}]}>
+          <Ionicons name="return-up-back" size={20} color="#fff"/>
         </View>
       );
   }

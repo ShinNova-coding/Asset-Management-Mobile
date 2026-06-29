@@ -105,6 +105,7 @@ export default function ProfileScreen() {
         await syncProfile(token);
         const updatedProfile = await getProfile();
         setProfile(updatedProfile);
+        setImageVersion(Date.now());
       }
 
       const data = await getAssignedAssets();
@@ -177,7 +178,7 @@ export default function ProfileScreen() {
 
           const latestProfile = await getProfile();
           setProfile(latestProfile);
-          
+          setImageVersion(Date.now());
 
           Alert.alert ("Success", "Profile photo updated.");
         } catch (error) {
@@ -232,6 +233,7 @@ export default function ProfileScreen() {
         await syncProfile(token);
         
         setProfile(await getProfile());
+        setImageVersion(Date.now());
       }
 
     }catch (error){

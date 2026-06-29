@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ContactInfoSkeleton from "../../components/skeletons/ContactInfoSkeleton";
-import { getProfile, saveProfile } from "../../database/profile.service";
+import { getProfile } from "../../database/profile.service";
 
 export default function ContactInfoScreen() {
   const router = useRouter();
@@ -25,6 +25,7 @@ export default function ContactInfoScreen() {
   const { colors, isDark } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [imageVersion, setImageVersion] = useState(Date.now());
   const isOnline = useIsOnline();
 
    const onRefresh = async () => {
@@ -35,6 +36,7 @@ export default function ContactInfoScreen() {
           await syncProfile(token);
           const updatedProfile = await getProfile();
           setProfile(updatedProfile);
+          setImageVersion(Date.now());
         }
   
     } catch (error) {
@@ -50,15 +52,15 @@ export default function ContactInfoScreen() {
         if (!token) return;
 
         try{
-            // await syncProfile(token);
             const localProfile = await getProfile();
             
             setProfile(localProfile);
             console.log ("LOCAL PROFILE INFO==>", localProfile)
             if (isOnline) {
-              const serverProfile = await syncProfile(token);
-              await saveProfile(serverProfile);
-              setProfile(serverProfile);
+              await syncProfile(token);
+              const updatedProfile = await getProfile();
+              setProfile(updatedProfile);
+              setImageVersion(Date.now());
             }
             // setPreviewImage(null);
         }catch (error) {
@@ -85,7 +87,10 @@ export default function ContactInfoScreen() {
             <Image
               source={{
                 uri:
-                  profile?.local_image_path ?? profile?.preview_url ?? profile?.image_url,
+                  profile?.local_image_path ? `${profile.local_image_path}?t=${imageVersion}`
+                  : profile?.preview_url ? `${profile.preview_url}?t=${imageVersion}`
+                  : profile?.image_url ? `${profile.image_url}?t=${imageVersion}`
+                  : undefined,
               }}
               style={{
                 width: 90,

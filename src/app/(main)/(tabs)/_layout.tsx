@@ -1,10 +1,20 @@
 import Header from "@/src/components/Header";
 import { useTheme } from "@/src/context/ThemeContext";
+import { getUnreadCount } from "@/src/database/notification.service";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 
 export default function TabsLayout() {
   const {colors, isDark} = useTheme();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      getUnreadCount().then(setUnreadCount);
+    }, [])
+  );
+
   return (
 
     <Tabs
@@ -52,6 +62,16 @@ export default function TabsLayout() {
         name="notifications"
         options={{
           title: "Notifications",
+          tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: "#EF4444",
+            fontSize: 11,
+            fontWeight: "bold",
+            minWidth: 18,
+            height: 18,
+            lineHeight: 18,
+            paddingHorizontal: 4,
+          },
           tabBarIcon: ({ color, size }) => (
             <Ionicons
               name="notifications"

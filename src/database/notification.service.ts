@@ -48,3 +48,10 @@ export const markAllAsRead = async () => {
     `
   );
 };
+
+export const getUnreadCount = async (): Promise<number> => {
+  const result = await db.getFirstAsync<{ count: number }>(
+    `SELECT COUNT(*) as count FROM notifications WHERE is_read = 0`
+  );
+  return result?.count ?? 0;
+};
