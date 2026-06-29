@@ -4,6 +4,12 @@ import { db } from "./db";
 export const insertNotification = async (
   notification: NotificationItem
 ) => {
+  const existing = await db.getFirstAsync<{ id: number }>(
+    `SELECT id FROM notifications WHERE title = ? AND message = ?`,
+    [notification.title, notification.message]
+  );
+  if (existing) return;
+
   await db.runAsync(
     `
     INSERT INTO notifications

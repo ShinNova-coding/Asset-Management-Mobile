@@ -24,6 +24,45 @@ function RootNavigator() {
 
   // 2. The entire Notification Listener block safely lives here now
   useEffect(() => {
+    // Handle notifications received while app was in background/killed
+    async function handleInitialNotification() {
+      const response = await Notifications.getLastNotificationResponseAsync();
+      if (response) {
+        const title = response.notification.request.content.title || "";
+        const message = response.notification.request.content.body || "";
+        const lowerTitle = title.toLowerCase();
+
+        let type: NotificationType = "maintenance_returned";
+
+        if (lowerTitle.includes("maintenance returned")) {
+          type = "maintenance_returned";
+        } else if (lowerTitle.includes("maintenance approved")) {
+          type = "maintenance_approved";
+        } else if (lowerTitle.includes("maintenance canceled")) {
+          type = "maintenance_canceled";
+        } else if (lowerTitle.includes("expense approved")) {
+          type = "expense_approved";
+        } else if (lowerTitle.includes("expense canceled")) {
+          type = "expense_canceled";
+        } else if (lowerTitle.includes("asset assigned")) {
+          type = "asset_assigned";
+        }
+
+        await insertNotification({
+          title,
+          message,
+          type,
+          is_read: 0,
+          created_at: new Date().toISOString(),
+        });
+
+        await updateUnreadCount();
+      }
+    }
+
+    handleInitialNotification();
+
+    // Handle notifications received while app is in foreground
     const receivedSubscription = Notifications.addNotificationReceivedListener(
       async (notification) => {
         const title = notification.request.content.title || "";
@@ -46,7 +85,6 @@ function RootNavigator() {
           type = "asset_assigned";
         }
 
-        // Save to your local SQLite DB
         await insertNotification({
           title,
           message,
@@ -54,17 +92,45 @@ function RootNavigator() {
           is_read: 0,
           created_at: new Date().toISOString(),
         });
-        
+
         console.log("Notification saved to DB");
 
-        // Force the global state provider to update the tab badge count instantly
         await updateUnreadCount();
       }
     );
 
     const responseSubscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        console.log("User tapped notification:", response);
+      async (response) => {
+        const title = response.notification.request.content.title || "";
+        const message = response.notification.request.content.body || "";
+        const lowerTitle = title.toLowerCase();
+
+        let type: NotificationType = "maintenance_returned";
+
+        if (lowerTitle.includes("maintenance returned")) {
+          type = "maintenance_returned";
+        } else if (lowerTitle.includes("maintenance approved")) {
+          type = "maintenance_approved";
+        } else if (lowerTitle.includes("maintenance canceled")) {
+          type = "maintenance_canceled";
+        } else if (lowerTitle.includes("expense approved")) {
+          type = "expense_approved";
+        } else if (lowerTitle.includes("expense canceled")) {
+          type = "expense_canceled";
+        } else if (lowerTitle.includes("asset assigned")) {
+          type = "asset_assigned";
+        }
+
+        await insertNotification({
+          title,
+          message,
+          type,
+          is_read: 0,
+          created_at: new Date().toISOString(),
+        });
+
+        console.log("Notification saved from tap:", title);
+        await updateUnreadCount();
       }
     );
 
