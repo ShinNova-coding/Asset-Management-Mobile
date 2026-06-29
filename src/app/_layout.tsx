@@ -2,135 +2,74 @@ import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import { Redirect, Stack, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { NotificationProvider, useNotifications } from "../context/NotificationContext";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { initDatabase } from "../database/db";
 import { insertNotification } from "../database/notification.service";
-import { createNotificationChannel } from "../services/notification.service";
+import { createNotificationChannel, registerForPushNotifications } from "../services/notification.service";
 import { NotificationType } from "../types/notification";
 
 SplashScreen.preventAutoHideAsync();
 
-function RootNavigator() {
-  const { token, isLoading: authLoading, user } = useAuth();
-  const { isLoading: themeLoading } = useTheme();
+// Helper function to process notification text payloads cleanly
+const processAndSaveNotification = async (title: string, message: string, callback?: () => void) => {
+  const lowerTitle = title.toLowerCase();
+  let type: NotificationType = "maintenance_returned";
+
+  if (lowerTitle.includes("maintenance returned")) {
+    type = "maintenance_returned";
+  } else if (lowerTitle.includes("maintenance approved")) {
+    type = "maintenance_approved";
+  } else if (lowerTitle.includes("maintenance canceled")) {
+    type = "maintenance_canceled";
+  } else if (lowerTitle.includes("expense approved")) {
+    type = "expense_approved";
+  } else if (lowerTitle.includes("expense canceled")) {
+    type = "expense_canceled";
+  } else if (lowerTitle.includes("asset assigned")) {
+    type = "asset_assigned";
+  }
+
+  await insertNotification({
+    title,
+    message,
+    type,
+    is_read: 0,
+    created_at: new Date().toISOString(),
+  });
   
-  // 1. We extract this hook here, inside the consumer layer where NotificationProvider is active
+  if (callback) {
+    await callback();
+  }
+};
+
+// 1. This listener component sits directly inside the Provider so it NEVER unmounts or redirects
+function NotificationListenerBridge() {
   const { updateUnreadCount } = useNotifications();
-  const segments = useSegments();
+  const lastNotificationResponse = Notifications.useLastNotificationResponse();
+  const hasProcessedColdStart = useRef(false);
 
-  // 2. The entire Notification Listener block safely lives here now
   useEffect(() => {
-    // Handle notifications received while app was in background/killed
-    async function handleInitialNotification() {
-      const response = await Notifications.getLastNotificationResponseAsync();
-      if (response) {
-        const title = response.notification.request.content.title || "";
-        const message = response.notification.request.content.body || "";
-        const lowerTitle = title.toLowerCase();
-
-        let type: NotificationType = "maintenance_returned";
-
-        if (lowerTitle.includes("maintenance returned")) {
-          type = "maintenance_returned";
-        } else if (lowerTitle.includes("maintenance approved")) {
-          type = "maintenance_approved";
-        } else if (lowerTitle.includes("maintenance canceled")) {
-          type = "maintenance_canceled";
-        } else if (lowerTitle.includes("expense approved")) {
-          type = "expense_approved";
-        } else if (lowerTitle.includes("expense canceled")) {
-          type = "expense_canceled";
-        } else if (lowerTitle.includes("asset assigned")) {
-          type = "asset_assigned";
-        }
-
-        await insertNotification({
-          title,
-          message,
-          type,
-          is_read: 0,
-          created_at: new Date().toISOString(),
-        });
-
-        await updateUnreadCount();
-      }
-    }
-
-    handleInitialNotification();
-
-    // Handle notifications received while app is in foreground
+    // Foreground streams
     const receivedSubscription = Notifications.addNotificationReceivedListener(
       async (notification) => {
         const title = notification.request.content.title || "";
         const message = notification.request.content.body || "";
-        const lowerTitle = title.toLowerCase();
-
-        let type: NotificationType = "maintenance_returned";
-
-        if (lowerTitle.includes("maintenance returned")) {
-          type = "maintenance_returned";
-        } else if (lowerTitle.includes("maintenance approved")) {
-          type = "maintenance_approved";
-        } else if (lowerTitle.includes("maintenance canceled")) {
-          type = "maintenance_canceled";
-        } else if (lowerTitle.includes("expense approved")) {
-          type = "expense_approved";
-        } else if (lowerTitle.includes("expense canceled")) {
-          type = "expense_canceled";
-        } else if (lowerTitle.includes("asset assigned")) {
-          type = "asset_assigned";
-        }
-
-        await insertNotification({
-          title,
-          message,
-          type,
-          is_read: 0,
-          created_at: new Date().toISOString(),
-        });
-
-        console.log("Notification saved to DB");
-
-        await updateUnreadCount();
+        console.log("Foreground Notification captured successfully:", title);
+        await processAndSaveNotification(title, message, updateUnreadCount);
       }
     );
 
+    // Background runtime taps
     const responseSubscription = Notifications.addNotificationResponseReceivedListener(
       async (response) => {
         const title = response.notification.request.content.title || "";
         const message = response.notification.request.content.body || "";
-        const lowerTitle = title.toLowerCase();
-
-        let type: NotificationType = "maintenance_returned";
-
-        if (lowerTitle.includes("maintenance returned")) {
-          type = "maintenance_returned";
-        } else if (lowerTitle.includes("maintenance approved")) {
-          type = "maintenance_approved";
-        } else if (lowerTitle.includes("maintenance canceled")) {
-          type = "maintenance_canceled";
-        } else if (lowerTitle.includes("expense approved")) {
-          type = "expense_approved";
-        } else if (lowerTitle.includes("expense canceled")) {
-          type = "expense_canceled";
-        } else if (lowerTitle.includes("asset assigned")) {
-          type = "asset_assigned";
-        }
-
-        await insertNotification({
-          title,
-          message,
-          type,
-          is_read: 0,
-          created_at: new Date().toISOString(),
-        });
-
-        console.log("Notification saved from tap:", title);
-        await updateUnreadCount();
+        console.log("Notification tapped in background state:", title);
+        await processAndSaveNotification(title, message, updateUnreadCount);
       }
     );
 
@@ -139,6 +78,36 @@ function RootNavigator() {
       responseSubscription.remove();
     };
   }, [updateUnreadCount]);
+
+  // Cold start processing
+  useEffect(() => {
+    if (
+      lastNotificationResponse && 
+      lastNotificationResponse.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER &&
+      !hasProcessedColdStart.current
+    ) {
+      hasProcessedColdStart.current = true;
+      const title = lastNotificationResponse.notification.request.content.title || "";
+      const message = lastNotificationResponse.notification.request.content.body || "";
+      console.log("Cold start notification caught:", title);
+      processAndSaveNotification(title, message, updateUnreadCount);
+    }
+  }, [lastNotificationResponse, updateUnreadCount]);
+
+  return null; // Invisible bridge component, runs purely for background logic hooks
+}
+
+function RootNavigator() {
+  const { token, isLoading: authLoading, user } = useAuth();
+  const { isLoading: themeLoading } = useTheme();
+  const segments = useSegments();
+
+  // Push token registration bound safely to session validation states
+  useEffect(() => {
+    if (token && user) {
+      registerForPushNotifications();
+    }
+  }, [token, user]);
 
   if (authLoading || themeLoading) {
     return null;
@@ -161,7 +130,6 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
-  // Base initialization loop remains pristine down here
   useEffect(() => {
     async function prepare() {
       try {
@@ -171,10 +139,9 @@ export default function RootLayout() {
           await SplashScreen.hideAsync();
         }
       } catch (error) {
-        console.log(error);
+        console.log("Core initialization failed:", error);
       }
     }
-
     prepare();
   }, [loaded]);
 
@@ -187,6 +154,8 @@ export default function RootLayout() {
       <AuthProvider>
         <ThemeProvider>
           <NotificationProvider>
+            {/* The bridge intercepts streams globally without interfering with auth redirects */}
+            <NotificationListenerBridge />
             <RootNavigator />
           </NotificationProvider>
         </ThemeProvider>
