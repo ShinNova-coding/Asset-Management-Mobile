@@ -74,7 +74,7 @@ const loadHistory = async () => {
         id: `maintenance-${item.id}`,
         type: "maintenance",
         title: "Asset Maintenance",
-        asset: item.name ?? "Unknown Asset",
+        asset: item.asset?.name ?? item.name ?? "Unknown Asset",
         isDeleted: false,
         rawDate: item.updated_at,
         date: dayjs(item.updated_at).format("DD MMM YYYY, h:mm A"),
