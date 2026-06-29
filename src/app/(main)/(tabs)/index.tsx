@@ -393,8 +393,22 @@ export default function DashboardScreen() {
                     <View style={styles.conditionBadge}>
                       <Text style={styles.conditionText}>{item.condition}</Text>
                     </View>
-                    <View style={styles.availableBadge}>
-                      <Text style={styles.availableText}>{item.status}</Text>
+                    <View style={[
+                      styles.availableBadge,
+                      item.status === "maintenance"
+                        ? { backgroundColor: "#FEF3C7" }
+                        : item.status === "returned"
+                          ? { backgroundColor: "#E0E7FF" }
+                          : { backgroundColor: "#DCFCE7" },
+                    ]}>
+                      <Text style={[
+                        styles.availableText,
+                        item.status === "maintenance"
+                          ? { color: "#D97706" }
+                          : item.status === "returned"
+                            ? { color: "#4F46E5" }
+                            : { color: "#16A34A" },
+                      ]}>{item.status}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
