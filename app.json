@@ -31,6 +31,11 @@
     ],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "itams-199df"
+      }
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.itams.app",
