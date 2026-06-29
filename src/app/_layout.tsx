@@ -58,6 +58,7 @@ function NotificationListenerBridge() {
   const hasProcessedColdStart = useRef(false);
 
   useEffect(() => {
+    console.log("Notification listeners registered");
     // Foreground streams
     const receivedSubscription = Notifications.addNotificationReceivedListener(
       async (notification) => {

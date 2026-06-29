@@ -4,9 +4,10 @@ import { db } from "./db";
 export const insertNotification = async (
   notification: NotificationItem
 ) => {
+  const fiveSecondsAgo = new Date(Date.now() - 5000).toISOString();
   const existing = await db.getFirstAsync<{ id: number }>(
-    `SELECT id FROM notifications WHERE title = ? AND message = ?`,
-    [notification.title, notification.message]
+    `SELECT id FROM notifications WHERE title = ? AND message = ? AND created_at > ?`,
+    [notification.title, notification.message, fiveSecondsAgo]
   );
   if (existing) return;
 
