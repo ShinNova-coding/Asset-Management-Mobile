@@ -92,8 +92,8 @@ const renderIcon = (type: NotificationType) => {
 
     case "asset_assigned":
       return (
-        <View style={[styles.iconContainer,{backgroundColor:"#3B82F6"}]}>
-          <Ionicons name="return-up-back" size={20} color="#fff"/>
+        <View style={[styles.iconContainer,{backgroundColor:"#6366F1"}]}>
+          <Ionicons name="briefcase" size={20} color="#fff"/>
         </View>
       );
   }

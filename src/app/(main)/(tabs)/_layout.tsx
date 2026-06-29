@@ -1,18 +1,18 @@
 import Header from "@/src/components/Header";
+import { useNotifications } from "@/src/context/NotificationContext";
 import { useTheme } from "@/src/context/ThemeContext";
-import { getUnreadCount } from "@/src/database/notification.service";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
 export default function TabsLayout() {
   const {colors, isDark} = useTheme();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const {unreadCount, updateUnreadCount} = useNotifications();
 
   useFocusEffect(
     useCallback(() => {
-      getUnreadCount().then(setUnreadCount);
-    }, [])
+      updateUnreadCount();
+    }, [updateUnreadCount])
   );
 
   return (
