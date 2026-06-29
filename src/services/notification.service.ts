@@ -53,18 +53,9 @@ export async function registerForPushNotifications() {
 
     await createNotificationChannel();
 
-    const projectId = process.env.EXPO_PUBLIC_PROJECT_ID;
+    const token = await Notifications.getDevicePushTokenAsync();
 
-    if (!projectId) {
-      console.log("Missing EXPO_PUBLIC_PROJECT_ID, falling back to device token");
-      const token = await Notifications.getDevicePushTokenAsync();
-      console.log("FCM TOKEN:", token.data);
-      return token.data;
-    }
-
-    const token = await Notifications.getExpoPushTokenAsync({ projectId });
-
-    console.log("Expo Push Token:", token.data);
+    console.log("FCM TOKEN:", token.data);
 
     return token.data;
   } catch (e) {

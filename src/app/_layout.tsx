@@ -4,6 +4,7 @@ import { Redirect, Stack, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { api } from "../api/client";
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import { NotificationProvider, useNotifications } from "../context/NotificationContext";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
@@ -17,21 +18,25 @@ SplashScreen.preventAutoHideAsync();
 // Helper function to process notification text payloads cleanly
 const processAndSaveNotification = async (title: string, message: string, callback?: () => void) => {
   const lowerTitle = title.toLowerCase();
+  const lowerMessage = message.toLowerCase();
+  const combined = `${lowerTitle} ${lowerMessage}`;
   let type: NotificationType = "maintenance_returned";
 
-  if (lowerTitle.includes("maintenance returned")) {
+  if (combined.includes("maintenance") && (combined.includes("return") || combined.includes("returned"))) {
     type = "maintenance_returned";
-  } else if (lowerTitle.includes("maintenance approved")) {
+  } else if (combined.includes("maintenance") && combined.includes("approved")) {
     type = "maintenance_approved";
-  } else if (lowerTitle.includes("maintenance canceled")) {
+  } else if (combined.includes("maintenance") && (combined.includes("cancel") || combined.includes("canceled") || combined.includes("rejected"))) {
     type = "maintenance_canceled";
-  } else if (lowerTitle.includes("expense approved")) {
+  } else if (combined.includes("expense") && combined.includes("approved")) {
     type = "expense_approved";
-  } else if (lowerTitle.includes("expense canceled")) {
+  } else if (combined.includes("expense") && (combined.includes("cancel") || combined.includes("canceled") || combined.includes("rejected"))) {
     type = "expense_canceled";
-  } else if (lowerTitle.includes("asset assigned")) {
+  } else if (combined.includes("asset") && combined.includes("assigned")) {
     type = "asset_assigned";
   }
+
+  console.log("Notification matched type:", type, "from title:", title);
 
   await insertNotification({
     title,
@@ -58,8 +63,13 @@ function NotificationListenerBridge() {
       async (notification) => {
         const title = notification.request.content.title || "";
         const message = notification.request.content.body || "";
-        console.log("Foreground Notification captured successfully:", title);
-        await processAndSaveNotification(title, message, updateUnreadCount);
+        const data = notification.request.content.data || {};
+        const finalTitle = title || (data as any).title || "";
+        const finalMessage = message || (data as any).message || (data as any).body || "";
+        console.log("Foreground Notification captured:", finalTitle, finalMessage, data);
+        if (finalTitle || finalMessage) {
+          await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
+        }
       }
     );
 
@@ -68,8 +78,13 @@ function NotificationListenerBridge() {
       async (response) => {
         const title = response.notification.request.content.title || "";
         const message = response.notification.request.content.body || "";
-        console.log("Notification tapped in background state:", title);
-        await processAndSaveNotification(title, message, updateUnreadCount);
+        const data = response.notification.request.content.data || {};
+        const finalTitle = title || (data as any).title || "";
+        const finalMessage = message || (data as any).message || (data as any).body || "";
+        console.log("Notification tapped:", finalTitle, finalMessage, data);
+        if (finalTitle || finalMessage) {
+          await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
+        }
       }
     );
 
@@ -105,7 +120,11 @@ function RootNavigator() {
   // Push token registration bound safely to session validation states
   useEffect(() => {
     if (token && user) {
-      registerForPushNotifications();
+      registerForPushNotifications().then((pushToken) => {
+        if (pushToken) {
+          api.post("/save-fcm-token", { fcm_token: pushToken }).catch(() => {});
+        }
+      });
     }
   }, [token, user]);
 
