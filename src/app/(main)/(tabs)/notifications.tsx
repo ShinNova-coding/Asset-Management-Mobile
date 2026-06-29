@@ -4,7 +4,7 @@ import {
   getNotifications,
   markAllAsRead as markAllAsReadDB
 } from "@/src/database/notification.service";
-import { NotificationItem } from "@/src/types/notification";
+import { NotificationItem, NotificationType } from "@/src/types/notification";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
@@ -24,9 +24,12 @@ export default function NotificationScreen() {
   const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
 
+
+
   const loadNotifications = async () => {
   const data = await getNotifications();
-  setNotifications(data);
+
+    setNotifications(data);
   };
 
   const handleDelete = async (id: number) => {
@@ -54,75 +57,120 @@ const handleMarkAllRead = async () => {
         return <NotiSkeleton />;
       }
   
-  const renderIcon = (type: string) => {
-    switch (type) {
-      case "assigned":
-        return (
-          <View style={[styles.iconContainer, { backgroundColor: colors.primary }]}>
-            <Ionicons
-              name="document-text"
-              size={20}
-              color="#fff"
-            />
-          </View>
-        );
+const renderIcon = (type: NotificationType) => {
+  switch (type) {
 
-      case "repair":
-        return (
-          <View style={[styles.iconContainer, { backgroundColor: colors.primary }]}>
-            <Ionicons
-              name="build"
-              size={20}
-              color="#fff"
-            />
-          </View>
-        );
+    case "maintenance_returned":
+      return (
+        <View style={[styles.iconContainer,{backgroundColor:"#3B82F6"}]}>
+          <Ionicons name="return-up-back" size={20} color="#fff"/>
+        </View>
+      );
 
-      case "urgent":
-        return (
-          <View style={[styles.iconContainer, { backgroundColor: "#FEE2E2" }]}>
-            <Ionicons
-              name="calendar"
-              size={20}
-              color="#DC2626"
-            />
-          </View>
-        );
+    case "maintenance_approved":
+      return (
+        <View style={[styles.iconContainer,{backgroundColor:"#10B981"}]}>
+          <Ionicons name="checkmark-circle" size={20} color="#fff"/>
+        </View>
+      );
 
-      default:
-        return null;
-    }
-  };
+    case "maintenance_canceled":
+      return (
+        <View style={[styles.iconContainer,{backgroundColor:"#EF4444"}]}>
+          <Ionicons name="close-circle" size={20} color="#fff"/>
+        </View>
+      );
 
-  // const deleteNotification = (id: string) => {
-  //   setNotifications((notifications) => notifications.filter((item) => item.id !== id));
-  // }
+    case "expense_approved":
+      return (
+        <View style={[styles.iconContainer,{backgroundColor:"#16A34A"}]}>
+          <Ionicons name="cash" size={20} color="#fff"/>
+        </View>
+      );
 
-  // const markAllAsRead = () => {
-  //   setNotifications((notifications) => notifications.map((item)=> ({ ...item, unread: false})));
-  // }
-  const groupedNotifications = [
-  {
-    title: "Today",
-    data: notifications.filter(
-      (item) => item.section === "Today"
-    ),
-  },
+    case "expense_canceled":
+      return (
+        <View style={[styles.iconContainer,{backgroundColor:"#DC2626"}]}>
+          <Ionicons name="wallet" size={20} color="#fff"/>
+        </View>
+      );
+  }
+};
 
-  {
-    title: "Yesterday",
-    data: notifications.filter(
-      (item) => item.section === "Yesterday"
-    ),
-  },
+//  const getSection = (dateString: string) => {
+//   const notificationDate = new Date(dateString);
+//   const today = new Date();
 
-  {
-    title: "This Week",
-    data: notifications.filter(
-      (item) => item.section === "This Week"
-    ),
-  },
-];
+//   if (
+//     notificationDate.toDateString() === today.toDateString()
+//   ) {
+//     return "Today";
+//   }
+
+//   const yesterday = new Date();
+//   yesterday.setDate(today.getDate() - 1);
+
+//   if (
+//     notificationDate.toDateString() === yesterday.toDateString()
+//   ) {
+//     return "Yesterday";
+//   }
+
+//   // Beginning of this week (Monday)
+//   const firstDayOfWeek = new Date(today);
+//   const day = firstDayOfWeek.getDay();
+
+//   const diff =
+//     day === 0
+//       ? 6
+//       : day - 1;
+
+//   firstDayOfWeek.setDate(
+//     firstDayOfWeek.getDate() - diff
+//   );
+
+//   if (notificationDate >= firstDayOfWeek) {
+//     return "This Week";
+//   }
+
+//   return "Older";
+// };
+
+const today = new Date();
+
+const getSection = (dateString: string) => {
+  const notificationDate = new Date(dateString);
+
+  const diffTime = today.getTime() - notificationDate.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays <= 7) return "This Week";
+
+  return "Older";
+};
+
+// const groupedNotifications = ["Today", "Yesterday", "This Week", "Older"]
+//   .map(section => ({
+//     title: section,
+//     data: notifications.filter(
+//       item => getSection(item.created_at) === section
+//     ),
+//   }))
+//   .filter(section => section.data.length > 0);
+
+const groupedNotifications = React.useMemo(() => {
+  return ["Today", "Yesterday", "This Week", "Older"]
+    .map(section => ({
+      title: section,
+      data: notifications.filter(
+        item => getSection(item.created_at) === section
+      ),
+    }))
+    .filter(section => section.data.length > 0);
+}, [notifications]);
+
 
   return (
     <SafeAreaView style={[styles.container,{ backgroundColor: colors.background}]}>
@@ -143,7 +191,7 @@ const handleMarkAllRead = async () => {
 
       <SectionList
         sections={groupedNotifications}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id!.toString()}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 120,

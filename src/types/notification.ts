@@ -1,8 +1,16 @@
+export type NotificationType =
+  | "maintenance_returned"
+  | "maintenance_approved"
+  | "maintenance_canceled"
+  | "expense_approved"
+  | "expense_canceled"
+  | "asset_assigned";
+
 export interface NotificationItem {
   id?: number;
   title: string;
   message: string;
-  type: "assigned" | "repair";
+  type: NotificationType;
   is_read: number;
   created_at: string;
 }

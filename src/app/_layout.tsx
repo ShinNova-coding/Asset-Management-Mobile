@@ -8,6 +8,9 @@ import { AuthProvider, useAuth } from "../context/AuthContext";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { initDatabase } from "../database/db";
 import { insertNotification } from "../database/notification.service";
+import { createNotificationChannel } from "../services/notification.service";
+import { NotificationType } from "../types/notification";
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -49,6 +52,7 @@ export default function RootLayout() {
     async function prepare() {
       try {
         await initDatabase();
+        await createNotificationChannel();
         if (loaded) {
           await SplashScreen.hideAsync();
         }
@@ -72,14 +76,28 @@ export default function RootLayout() {
 
           const lowerTitle = title.toLowerCase();
 
-           let type: "assigned" | "repair" = "assigned";
+          let type: NotificationType = "maintenance_returned";
 
-          if ( lowerTitle.includes("maintenance")||lowerTitle.includes("repair") )
-             { 
-            type = "repair";
-             }
+          if (lowerTitle.includes("maintenance returned")) {
+            type = "maintenance_returned";
+          }
+          else if (lowerTitle.includes("maintenance approved")) {
+            type = "maintenance_approved";
+          }
+          else if (lowerTitle.includes("maintenance canceled")) {
+            type = "maintenance_canceled";
+          }
+          else if (lowerTitle.includes("expense approved")) {
+            type = "expense_approved";
+          }
+          else if (lowerTitle.includes("expense canceled")) {
+            type = "expense_canceled";
+          }
+          else if (lowerTitle.includes("asset assigned")) {
+            type = "asset_assigned";
+          }
 
-          insertNotification({
+          await insertNotification({
             title,
             message,
             type,

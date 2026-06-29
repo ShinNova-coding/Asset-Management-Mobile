@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { api } from "../api/client";
+import { api, setToken as setApiToken } from "../api/client";
 import { db } from "../database/db";
 import { logoutUser } from "../services/auth.service";
 import { syncProfile } from "../services/syncProfile";
@@ -81,10 +81,10 @@ useEffect(() => {
       return;
     }
 
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setToken(token);
+      setApiToken(token);
+      setToken(token);
 
-    const savedProfile = await getProfile();
+      const savedProfile = await getProfile();
 
     if (savedProfile) {
       setUser(savedProfile);
@@ -121,7 +121,7 @@ useEffect(() => {
       await SecureStore.setItemAsync("user_id", data.user.id)
       await SecureStore.setItemAsync("employee_id", data.user.employee_id);
 
-      api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+      setApiToken(data.token);
 
       const pushToken = await registerForPushNotifications();
       console.log("PUSH TOKEN:", pushToken);
@@ -136,8 +136,7 @@ useEffect(() => {
       // setUser(data.user);
 
       await syncProfile(data.token); 
-      const localProfile = await getProfile();
-      setUser(localProfile || data.user)
+      setUser(data.user)
       
       // console.log("LOGIN, USER SET: ", localProfile)
       return true;
@@ -163,7 +162,7 @@ useEffect(() => {
     await SecureStore.deleteItemAsync("user_id")
     await SecureStore.deleteItemAsync("employee_id");
     await clearProfile();
-    delete api.defaults.headers.common["Authorization"];
+    setApiToken(null);
 
     setToken(null);
     setUser(null);
