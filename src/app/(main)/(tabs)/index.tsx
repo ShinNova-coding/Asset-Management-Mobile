@@ -94,8 +94,8 @@ export default function DashboardScreen() {
           getAssignedAssets(),
           getCategories(),
         ]);
-       console.log("ASSIGNED ASSETS==>", assignedAssets)
-       console.log("CATEGORY==>", rescategories)
+      //  console.log("ASSIGNED ASSETS==>", assignedAssets)
+      //  console.log("CATEGORY==>", rescategories)
       setAssets(assignedAssets || []);
       setCategories(rescategories || []);
 

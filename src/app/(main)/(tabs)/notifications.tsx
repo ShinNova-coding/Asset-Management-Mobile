@@ -175,7 +175,7 @@ const groupedNotifications = React.useMemo(() => {
 
 
   return (
-    <SafeAreaView style={[styles.container,{ backgroundColor: colors.background}]}>
+    <SafeAreaView style={[styles.container,{ backgroundColor: colors.background}]} edges={["top"]}>
 
       <View style={styles.titleRow}>
         <Text style={[styles.title, {color: colors.text}]}>Notifications</Text>

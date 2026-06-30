@@ -65,12 +65,20 @@ function NotificationListenerBridge() {
         const title = notification.request.content.title || "";
         const message = notification.request.content.body || "";
         const data = notification.request.content.data || {};
-        const finalTitle = title || (data as any).title || "";
-        const finalMessage = message || (data as any).message || (data as any).body || "";
-        console.log("Foreground Notification captured:", finalTitle, finalMessage, data);
-        if (finalTitle || finalMessage) {
-          await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
-        }
+        console.log("Raw notification payload:", JSON.stringify({ title, message, data }));
+
+        const finalTitle = title
+          || (data as any).title
+          || (data as any).titleMessage
+          || "";
+        const finalMessage = message
+          || (data as any).message
+          || (data as any).body
+          || (data as any).text
+          || (data as any).description
+          || "";
+        console.log("Foreground Notification captured:", finalTitle, finalMessage);
+        await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
       }
     );
 
@@ -80,12 +88,20 @@ function NotificationListenerBridge() {
         const title = response.notification.request.content.title || "";
         const message = response.notification.request.content.body || "";
         const data = response.notification.request.content.data || {};
-        const finalTitle = title || (data as any).title || "";
-        const finalMessage = message || (data as any).message || (data as any).body || "";
-        console.log("Notification tapped:", finalTitle, finalMessage, data);
-        if (finalTitle || finalMessage) {
-          await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
-        }
+        console.log("Raw tapped payload:", JSON.stringify({ title, message, data }));
+
+        const finalTitle = title
+          || (data as any).title
+          || (data as any).titleMessage
+          || "";
+        const finalMessage = message
+          || (data as any).message
+          || (data as any).body
+          || (data as any).text
+          || (data as any).description
+          || "";
+        console.log("Notification tapped:", finalTitle, finalMessage);
+        await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
       }
     );
 
@@ -103,9 +119,11 @@ function NotificationListenerBridge() {
       !hasProcessedColdStart.current
     ) {
       hasProcessedColdStart.current = true;
-      const title = lastNotificationResponse.notification.request.content.title || "";
-      const message = lastNotificationResponse.notification.request.content.body || "";
-      console.log("Cold start notification caught:", title);
+      const content = lastNotificationResponse.notification.request.content;
+      const data = content.data || {};
+      const title = content.title || (data as any).title || (data as any).titleMessage || "";
+      const message = content.body || (data as any).message || (data as any).body || (data as any).text || (data as any).description || "";
+      console.log("Cold start notification caught:", title, message);
       processAndSaveNotification(title, message, updateUnreadCount);
     }
   }, [lastNotificationResponse, updateUnreadCount]);
