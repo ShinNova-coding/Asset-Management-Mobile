@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { getUnreadCount as fetchUnreadCountFromDB } from "../database/notification.service";
+import { AppState, AppStateStatus } from "react-native";
+import { syncMissedNotifications } from "../services/notification.service";
 
 interface NotificationContextType {
   unreadCount: number;
@@ -12,12 +14,24 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [unreadCount, setUnreadCount] = useState(0);
 
   const updateUnreadCount = useCallback(async () => {
+    await syncMissedNotifications();
     const count = await fetchUnreadCountFromDB();
     setUnreadCount(count);
   }, []);
 
   useEffect(() => {
     updateUnreadCount();
+    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+      if (nextAppState === "active") {
+        await updateUnreadCount();
+      }
+    };
+
+    const subscription = AppState.addEventListener("change", handleAppStateChange);
+
+    return () => {
+      subscription.remove();
+    };
   }, [updateUnreadCount]);
 
   return (

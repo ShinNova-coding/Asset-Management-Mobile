@@ -1,6 +1,7 @@
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { insertNotification } from "../database/notification.service";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -10,6 +11,48 @@ Notifications.setNotificationHandler({
     shouldSetBadge: true,
   }),
 });
+
+export async function syncMissedNotifications() {
+  try {
+    // Fetch all notifications currently sitting in the device's notification center
+    const deliveredNotifs = await Notifications.getPresentedNotificationsAsync();
+    
+    if (deliveredNotifs.length === 0) return;
+
+    for (const notif of deliveredNotifs) {
+      const title = notif.request.content.title || "";
+      const message = notif.request.content.body || "";
+      
+      if (!title && !message) continue;
+
+      // Deduce type exactly like your helper function
+      const combined = `${title.toLowerCase()} ${message.toLowerCase()}`;
+      let type: any = "maintenance_returned";
+      
+      if (combined.includes("maintenance") && (combined.includes("return") || combined.includes("returned"))) type = "maintenance_returned";
+      else if (combined.includes("maintenance") && combined.includes("approved")) type = "maintenance_approved";
+      else if (combined.includes("maintenance") && (combined.includes("cancel") || combined.includes("canceled") || combined.includes("rejected"))) type = "maintenance_canceled";
+      else if (combined.includes("expense") && combined.includes("approved")) type = "expense_approved";
+      else if (combined.includes("expense") && (combined.includes("cancel") || combined.includes("canceled") || combined.includes("rejected"))) type = "expense_canceled";
+      else if (combined.includes("asset") && combined.includes("assigned")) type = "asset_assigned";
+
+      // Save to SQLite (your insertNotification already handles duplication checks!)
+      await insertNotification({
+        title,
+        message,
+        type,
+        is_read: 0,
+        created_at: new Date().toISOString(),
+      });
+    }
+    
+    // Optional: clear them from the notification center once consumed
+    // await Notifications.dismissAllNotificationsAsync();
+    
+  } catch (error) {
+    console.log("Error syncing notifications on startup:", error);
+  }
+}
 
 export async function createNotificationChannel() {
   if (Platform.OS === "android") {

@@ -1,3 +1,4 @@
+import { useNotifications } from "@/src/context/NotificationContext";
 import { useTheme } from "@/src/context/ThemeContext";
 import {
   deleteNotification as deleteNotificationDB,
@@ -21,6 +22,7 @@ import NotiSkeleton from "../../../components/skeletons/NotiSkeleton";
 
 export default function NotificationScreen() {
 
+  const { updateUnreadCount } = useNotifications();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -32,8 +34,17 @@ export default function NotificationScreen() {
   };
 
   const handleDelete = async (id: number) => {
+
+  try {
   await deleteNotificationDB(id);
+
+  await updateUnreadCount();
+
   loadNotifications();
+
+ }catch (error) {
+      console.log("Failed to delete notification:", error);
+    }
 };
 
 const handleMarkAllRead = async () => {
