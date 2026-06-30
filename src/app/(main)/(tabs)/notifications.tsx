@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
+  RefreshControl,
   SectionList,
   StyleSheet,
   Text,
@@ -26,6 +27,14 @@ export default function NotificationScreen() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadNotifications();
+    await updateUnreadCount();
+    setRefreshing(false);
+  };
 
   const loadNotifications = async () => {
   const data = await getNotifications();
@@ -62,6 +71,32 @@ const handleMarkAllRead = async () => {
     useEffect(() => {
       loadNotifications();
     }, [reloadKey]);
+
+const today = new Date();
+
+const getSection = (dateString: string) => {
+  const notificationDate = new Date(dateString);
+
+  const diffTime = today.getTime() - notificationDate.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays <= 7) return "This Week";
+
+  return "Older";
+};
+
+const groupedNotifications = React.useMemo(() => {
+  return ["Today", "Yesterday", "This Week", "Older"]
+    .map(section => ({
+      title: section,
+      data: notifications.filter(
+        item => getSection(item.created_at) === section
+      ),
+    }))
+    .filter(section => section.data.length > 0);
+}, [notifications]);
 
       if (loading) {
         return <NotiSkeleton />;
@@ -153,42 +188,6 @@ const renderIcon = (type: NotificationType) => {
 //   return "Older";
 // };
 
-const today = new Date();
-
-const getSection = (dateString: string) => {
-  const notificationDate = new Date(dateString);
-
-  const diffTime = today.getTime() - notificationDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays <= 7) return "This Week";
-
-  return "Older";
-};
-
-// const groupedNotifications = ["Today", "Yesterday", "This Week", "Older"]
-//   .map(section => ({
-//     title: section,
-//     data: notifications.filter(
-//       item => getSection(item.created_at) === section
-//     ),
-//   }))
-//   .filter(section => section.data.length > 0);
-
-const groupedNotifications = React.useMemo(() => {
-  return ["Today", "Yesterday", "This Week", "Older"]
-    .map(section => ({
-      title: section,
-      data: notifications.filter(
-        item => getSection(item.created_at) === section
-      ),
-    }))
-    .filter(section => section.data.length > 0);
-}, [notifications]);
-
-
   return (
     <SafeAreaView style={[styles.container,{ backgroundColor: colors.background}]} edges={["top"]}>
 
@@ -213,6 +212,14 @@ const groupedNotifications = React.useMemo(() => {
         contentContainerStyle={{
           paddingBottom: 120,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
         renderSectionHeader={({ section })=> (
           <Text style= {[styles.sectionHeader, {color: colors.subText}]}>
             {section.title}

@@ -12,7 +12,7 @@ export const requestExpense = async (payload:any) => {
 
 export const getExpenses = async () => {
   const response = await api.get("/expense/asset");
-  console.log("expanse ===>",response)
+  // console.log("expanse ===>",response)
 
   return response.data.data;
 };
