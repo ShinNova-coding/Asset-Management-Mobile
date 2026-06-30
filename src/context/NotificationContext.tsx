@@ -16,7 +16,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     setUnreadCount(count);
   }, []);
 
-  // Initial load on app boot
   useEffect(() => {
     updateUnreadCount();
   }, [updateUnreadCount]);

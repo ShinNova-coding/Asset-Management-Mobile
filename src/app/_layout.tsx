@@ -51,7 +51,6 @@ const processAndSaveNotification = async (title: string, message: string, callba
   }
 };
 
-// 1. This listener component sits directly inside the Provider so it NEVER unmounts or redirects
 function NotificationListenerBridge() {
   const { updateUnreadCount } = useNotifications();
   const lastNotificationResponse = Notifications.useLastNotificationResponse();
@@ -111,7 +110,6 @@ function NotificationListenerBridge() {
     };
   }, [updateUnreadCount]);
 
-  // Cold start processing
   useEffect(() => {
     if (
       lastNotificationResponse && 
@@ -128,7 +126,7 @@ function NotificationListenerBridge() {
     }
   }, [lastNotificationResponse, updateUnreadCount]);
 
-  return null; // Invisible bridge component, runs purely for background logic hooks
+  return null; 
 }
 
 function RootNavigator() {
@@ -136,7 +134,7 @@ function RootNavigator() {
   const { isLoading: themeLoading } = useTheme();
   const segments = useSegments();
 
-  // Push token registration bound safely to session validation states
+  
   useEffect(() => {
     if (token && user) {
       registerForPushNotifications().then((pushToken) => {
@@ -192,7 +190,6 @@ export default function RootLayout() {
       <AuthProvider>
         <ThemeProvider>
           <NotificationProvider>
-            {/* The bridge intercepts streams globally without interfering with auth redirects */}
             <NotificationListenerBridge />
             <RootNavigator />
           </NotificationProvider>
