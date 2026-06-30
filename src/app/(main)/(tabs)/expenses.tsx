@@ -53,7 +53,7 @@ export default function ExpenseHistoryScreen() {
 
         const data = await getExpenses();
         //  console.log("EXPENSES ===>", data);
-        console.log("=====",data)
+        // console.log("=====",data)
         setExpenses(data);
 
     } catch (error) {

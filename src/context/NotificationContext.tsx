@@ -1,6 +1,7 @@
+import * as Notifications from "expo-notifications";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { getUnreadCount as fetchUnreadCountFromDB } from "../database/notification.service";
 import { AppState, AppStateStatus } from "react-native";
+import { getUnreadCount as fetchUnreadCountFromDB } from "../database/notification.service";
 import { syncMissedNotifications } from "../services/notification.service";
 
 interface NotificationContextType {
@@ -14,9 +15,19 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [unreadCount, setUnreadCount] = useState(0);
 
   const updateUnreadCount = useCallback(async () => {
+
     await syncMissedNotifications();
+
     const count = await fetchUnreadCountFromDB();
+
     setUnreadCount(count);
+
+    try {
+      await Notifications.setBadgeCountAsync(count);
+    } catch (badgeError) {
+      console.log("Could not set native badge count:", badgeError);
+    }
+
   }, []);
 
   useEffect(() => {

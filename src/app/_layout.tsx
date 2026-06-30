@@ -17,6 +17,10 @@ SplashScreen.preventAutoHideAsync();
 
 // Helper function to process notification text payloads cleanly
 const processAndSaveNotification = async (title: string, message: string, callback?: () => void) => {
+  if (!title.trim() && !message.trim()) {
+    console.log("Skipping database insert: Title and Message are completely empty.");
+    return;
+  }
   const lowerTitle = title.toLowerCase();
   const lowerMessage = message.toLowerCase();
   const combined = `${lowerTitle} ${lowerMessage}`;
@@ -65,6 +69,8 @@ function NotificationListenerBridge() {
         const message = notification.request.content.body || "";
         const data = notification.request.content.data || {};
         console.log("Raw notification payload:", JSON.stringify({ title, message, data }));
+        console.log("NOTIFICATION RECEIVED");
+        console.log(notification.request.content);
 
         const finalTitle = title
           || (data as any).title
