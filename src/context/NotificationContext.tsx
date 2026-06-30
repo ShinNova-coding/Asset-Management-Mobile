@@ -6,13 +6,20 @@ import { syncMissedNotifications } from "../services/notification.service";
 
 interface NotificationContextType {
   unreadCount: number;
+  reloadKey: number;
   updateUnreadCount: () => Promise<void>;
+  notifyNewNotification: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const notifyNewNotification = useCallback(() => {
+    setReloadKey((k) => k + 1);
+  }, []);
 
   const updateUnreadCount = useCallback(async () => {
 
@@ -46,7 +53,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [updateUnreadCount]);
 
   return (
-    <NotificationContext.Provider value={{ unreadCount, updateUnreadCount }}>
+    <NotificationContext.Provider value={{ unreadCount, reloadKey, updateUnreadCount, notifyNewNotification }}>
       {children}
     </NotificationContext.Provider>
   );

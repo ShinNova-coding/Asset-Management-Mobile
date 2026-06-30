@@ -8,7 +8,7 @@ import {
 import { NotificationItem, NotificationType } from "@/src/types/notification";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   SectionList,
   StyleSheet,
@@ -22,7 +22,7 @@ import NotiSkeleton from "../../../components/skeletons/NotiSkeleton";
 
 export default function NotificationScreen() {
 
-  const { updateUnreadCount } = useNotifications();
+  const { updateUnreadCount, reloadKey } = useNotifications();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -58,6 +58,10 @@ const handleMarkAllRead = async () => {
         setLoading(false);
       }, [])
     );
+
+    useEffect(() => {
+      loadNotifications();
+    }, [reloadKey]);
 
       if (loading) {
         return <NotiSkeleton />;

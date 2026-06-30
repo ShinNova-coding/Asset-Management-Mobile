@@ -56,7 +56,7 @@ const processAndSaveNotification = async (title: string, message: string, callba
 };
 
 function NotificationListenerBridge() {
-  const { updateUnreadCount } = useNotifications();
+  const { updateUnreadCount, notifyNewNotification } = useNotifications();
   const lastNotificationResponse = Notifications.useLastNotificationResponse();
   const hasProcessedColdStart = useRef(false);
 
@@ -84,6 +84,7 @@ function NotificationListenerBridge() {
           || "";
         console.log("Foreground Notification captured:", finalTitle, finalMessage);
         await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
+        notifyNewNotification();
       }
     );
 
@@ -107,6 +108,7 @@ function NotificationListenerBridge() {
           || "";
         console.log("Notification tapped:", finalTitle, finalMessage);
         await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
+        notifyNewNotification();
       }
     );
 
