@@ -14,7 +14,6 @@ Notifications.setNotificationHandler({
 
 export async function syncMissedNotifications() {
   try {
-    // Fetch all notifications currently sitting in the device's notification center
     const deliveredNotifs = await Notifications.getPresentedNotificationsAsync();
     
     if (deliveredNotifs.length === 0) return;
@@ -23,9 +22,11 @@ export async function syncMissedNotifications() {
       const title = notif.request.content.title || "";
       const message = notif.request.content.body || "";
       
-      if (!title && !message) continue;
+      if (!title && !message) {
+        await Notifications.dismissNotificationAsync(notif.request.identifier);
+        continue;
+      }
 
-      // Deduce type exactly like your helper function
       const combined = `${title.toLowerCase()} ${message.toLowerCase()}`;
       let type: any = "maintenance_returned";
       
@@ -36,7 +37,6 @@ export async function syncMissedNotifications() {
       else if (combined.includes("expense") && (combined.includes("cancel") || combined.includes("canceled") || combined.includes("rejected"))) type = "expense_canceled";
       else if (combined.includes("asset") && combined.includes("assigned")) type = "asset_assigned";
 
-      // Save to SQLite (your insertNotification already handles duplication checks!)
       await insertNotification({
         title,
         message,
@@ -44,10 +44,9 @@ export async function syncMissedNotifications() {
         is_read: 0,
         created_at: new Date().toISOString(),
       });
+
+      await Notifications.dismissNotificationAsync(notif.request.identifier);
     }
-    
-    // Optional: clear them from the notification center once consumed
-    // await Notifications.dismissAllNotificationsAsync();
     
   } catch (error) {
     console.log("Error syncing notifications on startup:", error);
