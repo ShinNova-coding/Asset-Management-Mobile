@@ -22,11 +22,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   const updateUnreadCount = useCallback(async () => {
-
-    await syncMissedNotifications();
-
     const count = await fetchUnreadCountFromDB();
-
     setUnreadCount(count);
 
     try {
@@ -34,13 +30,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     } catch (badgeError) {
       console.log("Could not set native badge count:", badgeError);
     }
-
   }, []);
 
   useEffect(() => {
-    updateUnreadCount();
+    syncMissedNotifications().then(() => updateUnreadCount());
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
       if (nextAppState === "active") {
+        await syncMissedNotifications();
         await updateUnreadCount();
       }
     };
