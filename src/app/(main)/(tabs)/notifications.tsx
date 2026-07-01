@@ -98,9 +98,9 @@ const groupedNotifications = React.useMemo(() => {
     .filter(section => section.data.length > 0);
 }, [notifications]);
 
-      if (loading) {
-        return <NotiSkeleton />;
-      }
+if (loading) {
+    return <NotiSkeleton />;
+  }
   
 const renderIcon = (type: NotificationType) => {
   switch (type) {

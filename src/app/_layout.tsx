@@ -15,7 +15,6 @@ import { NotificationType } from "../types/notification";
 
 SplashScreen.preventAutoHideAsync();
 
-// Helper function to process notification text payloads cleanly
 const processAndSaveNotification = async (title: string, message: string, callback?: () => void) => {
   if (!title.trim() && !message.trim()) {
     console.log("Skipping database insert: Title and Message are completely empty.");
