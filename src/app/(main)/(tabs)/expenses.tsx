@@ -14,6 +14,7 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import useIsOnline from "../../../utils/useIsOnline";
 
 export default function ExpenseHistoryScreen() {
   const {colors, isDark} = useTheme();
@@ -22,6 +23,24 @@ export default function ExpenseHistoryScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const isOnline = useIsOnline();
+
+
+      const fetchExpenses = async () => {
+    try {
+        setLoading(true);
+
+        const data = await getExpenses();
+        //  console.log("EXPENSES ===>", data);
+        // console.log("=====",data)
+        setExpenses(data);
+
+    } catch (error) {
+        console.log("GET EXPENSE ERROR", error);
+    } finally {
+        setLoading(false);
+    }
+    };
 
   const onRefresh = async () => {
   try {
@@ -47,21 +66,6 @@ export default function ExpenseHistoryScreen() {
       }, [])
     );
 
-    const fetchExpenses = async () => {
-    try {
-        setLoading(true);
-
-        const data = await getExpenses();
-        //  console.log("EXPENSES ===>", data);
-        // console.log("=====",data)
-        setExpenses(data);
-
-    } catch (error) {
-        console.log("GET EXPENSE ERROR", error);
-    } finally {
-        setLoading(false);
-    }
-    };
 
         const pendingExpenses = expenses.filter(
             item => item.status === "requested"
@@ -85,7 +89,8 @@ export default function ExpenseHistoryScreen() {
 
         const approvedCount = approvedExpenses.length;
 
-        const listHeader = useMemo(() => (
+        const listHeader = useMemo(() => {
+          return (
             <>         
               <View style={[styles.searchSection,{backgroundColor: colors.card}]}>
                 <Feather
@@ -146,7 +151,8 @@ export default function ExpenseHistoryScreen() {
             </View>
         )}
             </>
-          ),
+          )
+        },
           [
             pendingCost,
             pendingCount,
@@ -157,6 +163,56 @@ export default function ExpenseHistoryScreen() {
             showStats
           ]
         );
+
+        
+    if (!isOnline) {
+      return (
+        
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      <View style={[styles.header, { backgroundColor: colors.head, borderBottomColor: colors.head, borderTopColor: colors.head}]}>
+        <View style={styles.headerLeft}>
+          <MaterialIcons name="archive" size={24} color="#1E62C9" style={styles.headerIcon} />
+          <Text style={styles.headerTitle}>Expense Requests</Text>
+        </View>        
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => router.push('/requestExpense')}
+        >
+          <Feather name="plus" size={21} color="#FFF" />
+        </TouchableOpacity>
+      </View>
+      <View style={[
+                  styles.emptyContainer,
+                  { backgroundColor: colors.background }
+                ]}
+              >
+                <Ionicons
+                  name="cloud-offline-outline"
+                  size={80}
+                  color={colors.subText}
+                />
+      
+                <Text
+                  style={[
+                    styles.emptyTitle,
+                    { color: colors.text }
+                  ]}
+                >
+                  No Internet Connection
+                </Text>
+      
+                <Text
+                  style={[
+                    styles.emptySubtitle,
+                    { color: colors.subText }
+                  ]}
+                >
+                  Please check your internet connection and try again.
+                </Text>
+              </View>
+        </SafeAreaView>
+      )
+    }
 
         const renderExpenseItem = ({ item }: { item: Expense }) => (
           <TouchableOpacity 
@@ -502,6 +558,11 @@ emptyTitle:{
  marginTop:16,
  fontSize:18,
  fontWeight:"700"
+},
+emptySubtitle: {
+  fontSize: 14,
+  textAlign: "center",
+  marginTop: 6,
 },
 
 emptyText:{
