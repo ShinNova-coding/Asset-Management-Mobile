@@ -1,7 +1,6 @@
 import * as Notifications from "expo-notifications";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { getUnreadCount as fetchUnreadCountFromDB } from "../database/notification.service";
-import { syncMissedNotifications } from "../services/notification.service";
 
 interface NotificationContextType {
   unreadCount: number;
@@ -32,7 +31,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, []);
 
   useEffect(() => {
-    syncMissedNotifications().then(() => updateUnreadCount());
+    updateUnreadCount();
   }, [updateUnreadCount]);
 
   return (
