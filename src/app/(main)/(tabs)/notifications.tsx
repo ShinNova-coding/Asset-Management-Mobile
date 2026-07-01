@@ -138,9 +138,6 @@ const groupedNotifications = React.useMemo(() => {
     .filter(section => section.data.length > 0);
 }, [notifications]);
 
-if (loading) {
-    return <NotiSkeleton />;
-  }
   
 const renderIcon = (type: NotificationType) => {
   switch (type) {
@@ -189,6 +186,9 @@ const renderIcon = (type: NotificationType) => {
   }
 };
 
+if (loading) {
+    return <NotiSkeleton />;
+  }
 
   return (
     <SafeAreaView style={[styles.container,{ backgroundColor: colors.background}]} edges={["top"]}>
@@ -212,7 +212,7 @@ const renderIcon = (type: NotificationType) => {
         keyExtractor={(item) => item.id!.toString()}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: 120,
+          paddingBottom: 16,
         }}
         refreshControl={
           <RefreshControl
@@ -281,15 +281,6 @@ const renderIcon = (type: NotificationType) => {
             </View>
           </TouchableOpacity>
           </Swipeable>
-        )}
-        ListFooterComponent={() => (
-          <View style={styles.footer}>
-            <Ionicons
-              name="notifications-off"
-              size={50}
-              color="#D1D5DB"
-            />
-          </View>
         )}
       />
     </SafeAreaView>
@@ -373,6 +364,7 @@ unreadDot: {
 
   content: {
     flex: 1,
+   
   },
 
   topRow: {

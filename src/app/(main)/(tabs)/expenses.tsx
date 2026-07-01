@@ -14,19 +14,22 @@ import {
   View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ExpenseSkeleton from '../../../components/skeletons/ExpenseSkeleton';
 import useIsOnline from "../../../utils/useIsOnline";
 
 export default function ExpenseHistoryScreen() {
   const {colors, isDark} = useTheme();
+  const isOnline = useIsOnline();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const isOnline = useIsOnline();
+  
 
 
-      const fetchExpenses = async () => {
+    const fetchExpenses = useCallback(async () => {
     try {
         setLoading(true);
 
@@ -40,59 +43,54 @@ export default function ExpenseHistoryScreen() {
     } finally {
         setLoading(false);
     }
-    };
+    },[]);
 
-  const onRefresh = async () => {
+  const onRefresh = useCallback(async () => {
   try {
     setRefreshing(true);
     await fetchExpenses();
   } finally {
     setRefreshing(false);
   }
-};
+}, [fetchExpenses]);
 
-  const filteredExpenses = expenses.filter(item =>
-  item.title.toLowerCase()
-    .includes(searchQuery.toLowerCase())
-  );
+  const filteredExpenses = useMemo(()=>  {
+  return expenses.filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  },[expenses, searchQuery]);
   
-  const showStats =
-  !isSearchFocused &&
-  searchQuery.trim().length === 0;
+  const showStats = !isSearchFocused && searchQuery.trim() === "";
 
-    useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       fetchExpenses();
-      }, [])
-    );
+      }, [fetchExpenses])
+  );
 
 
-        const pendingExpenses = expenses.filter(
-            item => item.status === "requested"
-        );
+        const pendingExpenses = useMemo( ()=>
+          expenses.filter(
+            e =>e.status === "requested"
+        ), [expenses]);
 
-        const approvedExpenses = expenses.filter(
-            item => item.status === "approved"
-        );
+        const approvedExpenses = useMemo(() => 
+          expenses.filter(
+            e => e.status === "approved"
+          ), [expenses]);
 
-        const pendingCost = pendingExpenses.reduce(
-            (sum, item) => sum + item.cost,
-            0
-        );
+        const pendingCost = useMemo(() => pendingExpenses.reduce(
+            (sum, e) => sum + e.cost,0 ), [pendingExpenses]);
 
-        const approvedCost = approvedExpenses.reduce(
-            (sum, item) => sum + item.cost,
-            0
-        );
+        const approvedCost = useMemo(() =>  approvedExpenses.reduce(
+            (sum, e) => sum + e.cost, 0), [approvedExpenses]);
+    
 
         const pendingCount = pendingExpenses.length;
-
         const approvedCount = approvedExpenses.length;
 
         const listHeader = useMemo(() => {
           return (
             <>         
-              <View style={[styles.searchSection,{backgroundColor: colors.card}]}>
+              <View style={[styles.searchSection,{backgroundColor: colors.card, borderColor: colors.border}]}>
                 <Feather
                   name="search"
                   size={20}
@@ -101,14 +99,26 @@ export default function ExpenseHistoryScreen() {
                 />
 
                 <TextInput
-                  style={[styles.searchInput,{ color: colors.subText}]}
-                  placeholderTextColor={colors.subText}
+                  style={[styles.searchInput,{ color: colors.text}]}
                   placeholder="Search claims..."
+                  placeholderTextColor={colors.subText}
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   onFocus={()=> setIsSearchFocused(true)}
                   onBlur={()=> setIsSearchFocused(false)}
                 />
+                  {searchQuery.length > 0 && (
+                  <TouchableOpacity
+                    onPress={() => setSearchQuery("")}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Ionicons
+                      name="close-circle"
+                      size={20}
+                      color={colors.subText}
+                    />
+                  </TouchableOpacity>
+                )}
               </View>
             {showStats && (
             <View style={styles.statsContainer}>
@@ -164,57 +174,9 @@ export default function ExpenseHistoryScreen() {
           ]
         );
 
-        
-    if (!isOnline) {
-      return (
-        
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
-      <View style={[styles.header, { backgroundColor: colors.head, borderBottomColor: colors.head, borderTopColor: colors.head}]}>
-        <View style={styles.headerLeft}>
-          <MaterialIcons name="archive" size={24} color="#1E62C9" style={styles.headerIcon} />
-          <Text style={styles.headerTitle}>Expense Requests</Text>
-        </View>        
-        <TouchableOpacity 
-          style={styles.addButton}
-          onPress={() => router.push('/requestExpense')}
-        >
-          <Feather name="plus" size={21} color="#FFF" />
-        </TouchableOpacity>
-      </View>
-      <View style={[
-                  styles.emptyContainer,
-                  { backgroundColor: colors.background }
-                ]}
-              >
-                <Ionicons
-                  name="cloud-offline-outline"
-                  size={80}
-                  color={colors.subText}
-                />
-      
-                <Text
-                  style={[
-                    styles.emptyTitle,
-                    { color: colors.text }
-                  ]}
-                >
-                  No Internet Connection
-                </Text>
-      
-                <Text
-                  style={[
-                    styles.emptySubtitle,
-                    { color: colors.subText }
-                  ]}
-                >
-                  Please check your internet connection and try again.
-                </Text>
-              </View>
-        </SafeAreaView>
-      )
-    }
-
-        const renderExpenseItem = ({ item }: { item: Expense }) => (
+       const renderExpenseItem = useCallback( 
+          ({ item }: { item: Expense }) => {
+         return (
           <TouchableOpacity 
               style={[styles.listItem, {backgroundColor: colors.card}]}
               onPress={() =>
@@ -282,6 +244,61 @@ export default function ExpenseHistoryScreen() {
             </View>
           </TouchableOpacity>
         );
+      }, [colors,router]
+    );
+
+if (loading) {
+  return <ExpenseSkeleton />;
+}
+        
+    if (!isOnline) {
+      return (
+        
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
+      <View style={[styles.header, { backgroundColor: colors.head, borderBottomColor: colors.head, borderTopColor: colors.head}]}>
+        <View style={styles.headerLeft}>
+          <MaterialIcons name="archive" size={24} color="#1E62C9" style={styles.headerIcon} />
+          <Text style={styles.headerTitle}>Expense Requests</Text>
+        </View>        
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => router.push('/requestExpense')}
+        >
+          <Feather name="plus" size={21} color="#FFF" />
+        </TouchableOpacity>
+      </View>
+      <View style={[
+                  styles.emptyContainer,
+                  { backgroundColor: colors.background }
+                ]}
+              >
+                <Ionicons
+                  name="cloud-offline-outline"
+                  size={80}
+                  color={colors.subText}
+                />
+      
+                <Text
+                  style={[
+                    styles.emptyTitle,
+                    { color: colors.text }
+                  ]}
+                >
+                  No Internet Connection
+                </Text>
+      
+                <Text
+                  style={[
+                    styles.emptySubtitle,
+                    { color: colors.subText }
+                  ]}
+                >
+                  Please check your internet connection and try again.
+                </Text>
+              </View>
+        </SafeAreaView>
+      )
+    }
 
 
   return (
@@ -408,11 +425,12 @@ const styles = StyleSheet.create({
   searchSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EFF1F6',
+    // backgroundColor: '#EFF1F6',
     borderRadius: 10,
     paddingHorizontal: 12,
-    height: 44,
-    marginBottom: 14,
+    height: 46,
+    borderWidth: 1,
+   marginBottom: 14,
   },
   searchIcon: {
     marginRight: 8,
@@ -550,8 +568,10 @@ textRejected:{
     color:"#D93025"
 },
 emptyContainer:{
+  flex: 1,
+  justifyContent: "center",
  alignItems:"center",
- marginTop:80
+ paddingHorizontal: 24,
 },
 
 emptyTitle:{
