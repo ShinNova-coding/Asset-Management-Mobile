@@ -137,6 +137,44 @@ export default function DashboardScreen() {
 
     if (!isOnline) {
       return (
+
+         <ScrollView
+                    style={[
+                      styles.container,
+                      { backgroundColor: colors.background },
+                    ]}
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={colors.primary}
+                        colors={[colors.primary]}
+                      />
+                    }
+                  >
+                  <View style={styles.profileHeader}>
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarText}>
+                        {user?.name?.charAt(0)?.toUpperCase()}
+                      </Text>
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.companyName, { color: colors.subText }]}>
+                        AGGA.IO IT Asset System
+                      </Text>
+
+                      <Text style={[styles.userName, { color: colors.text }]}>
+                        {user?.name}
+                      </Text>
+
+                      <Text style={[styles.userRole, { color: colors.subText }]}>
+                        Welcome back 
+                      </Text>
+                    </View>
+                  </View>
+         
         <View
           style={[
             styles.emptyContainer,
@@ -167,6 +205,7 @@ export default function DashboardScreen() {
             Please check your internet connection and try again.
           </Text>
         </View>
+         </ScrollView>
       );
    }
 

@@ -1,6 +1,5 @@
 import * as Notifications from "expo-notifications";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { AppState, AppStateStatus } from "react-native";
 import { getUnreadCount as fetchUnreadCountFromDB } from "../database/notification.service";
 import { syncMissedNotifications } from "../services/notification.service";
 
@@ -34,18 +33,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     syncMissedNotifications().then(() => updateUnreadCount());
-    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
-      if (nextAppState === "active") {
-        await syncMissedNotifications();
-        await updateUnreadCount();
-      }
-    };
-
-    const subscription = AppState.addEventListener("change", handleAppStateChange);
-
-    return () => {
-      subscription.remove();
-    };
   }, [updateUnreadCount]);
 
   return (

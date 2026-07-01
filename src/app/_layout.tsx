@@ -95,18 +95,7 @@ function NotificationListenerBridge() {
         const data = response.notification.request.content.data || {};
         console.log("Raw tapped payload:", JSON.stringify({ title, message, data }));
 
-        const finalTitle = title
-          || (data as any).title
-          || (data as any).titleMessage
-          || "";
-        const finalMessage = message
-          || (data as any).message
-          || (data as any).body
-          || (data as any).text
-          || (data as any).description
-          || "";
-        console.log("Notification tapped:", finalTitle, finalMessage);
-        await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
+        await updateUnreadCount();
         notifyNewNotification();
       }
     );
