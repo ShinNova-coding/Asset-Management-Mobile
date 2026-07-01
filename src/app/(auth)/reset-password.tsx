@@ -133,6 +133,16 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
           </Text>
         )}
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.secondaryButton}
+        onPress={() => router.replace("/(auth)/login")}
+        disabled={loading}
+      >
+          <Text style={styles.buttonText}>
+            Back to Login
+          </Text>
+        
+      </TouchableOpacity>
     </View>
   );
 }
@@ -167,6 +177,14 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
+    marginBottom: 10,
+  },
+  secondaryButton: {
+    backgroundColor: "#ccc",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 10,
   },
   buttonText: {
     color: "#fff",

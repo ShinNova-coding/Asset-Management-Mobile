@@ -139,7 +139,7 @@ const handleLogin = async () => {
         </View>
       </View>
 
-      <View style={styles.bottomText}>
+      {/* <View style={styles.bottomText}>
         <Text style={{ color: "#666" }}>
           Need field access?
         </Text>
@@ -149,7 +149,7 @@ const handleLogin = async () => {
             {" "}Request Account
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
     </KeyboardAvoidingView>
   );
