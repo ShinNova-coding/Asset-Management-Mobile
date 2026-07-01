@@ -72,20 +72,60 @@ const handleMarkAllRead = async () => {
       loadNotifications();
     }, [reloadKey]);
 
-const today = new Date();
+// const today = new Date();
 
-const getSection = (dateString: string) => {
+// const getSection = (dateString: string) => {
+//   const notificationDate = new Date(dateString);
+
+//   const diffTime = today.getTime() - notificationDate.getTime();
+//   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+//   if (diffDays === 0) return "Today";
+//   if (diffDays === 1) return "Yesterday";
+//   if (diffDays <= 7) return "This Week";
+
+//   return "Older";
+// };
+
+ const getSection = (dateString: string) => {
   const notificationDate = new Date(dateString);
+  const today = new Date();
 
-  const diffTime = today.getTime() - notificationDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  if (
+    notificationDate.toDateString() === today.toDateString()
+  ) {
+    return "Today";
+  }
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays <= 7) return "This Week";
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (
+    notificationDate.toDateString() === yesterday.toDateString()
+  ) {
+    return "Yesterday";
+  }
+
+  // Beginning of this week (Monday)
+  const firstDayOfWeek = new Date(today);
+  const day = firstDayOfWeek.getDay();
+
+  const diff =
+    day === 0
+      ? 6
+      : day - 1;
+
+  firstDayOfWeek.setDate(
+    firstDayOfWeek.getDate() - diff
+  );
+
+  if (notificationDate >= firstDayOfWeek) {
+    return "This Week";
+  }
 
   return "Older";
 };
+
 
 const groupedNotifications = React.useMemo(() => {
   return ["Today", "Yesterday", "This Week", "Older"]
@@ -149,44 +189,6 @@ const renderIcon = (type: NotificationType) => {
   }
 };
 
-//  const getSection = (dateString: string) => {
-//   const notificationDate = new Date(dateString);
-//   const today = new Date();
-
-//   if (
-//     notificationDate.toDateString() === today.toDateString()
-//   ) {
-//     return "Today";
-//   }
-
-//   const yesterday = new Date();
-//   yesterday.setDate(today.getDate() - 1);
-
-//   if (
-//     notificationDate.toDateString() === yesterday.toDateString()
-//   ) {
-//     return "Yesterday";
-//   }
-
-//   // Beginning of this week (Monday)
-//   const firstDayOfWeek = new Date(today);
-//   const day = firstDayOfWeek.getDay();
-
-//   const diff =
-//     day === 0
-//       ? 6
-//       : day - 1;
-
-//   firstDayOfWeek.setDate(
-//     firstDayOfWeek.getDate() - diff
-//   );
-
-//   if (notificationDate >= firstDayOfWeek) {
-//     return "This Week";
-//   }
-
-//   return "Older";
-// };
 
   return (
     <SafeAreaView style={[styles.container,{ backgroundColor: colors.background}]} edges={["top"]}>
