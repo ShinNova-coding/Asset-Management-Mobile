@@ -208,13 +208,38 @@ if (loading) {
         Stay updated on your IT assets
       </Text>
 
+      {notifications.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <View
+            style={[
+              styles.emptyIcon,
+              {
+                backgroundColor: isDark ? "#1E293B" : "#EAF3FF",
+              },
+            ]}
+          >
+            <Ionicons
+              name="notifications-outline"
+              size={52}
+              color={colors.primary}
+            />
+          </View>
+
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>
+            No Notifications Yet
+          </Text>
+
+          <Text style={[styles.emptyDescription, { color: colors.subText }]}>
+            Stay updated with your IT assets. Notifications about assigned assets,
+            maintenance requests, and expense requests will appear here.
+          </Text>
+        </View>
+    ):(
       <SectionList
         sections={groupedNotifications}
         keyExtractor={(item) => item.id!.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 16,
-        }}
+        contentContainerStyle={{paddingBottom: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -284,6 +309,7 @@ if (loading) {
           </Swipeable>
         )}
       />
+      )}
     </SafeAreaView>
   );
 }
@@ -416,4 +442,31 @@ deleteText: {
     alignItems: "center",
     marginTop: 40,
   },
+  emptyContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 30,
+},
+
+emptyIcon: {
+  width: 100,
+  height: 100,
+  borderRadius: 50,
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 24,
+},
+
+emptyTitle: {
+  fontSize: 22,
+  fontWeight: "700",
+  marginBottom: 12,
+},
+
+emptyDescription: {
+  fontSize: 15,
+  lineHeight: 24,
+  textAlign: "center",
+},
 });
