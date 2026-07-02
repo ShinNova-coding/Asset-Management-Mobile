@@ -115,14 +115,29 @@ const loadHistory = async () => {
 // }
 
   if (!isOnline) {
-        return (
-          
-          <View
-            style={[
-              styles.emptyContainer,
-              { backgroundColor: colors.background }
-            ]}
-          >
+   return (
+     <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: colors.background },
+      ]}
+     >
+      <HeaderBar
+        title="History"
+        backButtonAction={() => router.back()}
+      />
+
+      <View style={styles.headerSection}>
+        <Text style={[styles.title, { color: colors.text }]}>
+          Recent Activities
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.subText }]}>
+          Track your recent asset actions and requests.
+        </Text>
+      </View>
+      <View
+        style={[styles.emptyContainer,{ backgroundColor: colors.background } ]}
+       >
             <Ionicons
               name="cloud-offline-outline"
               size={80}
@@ -147,8 +162,9 @@ const loadHistory = async () => {
               Please check your internet connection and try again.
             </Text>
           </View>
-        );
-     }
+          </SafeAreaView>
+        )
+     };
 
   const getActivityStyle = (type: string) => {
     switch (type) {

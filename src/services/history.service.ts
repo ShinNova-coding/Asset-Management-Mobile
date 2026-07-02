@@ -12,6 +12,6 @@ export async function getMaintenanceHistory() {
   const response = await api.get(
     "/maintenance/asset"
   );
-  console.log("REPAIR History==>", response.data.data)
+  // console.log("REPAIR History==>", response.data.data)
   return response.data.data;
 }

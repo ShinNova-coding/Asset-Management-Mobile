@@ -125,7 +125,7 @@ export default function AssetDetailScreen() {
 
         const res = await getAssetById(id as string);
 
-        console.log("ASSET DETAIL:", res);
+        // console.log("ASSET DETAIL:", res);
         setAsset(res);
         setStatus(res.status);
 

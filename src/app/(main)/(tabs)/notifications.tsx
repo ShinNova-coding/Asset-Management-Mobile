@@ -249,38 +249,38 @@ if (loading) {
                 </TouchableOpacity>
               )}
             >
-          <TouchableOpacity
-            activeOpacity={0.9}
-            style={[
-              styles.card, { backgroundColor: item.is_read === 0 ? isDark ? "#1E293B" : "#F8FBFF" : colors.card, borderColor: colors.background},
-              // item.type === "urgent" && styles.urgentCard,
-            ]}
-          >
-            {renderIcon(item.type)}
+            <TouchableOpacity
+              activeOpacity={0.9}
+              style={[
+                styles.card, { backgroundColor: item.is_read === 0 ? isDark ? "#1E293B" : "#F8FBFF" : colors.card, borderColor: colors.background},
+                // item.type === "urgent" && styles.urgentCard,
+              ]}
+            >
+              {renderIcon(item.type)}
 
-            <View style={styles.content}>
-              <View style={styles.topRow}>
-                <View style={styles.titleRowInner}>
-                   {item.is_read===0 && (
-                    <View style={styles.unreadDot} />
-                   )}
-                    <Text style={[styles.cardTitle, {color: colors.text}]}>
-                      {item.title}
-                    </Text>
+              <View style={styles.content}>
+                <View style={styles.topRow}>
+                  <View style={styles.titleRowInner}>
+                    {item.is_read===0 && (
+                      <View style={styles.unreadDot} />
+                    )}
+                      <Text style={[styles.cardTitle, {color: colors.text}]}>
+                        {item.title}
+                      </Text>
+                  </View>
+                  <Text style={[styles.time, {color: colors.subText}]}>
+                    {new Date(item.created_at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
                 </View>
-                <Text style={[styles.time, {color: colors.subText}]}>
-                  {new Date(item.created_at).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+
+                <Text style={[styles.message, {color: colors.text}]}>
+                  {item.message}
                 </Text>
               </View>
-
-              <Text style={[styles.message, {color: colors.text}]}>
-                {item.message}
-              </Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
           </Swipeable>
         )}
       />
