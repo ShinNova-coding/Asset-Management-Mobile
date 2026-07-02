@@ -1,50 +1,164 @@
-# Welcome to your Expo app 👋
+# ITAMS Mobile Application
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern **IT Asset Management System (ITAMS)** mobile application built with **React Native**, **Expo**, and **TypeScript**. The application allows employees to manage assigned IT assets, submit expense requests, receive notifications, and manage their profiles through a clean and responsive mobile interface.
 
-## Get started
+---
 
-1. Install dependencies
+## 📱 Features
 
-   ```bash
-   npm install
-   ```
+### 🏠 Home
 
-2. Start the app
+* Assigned asset overview with status badges
+* Asset details and status
+* Pull-to-refresh support
+* Skeleton loading animations
+* Offline detection
 
-   ```bash
-   npx expo start
-   ```
+### 💰 Expense Management
 
-In the output, you'll find options to open the app in a
+* Submit expense requests with receipt upload
+* Expense history with status tracking
+* Category selection
+* Form validation
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### 🔔 Notifications
+* Real-time push notifications via Firebase Cloud Messaging (FCM)
+* Foreground notification capture and local storage
+* Cold-start notification handling on app open from notification tap
+* Real-time notification list/ unread badge count on Notifications tab
+* Mark all as read
+* Swipe-to-delete individual notifications
+* Different notification types with custom icons
+* Notifications grouped by time (Today, Yesterday, This Week, Older)
+* Pull-to-refresh
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 👤 Profile
 
-## Get a fresh project
+* View and edit profile information
+* Profile photo upload
+* Change password
+* Dark/Light theme support
+* Logout functionality
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## ✨ Additional Features
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+* Secure user authentication and session management
+* Token-based API authentication
+* User profile synchronization
+* Asset assignment and maintenance history tracking
+* Offline support with local SQLite storage
+* Network connectivity detection and graceful offline handling
+* Skeleton loading screens for improved user experience
+* Pull-to-refresh across supported screens
+* Responsive and modern mobile UI
+* Dark and Light theme support
+* Consistent error and empty-state handling
+* RESTful API integration
+* Image selection and upload support
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🛠 Tech Stack
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+* React Native
+* Expo
+* TypeScript
+* Expo Router
+* Axios
+* React Context API
+* SQLite
+* AsyncStorage
+* Expo Image Picker
+* Expo Notifications
+* Day.js
+* React Native Safe Area Context
+* Firebase Cloud Messaging (FCM)
+* Expo Vector Icons
+* React Native Gesture Handler
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 📂 Project Structure
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+src/
+├── app/
+│   ├── (auth)
+│   ├── (main)
+│   └── _layout.tsx
+├── api/
+├── components/
+├── context/
+├── assets/
+├── database/
+├── services/
+├── types/
+├── utils/
+└── constants/
+
+---
+
+## 🔄 Application Flow
+
+Login
+   │
+   ▼
+Home
+ ├── Asset Details
+ ├── History
+ ├── Expense
+ ├── Notifications
+ └── Profile
+        ├── Edit Profile
+        ├── Change Password
+        └── Logout
+
+
+---
+
+## 📡 API Features
+
+* User Authentication
+* Profile Management
+* Asset Management
+* Expense Requests
+* Notification Management
+* History Retrieval
+* Image Upload
+
+---
+
+## 🎨 UI Highlights
+
+* Modern Mobile UI
+* Dark Mode
+* Skeleton Loaders
+* Empty States
+* Offline Screen
+* Smooth Navigation
+* Consistent Color Theme
+
+---
+
+## 📌 Future Improvements
+
+* Push notification deep linking to related screens
+* Custom notification sounds and vibration settings
+* QR Code Asset Scanning
+* Biometric Authentication
+* Multi-language Support
+* Analytics Dashboard
+
+---
+
+## 👨‍💻 Author
+
+**Nang Kham Moe Oo**
+Final-Year Computer Science Student
+
+---
+
+## 📄 License
+
+This project is intended for educational and internship purposes.
