@@ -32,6 +32,7 @@ export const initDatabase = async () => {
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS notifications (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
         title TEXT NOT NULL,
         message TEXT NOT NULL,
         type TEXT NOT NULL,

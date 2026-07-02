@@ -12,46 +12,47 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export async function syncMissedNotifications() {
-  try {
-    const deliveredNotifs = await Notifications.getPresentedNotificationsAsync();
+// export async function syncMissedNotifications() {
+//   try {
+//     const deliveredNotifs = await Notifications.getPresentedNotificationsAsync();
     
-    if (deliveredNotifs.length === 0) return;
+//     if (deliveredNotifs.length === 0) return;
 
-    for (const notif of deliveredNotifs) {
-      const title = notif.request.content.title || "";
-      const message = notif.request.content.body || "";
+//     for (const notif of deliveredNotifs) {
+//       const title = notif.request.content.title || "";
+//       const message = notif.request.content.body || "";
       
-      if (!title && !message) {
-        await Notifications.dismissNotificationAsync(notif.request.identifier);
-        continue;
-      }
+//       if (!title && !message) {
+//         await Notifications.dismissNotificationAsync(notif.request.identifier);
+//         continue;
+//       }
 
-      const combined = `${title.toLowerCase()} ${message.toLowerCase()}`;
-      let type: any = "maintenance_returned";
+//       const combined = `${title.toLowerCase()} ${message.toLowerCase()}`;
+//       let type: any = "maintenance_returned";
       
-      if (combined.includes("maintenance") && (combined.includes("return") || combined.includes("returned"))) type = "maintenance_returned";
-      else if (combined.includes("maintenance") && combined.includes("approved")) type = "maintenance_approved";
-      else if (combined.includes("maintenance") && (combined.includes("cancel") || combined.includes("canceled") || combined.includes("rejected"))) type = "maintenance_canceled";
-      else if (combined.includes("expense") && combined.includes("approved")) type = "expense_approved";
-      else if (combined.includes("expense") && (combined.includes("cancel") || combined.includes("canceled") || combined.includes("rejected"))) type = "expense_canceled";
-      else if (combined.includes("asset") && combined.includes("assigned")) type = "asset_assigned";
+//       if (combined.includes("maintenance") && (combined.includes("return") || combined.includes("returned"))) type = "maintenance_returned";
+//       else if (combined.includes("maintenance") && combined.includes("approved")) type = "maintenance_approved";
+//       else if (combined.includes("maintenance") && (combined.includes("cancel") || combined.includes("canceled") || combined.includes("rejected"))) type = "maintenance_canceled";
+//       else if (combined.includes("expense") && combined.includes("approved")) type = "expense_approved";
+//       else if (combined.includes("expense") && (combined.includes("cancel") || combined.includes("canceled") || combined.includes("rejected"))) type = "expense_canceled";
+//       else if (combined.includes("asset") && combined.includes("assigned")) type = "asset_assigned";
 
-      await insertNotification({
-        title,
-        message,
-        type,
-        is_read: 0,
-        created_at: new Date().toISOString(),
-      });
+//       await insertNotification({
+//         user_id: userId,
+//         title,
+//         message,
+//         type,
+//         is_read: 0,
+//         created_at: new Date().toISOString(),
+//       });
 
-      await Notifications.dismissNotificationAsync(notif.request.identifier);
-    }
+//       await Notifications.dismissNotificationAsync(notif.request.identifier);
+//     }
     
-  } catch (error) {
-    console.log("Error syncing notifications on startup:", error);
-  }
-}
+//   } catch (error) {
+//     console.log("Error syncing notifications on startup:", error);
+//   }
+// }
 
 export async function createNotificationChannel() {
   if (Platform.OS === "android") {

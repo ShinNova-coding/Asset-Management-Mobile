@@ -7,10 +7,11 @@ export const insertNotification = async (
   await db.runAsync(
     `
     INSERT INTO notifications
-    (title,message,type,is_read,created_at)
-    VALUES (?,?,?,?,?)
+    (user_id,title,message,type,is_read,created_at)
+    VALUES (?,?,?,?,?,?)
     `,
     [
+      notification.user_id,
       notification.title,
       notification.message,
       notification.type,
@@ -20,13 +21,15 @@ export const insertNotification = async (
   );
 };
 
-export const getNotifications = async () => {
+export const getNotifications = async (userId: string) => {
   return await db.getAllAsync<NotificationItem>(
     `
     SELECT *
     FROM notifications
+    WHERE user_id = ?
     ORDER BY created_at DESC
-    `
+    `,
+    [userId]
   );
 };
 
@@ -40,18 +43,19 @@ export const deleteNotification = async (id: number) => {
   );
 };
 
-export const markAllAsRead = async () => {
+export const markAllAsRead = async (userId: string) => {
   await db.runAsync(
     `
     UPDATE notifications
-    SET is_read = 1
-    `
+    SET is_read = 1 WHERE user_id = ?
+    `,[userId]
   );
 };
 
-export const getUnreadCount = async (): Promise<number> => {
+export const getUnreadCount = async (userId: string): Promise<number> => {
   const result = await db.getFirstAsync<{ count: number }>(
-    `SELECT COUNT(*) as count FROM notifications WHERE is_read = 0`
+    `SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0`,
+    [userId]
   );
   return result?.count ?? 0;
 };

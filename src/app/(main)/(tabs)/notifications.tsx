@@ -20,6 +20,7 @@ import {
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { SafeAreaView } from "react-native-safe-area-context";
 import NotiSkeleton from "../../../components/skeletons/NotiSkeleton";
+import { useAuth } from "@/src/context/AuthContext"
 
 export default function NotificationScreen() {
 
@@ -28,6 +29,7 @@ export default function NotificationScreen() {
   const { colors, isDark } = useTheme();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { user } = useAuth();
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -37,7 +39,8 @@ export default function NotificationScreen() {
   };
 
   const loadNotifications = async () => {
-  const data = await getNotifications();
+  if (!user) return;
+  const data = await getNotifications(user.id);
 
     setNotifications(data);
   };
@@ -57,7 +60,8 @@ export default function NotificationScreen() {
 };
 
 const handleMarkAllRead = async () => {
-  await markAllAsReadDB();
+  if (!user) return;
+  await markAllAsReadDB(user.id);
   await updateUnreadCount();
   loadNotifications();
 };

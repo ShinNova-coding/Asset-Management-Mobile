@@ -15,7 +15,7 @@ import { NotificationType } from "../types/notification";
 
 SplashScreen.preventAutoHideAsync();
 
-const processAndSaveNotification = async (title: string, message: string, callback?: () => void) => {
+const processAndSaveNotification = async (userId: string,title: string, message: string, callback?: () => void) => {
   if (!title.trim() && !message.trim()) {
     console.log("Skipping database insert: Title and Message are completely empty.");
     return;
@@ -42,6 +42,7 @@ const processAndSaveNotification = async (title: string, message: string, callba
   console.log("Notification matched type:", type, "from title:", title);
 
   await insertNotification({
+    user_id: userId,
     title,
     message,
     type,
@@ -56,6 +57,7 @@ const processAndSaveNotification = async (title: string, message: string, callba
 
 function NotificationListenerBridge() {
   const { updateUnreadCount, notifyNewNotification } = useNotifications();
+  const { user } = useAuth();
   const lastNotificationResponse = Notifications.useLastNotificationResponse();
   const hasProcessedColdStart = useRef(false);
 
@@ -82,7 +84,8 @@ function NotificationListenerBridge() {
           || (data as any).description
           || "";
         console.log("Foreground Notification captured:", finalTitle, finalMessage);
-        await processAndSaveNotification(finalTitle, finalMessage, updateUnreadCount);
+        if (!user) return;
+        await processAndSaveNotification(user.id, finalTitle, finalMessage, updateUnreadCount);
         notifyNewNotification();
       }
     );
@@ -104,9 +107,11 @@ function NotificationListenerBridge() {
       receivedSubscription.remove();
       responseSubscription.remove();
     };
-  }, [updateUnreadCount]);
+  }, [updateUnreadCount, notifyNewNotification, user]);
 
   useEffect(() => {
+    const handleColdStartNotification = async () => {
+
     if (
       lastNotificationResponse && 
       lastNotificationResponse.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER &&
@@ -118,9 +123,12 @@ function NotificationListenerBridge() {
       const title = content.title || (data as any).title || (data as any).titleMessage || "";
       const message = content.body || (data as any).message || (data as any).body || (data as any).text || (data as any).description || "";
       console.log("Cold start notification caught:", title, message);
-      processAndSaveNotification(title, message, updateUnreadCount);
+      if (!user) return;
+      await processAndSaveNotification(user.id, title, message, updateUnreadCount);
     }
-  }, [lastNotificationResponse, updateUnreadCount]);
+  };
+  handleColdStartNotification();
+}, [lastNotificationResponse, updateUnreadCount, user]);
 
   return null; 
 }

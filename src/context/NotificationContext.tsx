@@ -1,6 +1,7 @@
 import * as Notifications from "expo-notifications";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { getUnreadCount as fetchUnreadCountFromDB } from "../database/notification.service";
+import { useAuth } from "./AuthContext";
 
 interface NotificationContextType {
   unreadCount: number;
@@ -14,13 +15,19 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
+  const { user } = useAuth();
 
   const notifyNewNotification = useCallback(() => {
     setReloadKey((k) => k + 1);
   }, []);
 
   const updateUnreadCount = useCallback(async () => {
-    const count = await fetchUnreadCountFromDB();
+
+    if (!user) {
+        setUnreadCount(0);
+        return;
+    }
+    const count = await fetchUnreadCountFromDB(user.id);
     setUnreadCount(count);
 
     try {
@@ -28,7 +35,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     } catch (badgeError) {
       console.log("Could not set native badge count:", badgeError);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     updateUnreadCount();
