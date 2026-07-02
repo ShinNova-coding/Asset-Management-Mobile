@@ -58,6 +58,7 @@ export default function NotificationScreen() {
 
 const handleMarkAllRead = async () => {
   await markAllAsReadDB();
+  await updateUnreadCount();
   loadNotifications();
 };
 
