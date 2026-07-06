@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-export const API_URL = "http://192.168.100.185:1011";
+export const API_URL = "http://192.168.100.190:1011";
 
 let _token: string | null = null;
 

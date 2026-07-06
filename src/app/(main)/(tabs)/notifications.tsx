@@ -92,48 +92,40 @@ const handleMarkAllRead = async () => {
 //   return "Older";
 // };
 
- const getSection = (dateString: string) => {
+const getSection = (dateString: string) => {
   const notificationDate = new Date(dateString);
   const today = new Date();
 
-  if (
-    notificationDate.toDateString() === today.toDateString()
-  ) {
-    return "Today";
-  }
-
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-
-  if (
-    notificationDate.toDateString() === yesterday.toDateString()
-  ) {
-    return "Yesterday";
-  }
-
-  // Beginning of this week (Monday)
-  const firstDayOfWeek = new Date(today);
-  const day = firstDayOfWeek.getDay();
-
-  const diff =
-    day === 0
-      ? 6
-      : day - 1;
-
-  firstDayOfWeek.setDate(
-    firstDayOfWeek.getDate() - diff
+  // Remove time so only dates are compared
+  const current = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
   );
 
-  if (notificationDate >= firstDayOfWeek) {
-    return "This Week";
-  }
+  const notification = new Date(
+    notificationDate.getFullYear(),
+    notificationDate.getMonth(),
+    notificationDate.getDate()
+  );
+
+  const diffDays = Math.floor(
+    (current.getTime() - notification.getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDays === 0) return "Today";
+
+  if (diffDays === 1) return "Yesterday";
+
+  if (diffDays >= 2 && diffDays <= 7) return "Last 7 Days";
 
   return "Older";
 };
 
 
 const groupedNotifications = React.useMemo(() => {
-  return ["Today", "Yesterday", "This Week", "Older"]
+  return ["Today", "Yesterday", "Last 7 Days", "Older"]
     .map(section => ({
       title: section,
       data: notifications.filter(
