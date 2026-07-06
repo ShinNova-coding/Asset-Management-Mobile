@@ -39,20 +39,31 @@ export default function NotificationScreen() {
   };
 
   const loadNotifications = async () => {
-  if (!user) return;
-  const data = await getNotifications(user.id);
+      if (!user) return;
 
-    setNotifications(data);
+      try {
+        setLoading(true);
+        const data = await getNotifications(user.id);
+
+        setNotifications(data || []);
+      } catch (error) {
+        console.log("NOTIFICATION LOAD ERROR:", error);
+        setNotifications([]);
+      } finally {
+        setLoading(false);
+      }
   };
 
   const handleDelete = async (id: number) => {
 
   try {
-  await deleteNotificationDB(id);
+    await deleteNotificationDB(id);
 
-  await updateUnreadCount();
+    setNotifications(prev =>
+      prev.filter(item => item.id !== id)
+    );
 
-  loadNotifications();
+    await updateUnreadCount();
 
  }catch (error) {
       console.log("Failed to delete notification:", error);
@@ -69,8 +80,7 @@ const handleMarkAllRead = async () => {
     useFocusEffect(
       useCallback(() => {
         loadNotifications();
-        setLoading(false);
-      }, [])
+      }, [user])
     );
 
     useEffect(() => {
