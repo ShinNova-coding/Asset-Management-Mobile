@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -18,12 +19,14 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "../../../api/client";
 import SkeletonBox from "../../../components/skeletonBox";
 import { useAuth } from "../../../context/AuthContext";
 import { getProfile, updateProfileImage } from "../../../database/profile.service";
 import { syncProfile } from "../../../services/syncProfile";
+import ImageViewing from "react-native-image-viewing";
+
 
 type Asset = {
   id: string;
@@ -87,6 +90,8 @@ export default function ProfileScreen() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [assetsLoading, setAssetsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const insets = useSafeAreaInsets();
   const isOnline = useIsOnline();
   
   const conditionScoreMap: Record<string, number> = {
@@ -131,7 +136,7 @@ export default function ProfileScreen() {
   const imageUri = previewImage ??
     (profile?.local_image_path ? `${profile.local_image_path}?t=${imageVersion}`
       : profile?.image_url ? `${profile.image_url}?t=${imageVersion}`
-      : null); 
+      : undefined); 
 
 
 
@@ -269,11 +274,15 @@ export default function ProfileScreen() {
             <View style={styles.imageContainer}>
               {imageUri ? (
                 <View style={styles.imageWrapper}>
-                  <Image
-                    key={imageVersion} 
-                    source={{ uri: imageUri }}
-                    style={styles.profileImage}
-                  />
+                  <TouchableOpacity
+                    onPress={() => imageUri && setViewerVisible(true)}
+                  >
+                    <Image
+                      key={imageVersion} 
+                      source={{ uri: imageUri }}
+                      style={styles.profileImage}
+                    />
+                  </TouchableOpacity>
                   {imageLoading && (
                     <View style={[styles.imageLoaderOverlay, { backgroundColor: colors.card }]}>
                       <ActivityIndicator size="small" color={colors.primary} />
@@ -401,6 +410,27 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
       </ScrollView>
+<Modal
+  visible={viewerVisible}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setViewerVisible(false)}
+>
+  <View style={styles.modalContainer}>
+    <TouchableOpacity
+      style={styles.closeButton}
+      onPress={() => setViewerVisible(false)}
+    >
+      <Ionicons name="close" size={32} color="white" />
+    </TouchableOpacity>
+
+    <Image
+      source={{ uri: imageUri }}
+      style={styles.fullImage}
+      resizeMode="contain"
+    />
+  </View>
+</Modal>
     </SafeAreaView>
   );
 }
@@ -510,4 +540,22 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     elevation: 4,
   },
+  modalContainer: {
+  flex: 1,
+  backgroundColor: "black",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+closeButton: {
+  position: "absolute",
+  top: 50, // or use insets.top + 16
+  right: 20,
+  zIndex: 10,
+},
+
+fullImage: {
+  width: "100%",
+  height: "100%",
+},
 });

@@ -15,7 +15,7 @@ import { getAssignedAssets } from "@/src/services/asset.service";
 import { getCategories } from "@/src/services/category.service";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect, useMemo, useRef } from "react";
 import { RefreshControl } from "react-native";
 import { API_URL } from "../../../api/client";
 import DashboardSkeleton from "../../../components/skeletons/DashboardSkeleton";
@@ -61,6 +61,7 @@ export default function DashboardScreen() {
    const [refreshing, setRefreshing] = useState(false);
    const [hasLoadError, setHasLoadError] = useState(false);
    const isOnline = useIsOnline();
+   const wasOffline = useRef(false);
 
   const filteredAssets = assets.filter((item) => {
         if (!item) return false;
@@ -78,34 +79,56 @@ export default function DashboardScreen() {
      
   });
 
-  const isGloballyEmpty = !loading && assets.length === 0;
+  const isGloballyEmpty = !loading && !hasLoadError && assets.length === 0;
 
   const categoryList = [{ id: 0, name: "All" }, ...(categories?? [])];
 
-  const loadAssets = async () => {
+  // const loadAssets = async () => {
     
-    try {
+  //   try {
+  //     setLoading(true);
+
+  //     setHasLoadError(false);
+
+  //     const [assignedAssets, rescategories] =
+  //       await Promise.all([
+  //         getAssignedAssets(),
+  //         getCategories(),
+  //       ]);
+  //     setAssets(assignedAssets || []);
+  //     setCategories(rescategories || []);
+
+  //   }catch(error){
+  //     setHasLoadError(true);
+  //   }
+  //    finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const loadAssets = async (showLoading = true) => {
+  try {
+    if (showLoading) {
       setLoading(true);
-
-      setHasLoadError(false);
-
-      const [assignedAssets, rescategories] =
-        await Promise.all([
-          getAssignedAssets(),
-          getCategories(),
-        ]);
-      //  console.log("ASSIGNED ASSETS==>", assignedAssets)
-      //  console.log("CATEGORY==>", rescategories)
-      setAssets(assignedAssets || []);
-      setCategories(rescategories || []);
-
-    }catch(error){
-      setHasLoadError(true);
     }
-     finally {
+
+    setHasLoadError(false);
+
+    const [assignedAssets, rescategories] = await Promise.all([
+      getAssignedAssets(),
+      getCategories(),
+    ]);
+
+    setAssets(assignedAssets || []);
+    setCategories(rescategories || []);
+  } catch (error) {
+    setHasLoadError(true);
+  } finally {
+    if (showLoading) {
       setLoading(false);
     }
-  };
+  }
+};
   
   const onRefresh = async () => {
   try {
@@ -127,6 +150,23 @@ export default function DashboardScreen() {
       }
     }, [user?.id])
  )
+
+ useEffect(() => {
+  if (!isOnline) {
+    wasOffline.current = true;
+    return;
+  }
+
+  if (wasOffline.current) {
+    wasOffline.current = false;
+
+    const timer = setTimeout(() =>{
+      loadAssets();
+    }, 1000);
+
+    return ()=> clearTimeout (timer);
+  }
+}, [isOnline]);
 
     if (authLoading || loading) {
       return <DashboardSkeleton />;
@@ -300,7 +340,7 @@ export default function DashboardScreen() {
               paddingVertical: 12,
               borderRadius: 10,
             }}
-            onPress={loadAssets}
+            onPress={() => loadAssets()}
           >
             <Text
               style={{
@@ -362,8 +402,9 @@ export default function DashboardScreen() {
                       </Text>
                     </View>
                     <View style={[styles.statCard, { backgroundColor: colors.card }]}>
-                      <Text style={[styles.statTitle, { color: colors.subText }]}>ASSIGNED</Text>
-                      <Text style={[styles.statNumber, { color: colors.primary }]}>{assets.length}</Text>
+                      <Text style={[styles.statTitle, { color: colors.subText }]}>ACTIVE</Text>
+                      <Text style={[styles.statNumber, { color: colors.primary }]}>
+                        {assets.filter(a => a.status === 'assigned').length}</Text>
                     </View>
                   </View>
 

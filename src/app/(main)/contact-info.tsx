@@ -8,15 +8,18 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
+  Modal,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import ContactInfoSkeleton from "../../components/skeletons/ContactInfoSkeleton";
 import { getProfile } from "../../database/profile.service";
+import ImageViewing from "react-native-image-viewing";
 
 export default function ContactInfoScreen() {
   const router = useRouter();
@@ -26,6 +29,8 @@ export default function ContactInfoScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [imageVersion, setImageVersion] = useState(Date.now());
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const insets = useSafeAreaInsets();
   const isOnline = useIsOnline();
 
    const onRefresh = async () => {
@@ -77,6 +82,11 @@ export default function ContactInfoScreen() {
       return <ContactInfoSkeleton />;
     }
 
+     const imageUri = profile?.local_image_path ? `${profile.local_image_path}?t=${imageVersion}`
+                      : profile?.preview_url ? `${profile.preview_url}?t=${imageVersion}`
+                      : profile?.image_url ? `${profile.image_url}?t=${imageVersion}`
+                      : undefined;
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <HeaderBar title="Profile Info" backButtonAction={()=> router.push('/profile')}/>
@@ -84,20 +94,21 @@ export default function ContactInfoScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/> }>
         <View style={styles.avatarSection}>
           <View style={styles.imageContainer}>
-            <Image
-              source={{
-                uri:
-                  profile?.local_image_path ? `${profile.local_image_path}?t=${imageVersion}`
-                  : profile?.preview_url ? `${profile.preview_url}?t=${imageVersion}`
-                  : profile?.image_url ? `${profile.image_url}?t=${imageVersion}`
-                  : undefined,
-              }}
-              style={{
-                width: 90,
-                height: 90,
-                borderRadius: 45,
-              }}
-            />
+            <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => imageUri && setViewerVisible(true)}
+              >
+                <Image
+                  source={{
+                    uri: imageUri,
+                  }}
+                  style={{
+                    width: 90,
+                    height: 90,
+                    borderRadius: 45,
+                  }}
+                />
+            </TouchableOpacity>
           </View>
           <Text style={[styles.userName, { color: colors.text }]}>{profile?.name}</Text>
           <Text style={[styles.userRole, { color: colors.subText }]}>{profile?.position || "Employee"}</Text>
@@ -173,6 +184,27 @@ export default function ContactInfoScreen() {
         </View> */}
 
       </ScrollView>
+<Modal
+  visible={viewerVisible}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setViewerVisible(false)}
+>
+  <View style={styles.modalContainer}>
+    <TouchableOpacity
+      style={styles.closeButton}
+      onPress={() => setViewerVisible(false)}
+    >
+      <Ionicons name="close" size={32} color="white" />
+    </TouchableOpacity>
+
+    <Image
+      source={{ uri: imageUri }}
+      style={styles.fullImage}
+      resizeMode="contain"
+    />
+  </View>
+</Modal>
     </SafeAreaView>
   );
 }
@@ -258,6 +290,24 @@ const styles = StyleSheet.create({
   label: { fontSize: 13 },
   value: { fontSize: 14, fontWeight: "500" },
   alignRight: { flex: 1, textAlign: "right", marginLeft: 20 },
+  modalContainer: {
+  flex: 1,
+  backgroundColor: "black",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+closeButton: {
+  position: "absolute",
+  top: 50, // or use insets.top + 16
+  right: 20,
+  zIndex: 10,
+},
+
+fullImage: {
+  width: "100%",
+  height: "100%",
+},
   // permissionSub: {
   //   fontSize: 11,
   //   color: "#9CA3AF",

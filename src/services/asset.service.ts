@@ -5,7 +5,7 @@ export async function getAssignedAssets() {
    try {
 
     const token = await SecureStore.getItemAsync("token");
-    console.log("TOKEN =", token);
+   //  console.log("TOKEN =", token);
 
    const response = await api.get(`/assignment/asset`);
    return response.data.data || [];
