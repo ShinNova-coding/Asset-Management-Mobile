@@ -106,7 +106,6 @@ const getSection = (dateString: string) => {
   const notificationDate = new Date(dateString);
   const today = new Date();
 
-  // Remove time so only dates are compared
   const current = new Date(
     today.getFullYear(),
     today.getMonth(),
