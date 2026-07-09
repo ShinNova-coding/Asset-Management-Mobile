@@ -2,6 +2,7 @@
   "expo": {
     "name": "ITAMS",
     "slug": "ITAMS",
+    "icon": "./src/assets/images/icon.png",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "itams",
@@ -44,16 +45,13 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./src/assets/images/android-icon-foreground.png",
-        "backgroundImage": "./src/assets/images/android-icon-background.png",
-        "monochromeImage": "./src/assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#0070EB",
+        "foregroundImage": "./src/assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.itams.app",
-      "googleServicesFile": "./google-services.json",
-      "usesCleartextTraffic": true
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
