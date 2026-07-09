@@ -83,19 +83,42 @@ A modern **IT Asset Management System (ITAMS)** mobile application built with **
 ## 📂 Project Structure
 
 src/
-├── app/
-│   ├── (auth)
-│   ├── (main)
-│   └── _layout.tsx
-├── api/
-├── components/
-├── context/
+├── app/                                          # Expo Router: File-based routing setup
+│   ├── (main)/                                   # Route group for main app
+│   │   ├── (tabs)/                               # Tab navigation for authenticated users
+│   │   │   ├── index.tsx                         # Home/Dashboard screen
+│   │   │   ├── expenses.tsx                      # Expenses screen
+│   │   │   ├── notifications.tsx                 # Notification screen
+│   │   │   └── profile.tsx                       # Profile screen
+│   │   ├── assetsDetail.tsx
+│   │   ├── contact-info.tsx
+│   │   ├── expenseDetail.tsx
+│   │   ├── history.tsx
+│   │   ├── reportIssue.tsx
+│   │   ├── requestExpense.tsx
+│   │   ├── security.tsx
+│   │   └── about.tsx
+│   └── (auth)/
+│        ├── forgot-password.tsx     
+│        ├── login.tsx                             # Authentication screen
+│        └──  reset-password.tsx
+├── components/                                   # Reusable React components
 ├── assets/
-├── database/
-├── services/
-├── types/
-├── utils/
-└── constants/
+├── api/                                          # Axios API client and backend communication config
+├── database/                                     # Local database setup
+│   ├── db.ts                                     # SQLite database
+│   ├── notification.service.ts                   # Service between localDB and server
+│   └── profile.service.ts                        # Service between localDB and server
+├── context/                                      # React Context providers
+│   ├── AuthContext.tsx                           # Authentication context
+│   ├── NotificationContext.tsx                   # Notification context
+│   └── ThemeContex.tsx                           # Theme management                
+├── hooks/                                        # Custom React hooks
+├── types/                                        # TypeScript type definitions
+├── services/                                     # Business logic and API/database service functions 
+└── utils/                                        # Utility functions
+
+
 
 ---
 
@@ -106,12 +129,17 @@ Login
    ▼
 Home
  ├── Asset Details
+ │    ├── Return Asset
+ │    └── Report Asset Issue
  ├── History
  ├── Expense
+ │      ├── Request Expense
  ├── Notifications
  └── Profile
-        ├── Edit Profile
+        ├── Profile Info
+        ├── Dark/Light Mode
         ├── Change Password
+        ├── About
         └── Logout
 
 
