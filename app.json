@@ -46,6 +46,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#F0F7FF",
+        "backgroundImage": "./src/assets/images/android-icon-background.png",
         "foregroundImage": "./src/assets/images/icon.png"
       },
       "edgeToEdgeEnabled": true,
