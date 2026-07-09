@@ -8,7 +8,7 @@
     "plugins": [
       "expo-router",
       [
-        "expo-notifications", 
+        "expo-notifications",
         {
           "icon": "./src/assets/images/icon.png",
           "color": "#0070EB"
@@ -32,8 +32,9 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "itams-199df"
+        "projectId": "03379f2c-ef5b-46d4-bc73-683d34c741c2"
       }
     },
     "ios": {
@@ -53,7 +54,6 @@
       "package": "com.itams.app",
       "googleServicesFile": "./google-services.json",
       "usesCleartextTraffic": true
-
     },
     "web": {
       "output": "static",
